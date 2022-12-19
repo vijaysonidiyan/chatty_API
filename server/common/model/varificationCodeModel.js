@@ -22,6 +22,7 @@ class varificationCodeModel extends ModelBase {
         super(CONFIG.DB.MONGO.DB_NAME, "varificationCode", {
             userId: { type: Object, allowNullEmpty: true },
             token: { type: String, allowNullEmpty: true },
+            mobileNo:{type: String, allowNullEmpty: true},
             activity: {
                 type: Number,
                 allowNullEmpty: true,
