@@ -1,0 +1,7 @@
+{
+  "ResourceNotFound": 404,
+  "Success": 200,
+  "Unautorized": 401,
+  "InternalServerError": 500,
+  "BadRequest": 400
+}

@@ -1,0 +1,27 @@
+{
+    "APP": {
+        "WEB": {
+            "PROTOCOL": "http",
+            "HOST": "mongodb://localhost:27017",
+            "PORT": 5001
+        }
+    },
+    "LOGGER": {
+        "LEVEL": 0,
+        "DATA_PATH": "bg_info.log",
+        "INFO_PATH": "bg_info.log",
+        "ERROR_PATH": "bg_err.log",
+        "CRITICAL_PATH": "bg_err.log"
+    },
+    "DB": {
+        "MONGO": {
+            "DB_NAME": "chatty",
+            "SERVER_URL": "`mongodb://localhost:27017`"
+        }
+    },
+    "MAIL": {
+        "SERVICEPROVIDER": " ",
+        "MAILID": " ",
+        "PASSWORD": " "
+    }
+}
