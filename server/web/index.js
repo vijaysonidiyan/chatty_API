@@ -599,7 +599,7 @@ server.listen(process.env.PORT || 3017, function () {
 
   console.log(
 
-    `your project API is listening on port ${CONFIG.APP.WEB.PORT}`
+    `chatty API is listening on port ${CONFIG.APP.WEB.PORT}`
 
   );
 
