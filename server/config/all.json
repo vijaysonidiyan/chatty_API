@@ -3,7 +3,7 @@
         "WEB": {
             "PROTOCOL": "http",
             "HOST": "mongodb://localhost:27017",
-            "PORT": 5001
+            "PORT": 3017
         }
     },
     "LOGGER": {
