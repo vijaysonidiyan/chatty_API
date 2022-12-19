@@ -489,7 +489,7 @@ userCtrl.resendOtpUser = (req, res) => {
     const response = new HttpRespose();
     console.log("zgfhsdhjgfhjgfjsdghsgdf")
 
-    if (!!req.body.mobileNo && !!req.body && !!req.body.activity) {
+    if (!!req.body.mobileNo && !!req.body ) {
         try {
             let query = {
                 mobileNo: req.body.mobileNo,
@@ -508,10 +508,10 @@ userCtrl.resendOtpUser = (req, res) => {
                         response.setError(AppCode.NoUserFound);
                         response.send(res);
                     } else {
-                        let activity = parseInt(req.body.activity);
-                        console.log("------------------------------------", activity);
+                       // let activity = parseInt(req.body.activity);
+                       // console.log("------------------------------------", activity);
                         VarificationCodeModel.removeMany({
-                            mobileNo: req.body.mobileNo, activity: activity
+                            mobileNo: req.body.mobileNo
                         }, function (err, removecode) {
                             if (err) {
                                 console.log("-------------", err)
@@ -525,7 +525,7 @@ userCtrl.resendOtpUser = (req, res) => {
                                 var params = {
                                     mobileNo:req.body.mobileNo,
                                     userId: ObjectID(User._id),
-                                    activity: activity
+                                    activity: 1
                                 };
                                 VarificationCodeModel.create(params, function (err, newVarificationId) {
                                     if (err) {
