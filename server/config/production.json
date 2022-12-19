@@ -16,7 +16,7 @@
     "DB": {
         "MONGO": {
             "DB_NAME": "chatty",
-            "SERVER_URL": "mongodb://localhost:27017"
+            "SERVER_URL": "mongodb+srv://chatty:chatty123@cluster0.idbzsls.mongodb.net/test"
         }
     },
     "MAIL": {
