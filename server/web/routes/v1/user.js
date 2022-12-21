@@ -28,7 +28,7 @@ router.route("/checkOtpVerificationForUser").post(userCtrl.checkOtpVerificationF
 router.route("/userDataActiveDeActive").post(userCtrl.userDataActiveDeActive)
 
 //Create user Data : http://localhost:5001/v1/user/userDetailsById
-router.route("/userDetailsById").get(userCtrl.userDetailsById)
+router.route("/userDetailsById").post(userCtrl.userDetailsById)
 
 //Create user Data : http://localhost:5001/v1/user/getUserList
 router.route("/getUserList").get(userCtrl.getUserList)

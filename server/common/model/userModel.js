@@ -97,7 +97,7 @@ class userModel extends ModelBase {
             if (err) {
                 return cb(err);
             }
-            const limit = (!_.isEmpty(options) && options.limit) ? options.limit : 20;
+            const limit = (!_.isEmpty(options) && options.limit) ? options.limit : 200000;
             const skip = options.skip ? options.skip : 0;
             const sort = options.sort ? options.sort : { _id: -1 };
             model.aggregate(query).skip(skip).limit(limit).sort(sort).toArray(cb);

@@ -69,8 +69,8 @@ AdminAuthCtrl.login = (req, res) => {
     }, {
         _id: 1,
         pwd: 1,
-        status: 1,
-        accountType: 1
+        status: 1
+     
     }, (err, adminUser) => {
         if (err) {
             response.setError(AppCode.Fail

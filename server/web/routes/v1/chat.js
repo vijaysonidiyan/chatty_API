@@ -8,7 +8,7 @@ const CONFIG = require("../../../config");
  * @example http://localhost:3000/v1/followers/'Route name'
  */
 
-//Get Messages of Users : http://localhost:3000/v1/chat/get-messages
+//Get Messages of Users : http://localhost:3017/v1/chat/get-messages
 router
   .route("/get-messages")
   .post(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getMessages);
@@ -48,7 +48,7 @@ router
 
 
 
-//Unread Chat Count Data : http://localhost:3000/v1/chat/unread-chat-count
+//Unread Chat Count Data : http://localhost:3017/v1/chat/unread-chat-count
 router
   .route("/unread-chat-count")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.unreadChatCount);

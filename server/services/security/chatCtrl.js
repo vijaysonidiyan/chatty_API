@@ -12,6 +12,7 @@ const Logger = require("../../common/logger");
 const _ = require("lodash");
 const ObjectID = require("mongodb").ObjectID;
 const CONFIG = require("../../config");
+const userModel = require("../../common/model/userModel");
 
 ChatCtrl.getMessages = (req, res) => {
   const response = new HttpRespose();
@@ -194,7 +195,7 @@ ChatCtrl.getMessages = (req, res) => {
                   reciver_id: ObjectID(data.user_id),
                 },
                 {
-                  reciver_id: ObjectID(req.auth.userId),
+                  reciver_id: ObjectID(req.auth._id),
                   sender_id: ObjectID(data.user_id),
                 },
               ],
@@ -776,6 +777,490 @@ ChatCtrl.getMessagesAll = (req, res) => {
     response.send(res);
   }
 };
+ChatCtrl.getChatUsersList1 = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.body;
+  let searchKey = "";
+  let options = {};
+  let condition = {};
+  searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+  let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
+  let limit = !!req.query.limit ? parseInt(req.query.limit) : 100000000;
+  let loginUserId = ObjectID(req.auth._id);
+  // const limit = 100000;
+  const skip = limit * parseInt(pageNumber);
+  options.skip = skip;
+  options.limit = limit;
+  options.sort = { messageAt: -1 };
+ // getBuddiesList(req.payload.userId).then((user) => {
+    // const buddyRequest = [];
+    // _.forEach(user.BuddiesFriends, (follower) => {
+    //   console.log(follower);
+    //   buddyRequest.push(ObjectID(follower.buddiesId));
+    // });
+
+    // if (searchKey == "") {
+    //   condition = {
+    //     $expr: {
+    //       $in: ["$userId", buddyRequest],
+    //     },
+    //   };
+    // } else {
+    //   condition = {
+    //     userName: new RegExp(
+    //       ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+    //       "i"
+    //     ),
+    //     $expr: {
+    //       $in: ["$userId", buddyRequest],
+    //     },
+    //   };
+    // }
+
+    let query = [
+      {
+        $match: {
+          _id:ObjectID(req.auth._id)
+
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "user",
+      //     as: "isDeleted",
+      //     let: { userId : "$userId" },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: {
+      //             $and: [
+      //               {
+      //                 $eq: ["$_id", "$$userId"],
+      //               },
+      //               {
+      //                 $eq: ["$isdeleted", true],
+      //               },
+      //             ],
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "chat",
+          as: "chat",
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    {
+                      $and: [
+                        { $eq: ["$sender_id", ObjectID(req.auth._id)] },
+                        { $eq: ["$reciver_id", "$$userId"] },
+                      ],
+                    },
+                    {
+                      $and: [
+                        { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
+                        { $eq: ["$sender_id", "$$userId"] },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                message: { $last: "$message" },
+                type: { $last: "$type" },
+                messageAt: { $last: "$createdAt" },
+                senderId: { $last: "$sender_id" },
+                receiverId: { $last: "$reciver_id" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$chat",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $sort: { "chat.messageAt": -1, userName: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "chat",
+          as: "unreadCount",
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
+                    { $eq: ["$sender_id", "$$userId"] },
+                    { $ne: ["$isRead", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$unreadCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          userName: 1,
+          firstName: 1,
+          lastName: 1,
+          profileUrl: { $ifNull: ["$profileUrl", ""] },
+          statusType: 1,
+          // "chat": "$chat.message",
+          chat: {
+            $cond: {
+              if: { $eq: ["$chat.type", "post"] },
+              then: "Shared a post",
+              else: "$chat.message",
+            },
+          },
+          isDeleted: {
+            $cond: {
+              if: { $isArray: "$isDeleted" },
+              then: { $size: "$isDeleted" },
+              else: 0,
+            },
+          },
+          messageAt: "$chat.messageAt",
+          senderId: "$chat.senderId",
+          receiverId: "$chat.receiverId",
+          unreadCount: { $ifNull: ["$unreadCount.count", 0] },
+        },
+      },
+    ];
+
+    try {
+      let result = {};
+      async.parallel(
+        [
+          function (cb) {
+            // UserModel.advancedAggregate(query, {}, (err, countData) => {
+            UserModel.count(condition, (err, countData) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && countData == 0) {
+                cb(null);
+              } else if (options.skip > 0 && countData == 0) {
+                cb(null);
+              } else {
+                if (countData <= skip + limit) {
+                } else {
+                  result.nextPage = parseInt(pageNumber) + 1;
+                }
+                cb(null);
+              }
+            });
+          },
+          function (cb) {
+            UserModel.aggregate(query, (err, followers) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else if (options.skip > 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else {
+                result.result = followers;
+                cb(null);
+              }
+            });
+          },
+        ],
+        function (err) {
+          if (err) {
+            throw err;
+          } else if (options.skip === 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoBuddiesFound, result);
+            response.send(res);
+          } else if (options.skip > 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoMoreBuddiesFound, result);
+            response.send(res);
+          } else {
+            response.setData(AppCode.Success, result);
+            response.send(res);
+          }
+        }
+      );
+    } catch (exception) {
+      response.setError(AppCode.InternalServerError);
+      response.send(res);
+    }
+    //buddilist breket
+  //});
+};
+
+// shweta
+ChatCtrl.getChatUsersList2 = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.body;
+  let searchKey = "";
+  let options = {};
+  let condition = {};
+  searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+  let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
+  let limit = !!req.query.limit ? parseInt(req.query.limit) : 100000000;
+  let loginUserId = ObjectID(req.auth._id);
+  // const limit = 100000;
+  const skip = limit * parseInt(pageNumber);
+  options.skip = skip;
+  options.limit = limit;
+  options.sort = { messageAt: -1 };
+ // getBuddiesList(req.payload.userId).then((user) => {
+    // const buddyRequest = [];
+    // _.forEach(user.BuddiesFriends, (follower) => {
+    //   console.log(follower);
+    //   buddyRequest.push(ObjectID(follower.buddiesId));
+    // });
+
+    // if (searchKey == "") {
+    //   condition = {
+    //     $expr: {
+    //       $in: ["$userId", buddyRequest],
+    //     },
+    //   };
+    // } else {
+    //   condition = {
+    //     userName: new RegExp(
+    //       ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+    //       "i"
+    //     ),
+    //     $expr: {
+    //       $in: ["$userId", buddyRequest],
+    //     },
+    //   };
+    // }
+
+    let query = [
+      {
+        $match: {
+          _id:ObjectID(req.auth._id)
+
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "user",
+      //     as: "isDeleted",
+      //     let: { userId : "$userId" },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: {
+      //             $and: [
+      //               {
+      //                 $eq: ["$_id", "$$userId"],
+      //               },
+      //               {
+      //                 $eq: ["$isdeleted", true],
+      //               },
+      //             ],
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "chat",
+          as: "chat",
+          let: { userId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    {
+                      $and: [
+                        { $eq: ["$sender_id", ObjectID(req.auth._id)] },
+                        { $eq: ["$reciver_id", "$$userId"] },
+                      ],
+                    },
+                    {
+                      $and: [
+                        { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
+                        { $eq: ["$sender_id", "$$userId"] },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                message: { $last: "$message" },
+                type: { $last: "$type" },
+                messageAt: { $last: "$createdAt" },
+                senderId: { $last: "$sender_id" },
+                receiverId: { $last: "$reciver_id" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$chat",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $sort: { "chat.messageAt": -1, userName: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "chat",
+          as: "unreadCount",
+          let: { userId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
+                    { $eq: ["$sender_id", "$$userId"] },
+                    { $ne: ["$isRead", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$unreadCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          userName: 1,
+          firstName: 1,
+          lastName: 1,
+          profileUrl: { $ifNull: ["$profileUrl", ""] },
+          statusType: 1,
+          // "chat": "$chat.message",
+          chat: {
+            $cond: {
+              if: { $eq: ["$chat.type", "post"] },
+              then: "Shared a post",
+              else: "$chat.message",
+            },
+          },
+          isDeleted: {
+            $cond: {
+              if: { $isArray: "$isDeleted" },
+              then: { $size: "$isDeleted" },
+              else: 0,
+            },
+          },
+          messageAt: "$chat.messageAt",
+          senderId: "$chat.senderId",
+          receiverId: "$chat.receiverId",
+          unreadCount: { $ifNull: ["$unreadCount.count", 0] },
+        },
+      },
+    ];
+
+    try {
+      let result = {};
+      async.parallel(
+        [
+          function (cb) {
+            // UserModel.advancedAggregate(query, {}, (err, countData) => {
+            UserModel.count(condition, (err, countData) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && countData == 0) {
+                cb(null);
+              } else if (options.skip > 0 && countData == 0) {
+                cb(null);
+              } else {
+                if (countData <= skip + limit) {
+                } else {
+                  result.nextPage = parseInt(pageNumber) + 1;
+                }
+                cb(null);
+              }
+            });
+          },
+          function (cb) {
+            UserModel.aggregate(query, (err, followers) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else if (options.skip > 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else {
+                result.result = followers;
+                cb(null);
+              }
+            });
+          },
+        ],
+        function (err) {
+          if (err) {
+            throw err;
+          } else if (options.skip === 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoBuddiesFound, result);
+            response.send(res);
+          } else if (options.skip > 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoMoreBuddiesFound, result);
+            response.send(res);
+          } else {
+            response.setData(AppCode.Success, result);
+            response.send(res);
+          }
+        }
+      );
+    } catch (exception) {
+      response.setError(AppCode.InternalServerError);
+      response.send(res);
+    }
+    //buddilist breket
+  //});
+};
 ChatCtrl.getChatUsersList = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
@@ -791,12 +1276,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
   options.skip = skip;
   options.limit = limit;
   options.sort = { messageAt: -1 };
-  getBuddiesList(req.payload.userId).then((user) => {
-    const buddyRequest = [];
-    _.forEach(user.BuddiesFriends, (follower) => {
-      console.log(follower);
-      buddyRequest.push(ObjectID(follower.buddiesId));
-    });
+ 
 
     if (searchKey == "") {
       condition = {
@@ -1011,7 +1491,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
       response.setError(AppCode.InternalServerError);
       response.send(res);
     }
-  });
+  
 };
 // ChatCtrl.getChatUsersList = (req, res) => {
 //     const response = new HttpRespose();
@@ -1566,9 +2046,9 @@ ChatCtrl.manageChatScreenData = (req, res) => {
   if (!!req.body && !!req.body.status) {
     try {
       //let icon = '';
-      let query = { userId: ObjectID(req.auth.userId) };
+      let query = { userId: ObjectID(req.auth._id) };
       let bodyData = req.body;
-      bodyData.userId = ObjectID(req.auth.userId);
+      bodyData.userId = ObjectID(req.auth._id);
       if (!!bodyData.chatWith) {
         bodyData.chatWith = ObjectID(bodyData.chatWith);
       }
@@ -1701,15 +2181,15 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
 
 ChatCtrl.unreadChatCount = (req, res) => {
   var response = new HttpRespose();
-  if (!!req.payload && !!req.payload.userId) {
-    console.log(req.payload.userId);
+  if (!!req.auth && !!req.auth._id) {
+    console.log(req.auth._id);
     let query = [
       {
         $match: {
           $and: [
             {
               $expr: {
-                $eq: ["$reciver_id", ObjectID(req.payload.userId)],
+                $eq: ["$reciver_id", ObjectID(req.auth._id)],
               },
               isRead: { $ne: true },
             },
@@ -1750,11 +2230,11 @@ ChatCtrl.unreadChatCount = (req, res) => {
 
 ChatCtrl.onChatScreen = (req, res) => {
   var response = new HttpRespose();
-  if (!!req.payload && !!req.payload.userId) {
+  if (!!req.auth && !!req.auth._id) {
     try {
       ChatScreenManagementModel.findOne(
         {
-          chatWith: ObjectID(req.payload.userId),
+          chatWith: ObjectID(req.auth._id),
           userId: ObjectID(req.query.userId),
           status: 2,
         },
@@ -2027,7 +2507,7 @@ const getBuddiesList = (userId) => {
         },
       },
     ];
-    MasterUserModel.advancedAggregate(query, {}, (err, user) => {
+    UserModel.advancedAggregate(query, {}, (err, user) => {
       if (err) {
         return reject(err);
       }
