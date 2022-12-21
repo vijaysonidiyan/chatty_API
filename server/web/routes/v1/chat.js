@@ -26,6 +26,11 @@ router
   .route("/get-chat-users-list")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList);
 
+  //Get Messages of Users : http://localhost:3000/v1/chat/getChatUsersList1
+router
+.route("/getChatUsersList1")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList1);
+
 //Get Messages of Users : http://localhost:3000/v1/chat/get-chat-users-list-filter
 router
   .route("/get-chat-users-list-filter")

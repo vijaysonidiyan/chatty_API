@@ -79,7 +79,31 @@ class adminUserModel extends ModelBase {
             });
         });
     }
-
+    findOne(conditions, projection, options, callback) {
+        if (typeof conditions === 'function') {
+            callback = conditions;
+            conditions = null;
+            projection = null;
+            options = {};
+        } else if (typeof projection === 'function') {
+            callback = projection;
+            options = {};
+            projection = null;
+        } else if (typeof options === 'function') {
+            callback = options;
+            options = {};
+        }
+        let projectionAndOpt = { fields: projection };
+        if (!!options && typeof options !== 'function' && options.sort !== undefined) {
+            projectionAndOpt.sort = options.sort;
+        }
+        this.getModel(function (err, model) {
+            if (err) {
+                return callback(err);
+            }
+            model.findOne(conditions, projectionAndOpt, callback);
+        });
+    }
     advancedAggregate(query, options, cb) {
         // do a validation with this.schema
         this.getModel(function (err, model) {

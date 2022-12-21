@@ -20,8 +20,8 @@
         }
     },
     "MAIL": {
-        "SERVICEPROVIDER": " ",
-        "MAILID": " ",
-        "PASSWORD": " "
+        "SERVICEPROVIDER": "gmail",
+        "MAILID": "harikbarbar@gmail.com",
+        "PASSWORD": "fmmkbclgeixrozim"
     }
 }

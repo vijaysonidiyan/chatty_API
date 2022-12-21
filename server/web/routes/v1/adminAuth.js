@@ -18,7 +18,17 @@ router.route("/adminCreate").post(AdminAuthCtrl.adminCreate)
 router.route("/login").post(AdminAuthCtrl.login)
 
 //List country Data : http://localhost:3017/v1/adminAuth/ChangePasswordForAdmin
-router.route("/ChangePasswordForAdmin").post(AdminAuthCtrl.ChangePasswordForAdmin)
+router.route("/ChangePasswordForAdmin").post(CONFIG.JWTTOKENALLOWACCESS,AdminAuthCtrl.ChangePasswordForAdmin)
+
+//List country Data : http://localhost:3017/v1/adminAuth/forgotPassworForAdmin
+router.route("/forgotPassworForAdmin").post(AdminAuthCtrl.forgotPassworForAdmin)
+
+//List country Data : http://localhost:3017/v1/adminAuth/checkOtpVerificationForAdmin
+router.route("/checkOtpVerificationForAdmin").post(AdminAuthCtrl.checkOtpVerificationForAdmin)
+
+//List country Data : http://localhost:3017/v1/adminAuth/passwordResetForUser
+router.route("/passwordResetForUser").post(AdminAuthCtrl.passwordResetForUser)
+
 
 module.exports = router;
 

@@ -407,6 +407,7 @@ userCtrl.userUpdate = (req, res) => {
         response.send(res);
     }
 };
+
 // Otp Verification For userregistration
 userCtrl.checkOtpVerificationForUser = (req, res) => {
     var response = new HttpRespose();

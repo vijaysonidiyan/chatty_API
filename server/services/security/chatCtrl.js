@@ -792,30 +792,6 @@ ChatCtrl.getChatUsersList1 = (req, res) => {
   options.skip = skip;
   options.limit = limit;
   options.sort = { messageAt: -1 };
- // getBuddiesList(req.payload.userId).then((user) => {
-    // const buddyRequest = [];
-    // _.forEach(user.BuddiesFriends, (follower) => {
-    //   console.log(follower);
-    //   buddyRequest.push(ObjectID(follower.buddiesId));
-    // });
-
-    // if (searchKey == "") {
-    //   condition = {
-    //     $expr: {
-    //       $in: ["$userId", buddyRequest],
-    //     },
-    //   };
-    // } else {
-    //   condition = {
-    //     userName: new RegExp(
-    //       ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-    //       "i"
-    //     ),
-    //     $expr: {
-    //       $in: ["$userId", buddyRequest],
-    //     },
-    //   };
-    // }
 
     let query = [
       {
@@ -824,63 +800,26 @@ ChatCtrl.getChatUsersList1 = (req, res) => {
 
         },
       },
-      // {
-      //   $lookup: {
-      //     from: "user",
-      //     as: "isDeleted",
-      //     let: { userId : "$userId" },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               {
-      //                 $eq: ["$_id", "$$userId"],
-      //               },
-      //               {
-      //                 $eq: ["$isdeleted", true],
-      //               },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
       {
         $lookup: {
           from: "chat",
           as: "chat",
-          let: { userId: "$userId" },
+          let: { userId: "$_id" },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $or: [
                     {
-                      $and: [
-                        { $eq: ["$sender_id", ObjectID(req.auth._id)] },
-                        { $eq: ["$reciver_id", "$$userId"] },
-                      ],
+                      $eq: ["$reciver_id", "$$userId"]
                     },
                     {
-                      $and: [
-                        { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
-                        { $eq: ["$sender_id", "$$userId"] },
-                      ],
-                    },
-                  ],
+                      $eq: ["$sender_id", "$$userId"]
+
+                    }
+
+                  ]
                 },
-              },
-            },
-            {
-              $group: {
-                _id: null,
-                message: { $last: "$message" },
-                type: { $last: "$type" },
-                messageAt: { $last: "$createdAt" },
-                senderId: { $last: "$sender_id" },
-                receiverId: { $last: "$reciver_id" },
               },
             },
           ],
@@ -892,129 +831,29 @@ ChatCtrl.getChatUsersList1 = (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
-      { $sort: { "chat.messageAt": -1, userName: 1 } },
-      { $skip: skip },
-      { $limit: limit },
-      {
-        $lookup: {
-          from: "chat",
-          as: "unreadCount",
-          let: { userId: "$userId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
-                    { $eq: ["$sender_id", "$$userId"] },
-                    { $ne: ["$isRead", true] },
-                  ],
-                },
-              },
-            },
-            {
-              $group: {
-                _id: null,
-                count: { $sum: 1 },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$unreadCount",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
       {
         $project: {
           _id: 1,
-          userId: 1,
-          userName: 1,
-          firstName: 1,
-          lastName: 1,
-          profileUrl: { $ifNull: ["$profileUrl", ""] },
-          statusType: 1,
-          // "chat": "$chat.message",
-          chat: {
-            $cond: {
-              if: { $eq: ["$chat.type", "post"] },
-              then: "Shared a post",
-              else: "$chat.message",
-            },
-          },
-          isDeleted: {
-            $cond: {
-              if: { $isArray: "$isDeleted" },
-              then: { $size: "$isDeleted" },
-              else: 0,
-            },
-          },
-          messageAt: "$chat.messageAt",
-          senderId: "$chat.senderId",
-          receiverId: "$chat.receiverId",
-          unreadCount: { $ifNull: ["$unreadCount.count", 0] },
+          //chat:1,
+        
+          sender_id: "$chat.sender_id",
+          reciver_id: "$chat.reciver_id",
+          message:"$chat.message"
+         // unreadCount: { $ifNull: ["$unreadCount.count", 0] },
         },
       },
     ];
 
-    try {
-      let result = {};
-      async.parallel(
-        [
-          function (cb) {
-            // UserModel.advancedAggregate(query, {}, (err, countData) => {
-            UserModel.count(condition, (err, countData) => {
-              if (err) {
-                throw err;
-              } else if (options.skip === 0 && countData == 0) {
-                cb(null);
-              } else if (options.skip > 0 && countData == 0) {
-                cb(null);
-              } else {
-                if (countData <= skip + limit) {
-                } else {
-                  result.nextPage = parseInt(pageNumber) + 1;
-                }
-                cb(null);
-              }
-            });
-          },
-          function (cb) {
-            UserModel.aggregate(query, (err, followers) => {
-              if (err) {
-                throw err;
-              } else if (options.skip === 0 && _.isEmpty(followers)) {
-                cb(null);
-              } else if (options.skip > 0 && _.isEmpty(followers)) {
-                cb(null);
-              } else {
-                result.result = followers;
-                cb(null);
-              }
-            });
-          },
-        ],
-        function (err) {
-          if (err) {
-            throw err;
-          } else if (options.skip === 0 && _.isEmpty(result.result)) {
-            response.setData(AppCode.NoBuddiesFound, result);
-            response.send(res);
-          } else if (options.skip > 0 && _.isEmpty(result.result)) {
-            response.setData(AppCode.NoMoreBuddiesFound, result);
-            response.send(res);
-          } else {
-            response.setData(AppCode.Success, result);
-            response.send(res);
-          }
-        }
-      );
-    } catch (exception) {
-      response.setError(AppCode.InternalServerError);
+
+  UserModel.aggregate(query, (err, followers) => {
+    if (err) {
+      throw err;
+    } else {
+      response.setData(AppCode.Success, followers);
       response.send(res);
+
     }
+  });
     //buddilist breket
   //});
 };
