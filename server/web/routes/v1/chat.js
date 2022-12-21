@@ -26,10 +26,15 @@ router
   .route("/get-chat-users-list")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList);
 
-  //Get Messages of Users : http://localhost:3000/v1/chat/getChatUsersList1
+  //Get Messages of Users : http://localhost:3000/v1/chat/getChatUsersList2
 router
-.route("/getChatUsersList1")
-.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList1);
+.route("/getChatUsersList2")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList2);
+
+  //Get Messages of Users : http://localhost:3000/v1/chat/getChatWithUsersList
+router
+.route("/getChatWithUsersList")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatWithUsersList);
 
 //Get Messages of Users : http://localhost:3000/v1/chat/get-chat-users-list-filter
 router
@@ -62,5 +67,11 @@ router
 router
 .route("/check-chat-live")
 .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
+
+
+//Check OnChatOrNot : http://localhost:3000/v1/chat/getChatUsersListttt
+router
+.route("/getChatUsersListttt")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersListttt);
 
 module.exports = router;
