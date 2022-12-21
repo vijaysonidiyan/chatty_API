@@ -294,8 +294,6 @@ AdminAuthCtrl.forgotPassworForAdmin = (req, res) => {
     }
   };
 
-
-
 AdminAuthCtrl.checkOtpVerificationForAdmin = (req, res) => {
     var response = new HttpRespose();
     var paramsObj = req.body;
@@ -339,6 +337,129 @@ AdminAuthCtrl.checkOtpVerificationForAdmin = (req, res) => {
         response.send(res);
     }
 };
+
+AdminAuthCtrl.resendOtpAdmin = (req, res) => {
+    const response = new HttpRespose();
+    console.log("zgfhsdhjgfhjgfjsdghsgdf")
+
+    if (!!req.body.userId && !!req.body && !!req.body.activity) {
+        try {
+            let query = {
+                _id: ObjectID(req.body.userId),
+
+            };
+            AdminUserModel.findOne(query, function (err, User) {
+                if (err) {
+                    console.log("@@@@@@@@@@@@@@@@@@", err)
+                    //TODO: Log the error here
+                    AppCode.Fail.error = err.message;
+                    response.setError(AppCode.Fail);
+                    response.send(res);
+                } else {
+                    console.log("@@@@@@@@@@@@@@@@@@", User)
+                    if (User === null) {
+                        response.setError(AppCode.NoUserFound);
+                        response.send(res);
+                    } else {
+                        let activity = parseInt(req.body.activity);
+                        console.log("------------------------------------", activity);
+                        VarificationCodeModel.removeMany({
+                            userId: ObjectID(req.body.userId), activity: activity
+                        }, function (err, removecode) {
+                            if (err) {
+                                console.log("-------------", err)
+                                AppCode.Fail.error = err.message;
+                                response.setError(AppCode.Fail);
+                                response.send(res);;
+
+                                // });
+                            } else {
+                                // if (isEmail(User.email)) {
+                                var params = {
+                                    userId: ObjectID(User._id),
+                                    activity: activity
+                                };
+                                VarificationCodeModel.create(params, function (err, newVarificationId) {
+                                    if (err) {
+                                        console.log(err)
+                                        response.setError(AppCode.Fail);
+                                        response.send(res);
+                                    } else {
+
+                                        // let userName = [User.firstName + " " + User.lastName]
+                                        // console.log("---------------------", userName)
+                                        var transporter = nodemailer.createTransport({
+                                            service: CONFIG.MAIL.SERVICEPROVIDER,
+                                            auth: {
+
+                                                user: CONFIG.MAIL.MAILID,
+                                                pass: CONFIG.MAIL.PASSWORD
+                                            }
+                                        });
+                                        var readHTMLFile = function (path, callback) {
+                                            fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
+                                                if (err) {
+                                                    throw err;
+                                                    callback(err);
+                                                }
+                                                else {
+                                                    callback(null, html);
+                                                }
+                                            });
+                                        };
+                                        readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
+                                            var template = handlebars.compile(html);
+                                            var replacements = {
+                                                // fullName: userName,
+                                                OTP: newVarificationId.token,
+                                                // email: user.otp,
+                                                // // pwd: userData.password,
+                                                // mobile: user.mobile,
+                                            };
+                                            // console.log("------", User.email,)
+
+                                            var htmlToSend = template(replacements);
+                                            var mailOptions = {
+                                                from: CONFIG.MAIL.MAILID,
+                                                to: User.email,
+                                                subject: 'resend OTP for user',
+                                                html: htmlToSend,
+                                                // text: 'Your password Is ' + password
+                                            };
+                                            // console.log("+++++++++++", mailOptions)
+                                            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!", User.email)
+
+                                            transporter.sendMail(mailOptions, function (error, info) {
+                                                if (error) {
+                                                } else {
+                                                    console.log('Email sent: ' + info.response);
+                                                }
+
+                                            });
+                                        });
+
+                                        response.setData(AppCode.Success, User._id);
+                                        response.send(res);
+                                    }
+                                });
+                            }
+
+                        });
+                    }
+                }
+            });
+        }
+        catch (exception) {
+
+        }
+
+    } else {
+        response.setError(AppCode.enterdetails);
+        response.send(res);
+    }
+
+};
+
 
 /* Password Reset For admin */
 AdminAuthCtrl.passwordResetForUser = (req, res) => {

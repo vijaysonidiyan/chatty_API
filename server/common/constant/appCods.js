@@ -44,6 +44,10 @@ module.exports = {
         code: 1005,
         message: "already added to favoriteList."
     },
+    enterdetails: {
+        code: 1005,
+        message: "please pass require details"
+    },
     NoseshTypeFound: { code: 1006, message: "No seshType found" },
     NoSparesFound: { code: 1010, message: "No spares  data found" },
     NoSpareModelFound: { code: 1010, message: "No spare model  data found" },

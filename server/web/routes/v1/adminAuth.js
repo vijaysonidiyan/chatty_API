@@ -26,6 +26,9 @@ router.route("/forgotPassworForAdmin").post(AdminAuthCtrl.forgotPassworForAdmin)
 //List country Data : http://localhost:3017/v1/adminAuth/checkOtpVerificationForAdmin
 router.route("/checkOtpVerificationForAdmin").post(AdminAuthCtrl.checkOtpVerificationForAdmin)
 
+//List country Data : http://localhost:3017/v1/adminAuth/resendOtpUser
+router.route("/resendOtpUser").post(AdminAuthCtrl.resendOtpAdmin)
+
 //List country Data : http://localhost:3017/v1/adminAuth/passwordResetForUser
 router.route("/passwordResetForUser").post(AdminAuthCtrl.passwordResetForUser)
 
