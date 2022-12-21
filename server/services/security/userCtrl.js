@@ -67,7 +67,7 @@ userCtrl.countryList = (req, res) => {
         var customObj = {
             'isoCode': countryData.isoCode,
             'name': countryData.name,
-            'countryCode': countryData.phonecode,
+            'countryCode':"+"+ countryData.phonecode,
         }
         countryList.push(customObj)
     });
@@ -247,6 +247,21 @@ userCtrl.userCreate = (req, res) => {
                             response.setError(AppCode.Fail);
                             response.send(res);
                         } else {
+                            let bodyData = {
+                                isverified: false
+                            }
+                            UserModel.update(query, bodyData, function (err, userdata) {
+                                if (err) {
+                                    console.log(err)
+                                    response.setError(AppCode.Fail);
+                                    response.send(res);
+                                } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
+                                    response.setError(AppCode.NotFound);
+                                } else {
+                                    // response.setData(AppCode.Success, req.body);
+                                    // response.send(res);
+                                }
+                            });
                             console.log("................", newVarificationId)
                             response.setData(AppCode.Success);
                             response.send(res);
@@ -257,6 +272,8 @@ userCtrl.userCreate = (req, res) => {
             });
 
         } else {
+            console.log(".....else part exicuted")
+            data.isverified = false
             UserModel.create(data, (err, userData) => {
                 if (err) {
                     console.log(err);
@@ -426,37 +443,45 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                         response.setError(AppCode.Fail);
                                         response.send(res);
                                     } else {
-                                        UserModel.generateSessionToken({ _id: data._id }, function (err, userResData) {
+
+                                        let bodydata = {
+
+                                            isverified: true
+                                        }
+
+                                        UserModel.update(query, bodydata, function (err, userdata) {
                                             if (err) {
-                                                response.setError(err);
+                                                console.log(err)
+                                                response.setError(AppCode.Fail);
                                                 response.send(res);
+                                            } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
+                                                response.setError(AppCode.NotFound);
                                             } else {
-                                                let bodydata = {
-
-                                                    isverified: true
-                                                }
-
-                                                UserModel.update(query, bodydata, function (err, userdata) {
+                                                UserModel.generateSessionToken({ _id: data._id }, function (err, userResData) {
                                                     if (err) {
-                                                        console.log(err)
-                                                        response.setError(AppCode.Fail);
+                                                        response.setError(err);
                                                         response.send(res);
-                                                    } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
-                                                        response.setError(AppCode.NotFound);
                                                     } else {
-                                                        console.log("verification true");
-                                                        //response.setData(AppCode.Success, req.body);
-                                                        // response.send(res);
+                                                        UserModel.findOne(query, {}, (err, data) => {
+                                                            if (err) {
+                                                                console.log(err)
+                                                                response.setError(AppCode.Fail);
+                                                                response.send(res);
+                                                            } else {
+                                                                response.setData(AppCode.Success, data);
+                                                                response.send(res);
+                                                            }
+                                                        });
+                                                        console.log("generate session")
+                                                        //   response.setData(AppCode.Success, userResData);
+                                                        //  response.send(res);
                                                     }
                                                 });
 
-                                                console.log("generate session")
-                                                // response.setData(AppCode.LoginSuccess, userResData);
-                                                //response.send(res);
+                                                console.log(" update verification true");
+                                               
                                             }
                                         });
-                                        response.setData(AppCode.Success, data);
-                                        response.send(res);
 
                                     }
                                 })
@@ -489,7 +514,7 @@ userCtrl.resendOtpUser = (req, res) => {
     const response = new HttpRespose();
     console.log("zgfhsdhjgfhjgfjsdghsgdf")
 
-    if (!!req.body.mobileNo && !!req.body ) {
+    if (!!req.body.mobileNo && !!req.body) {
         try {
             let query = {
                 mobileNo: req.body.mobileNo,
@@ -508,8 +533,8 @@ userCtrl.resendOtpUser = (req, res) => {
                         response.setError(AppCode.NoUserFound);
                         response.send(res);
                     } else {
-                       // let activity = parseInt(req.body.activity);
-                       // console.log("------------------------------------", activity);
+                        // let activity = parseInt(req.body.activity);
+                        // console.log("------------------------------------", activity);
                         VarificationCodeModel.removeMany({
                             mobileNo: req.body.mobileNo
                         }, function (err, removecode) {
@@ -523,7 +548,7 @@ userCtrl.resendOtpUser = (req, res) => {
                             } else {
                                 // if (isEmail(User.email)) {
                                 var params = {
-                                    mobileNo:req.body.mobileNo,
+                                    mobileNo: req.body.mobileNo,
                                     userId: ObjectID(User._id),
                                     activity: 1
                                 };
@@ -636,7 +661,7 @@ userCtrl.userDetailsById = (req, res) => {
         let query = [
             {
                 $match: {
-                    _id: ObjectID(req.query._id)
+                    _id: ObjectID(req.body._id)
                 }
 
             },
@@ -665,7 +690,15 @@ userCtrl.getUserList = (req, res) => {
         let query = [
             {
                 $match: {
-                    status: 1
+                    $and: [
+                        {
+                            status: 1
+                        },
+                        {
+                            isverified: true
+                        }
+                    ]
+
                 }
 
             },
@@ -678,6 +711,7 @@ userCtrl.getUserList = (req, res) => {
                 response.setError(AppCode.NotFound);
                 response.send(res);
             } else {
+                console.log("............", getuserList.length)
                 response.setData(AppCode.Success, getuserList);
                 response.send(res);
             }
@@ -1047,12 +1081,12 @@ userCtrl.favouriteUserList = (req, res) => {
                                                 $eq: ["$_id", "$$favId"],
                                             },
 
-                                           
+
 
 
                                         ],
                                     },
-                                    $or:[
+                                    $or: [
                                         {
                                             userName: new RegExp(
                                                 ".*" +
@@ -1088,181 +1122,181 @@ userCtrl.favouriteUserList = (req, res) => {
                     $project: {
                         _id: 1,
                         userId: 1,
-                        favId:1,
+                        favId: 1,
                         "favoritename": "$userDataa.userName",
-                       // userDataa:1,
-                       // userName: "$userData.userName"
+                        // userDataa:1,
+                        // userName: "$userData.userName"
                     },
                 },
             ];
 
-        
-       
 
-        console.log(query);
-        FavouriteModel.advancedAggregate(query, {}, (err, favouriteJobList) => {
-            if (err) {
-                throw err;
-            } else if (_.isEmpty(favouriteJobList)) {
-                response.setError(AppCode.NotFound);
-                response.send(res);
-            } else {
-                console.log(",,,,,,,,,", favouriteJobList)
-                let jobMasterData = []
-                for (let i = 0; i < favouriteJobList.length; i++) {
+
+
+            console.log(query);
+            FavouriteModel.advancedAggregate(query, {}, (err, favouriteJobList) => {
+                if (err) {
+                    throw err;
+                } else if (_.isEmpty(favouriteJobList)) {
+                    response.setError(AppCode.NotFound);
+                    response.send(res);
+                } else {
+                    console.log(",,,,,,,,,", favouriteJobList)
+                    let jobMasterData = []
+                    for (let i = 0; i < favouriteJobList.length; i++) {
 
                         if (!!favouriteJobList[i].favoritename) {
                             let data = {
                                 _id: favouriteJobList[i]._id,
                                 userId: favouriteJobList[i].userId,
                                 favId: favouriteJobList[i].favId,
-                                favoritename:favouriteJobList[i].favoritename
+                                favoritename: favouriteJobList[i].favoritename
 
-                               
+
                             }
                             jobMasterData.push(data);
                         }
-                        else{
+                        else {
                             console.log(",,,,,else")
 
                         }
-                       
 
-                    
+
+
+                    }
+
+                    response.setData(AppCode.Success, jobMasterData);
+                    response.send(res);
                 }
-               
-                response.setData(AppCode.Success, jobMasterData);
-                response.send(res);
-            }
-        });
-    }
-    else {
-        console.log("11111111111111111111111111111111111111111111111111111")
-        query = [
-            {
-                $match: {
-                    $expr: {
-                        $eq: ["$userId", ObjectID(req.body.userId)]
+            });
+        }
+        else {
+            console.log("11111111111111111111111111111111111111111111111111111")
+            query = [
+                {
+                    $match: {
+                        $expr: {
+                            $eq: ["$userId", ObjectID(req.body.userId)]
+                        },
                     },
                 },
-            },
 
-            {
-                $lookup: {
-                    from: "user",
-                    as: "userData",
-                    let: { userId: "$userId" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        {
-                                            $eq: ["$_id", "$$userId"],
-                                        },
-                                    ],
+                {
+                    $lookup: {
+                        from: "user",
+                        as: "userData",
+                        let: { userId: "$userId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            {
+                                                $eq: ["$_id", "$$userId"],
+                                            },
+                                        ],
+                                    },
+
+
                                 },
-                               
-
                             },
-                        },
-                       
-
-                        {
-                            $project: {
-                                _id: 1,
-                                userName: 1,
 
 
-                            },
-                        },
-                    ],
-                },
-            },
-            {
-                $unwind: {
-                    path: "$userData",
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-            {
-                $lookup: {
-                    from: "user",
-                    as: "userDataa",
-                    let: { favId: "$favId" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        {
-                                            $eq: ["$_id", "$$favId"],
-                                        },
-
-                                        {
-                                            userName: new RegExp(
-                                                ".*" +
-                                                SearchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") +
-                                                ".*",
-                                                "i"
-                                            ),
-                                        },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    userName: 1,
 
 
-                                    ],
                                 },
-
                             },
-                        },
+                        ],
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$userData",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "user",
+                        as: "userDataa",
+                        let: { favId: "$favId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            {
+                                                $eq: ["$_id", "$$favId"],
+                                            },
 
-                        {
-                            $project: {
-                                _id: 1,
-                                userName: 1,
+                                            {
+                                                userName: new RegExp(
+                                                    ".*" +
+                                                    SearchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") +
+                                                    ".*",
+                                                    "i"
+                                                ),
+                                            },
 
 
+                                        ],
+                                    },
+
+                                },
                             },
-                        },
-                    ],
+
+                            {
+                                $project: {
+                                    _id: 1,
+                                    userName: 1,
+
+
+                                },
+                            },
+                        ],
+                    },
                 },
-            },
-            {
-                $unwind: {
-                    path: "$userDataa",
-                    preserveNullAndEmptyArrays: true,
+                {
+                    $unwind: {
+                        path: "$userDataa",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    userId: 1,
-                    favId: 1,
-                    "favoritename": "$userDataa.userName",
+                {
+                    $project: {
+                        _id: 1,
+                        userId: 1,
+                        favId: 1,
+                        "favoritename": "$userDataa.userName",
 
-                    userName: "$userData.userName"
-
+                        userName: "$userData.userName"
 
 
+
+                    },
                 },
-            },
-           
-        ];
-    
 
-    console.log(query);
-    FavouriteModel.advancedAggregate(query, {}, (err, favouriteJobList) => {
-        if (err) {
-            throw err;
-        } else if (_.isEmpty(favouriteJobList)) {
-            response.setError(AppCode.NotFound);
-            response.send(res);
-        } else {
+            ];
 
-            response.setData(AppCode.Success, favouriteJobList);
-            response.send(res);
+
+            console.log(query);
+            FavouriteModel.advancedAggregate(query, {}, (err, favouriteJobList) => {
+                if (err) {
+                    throw err;
+                } else if (_.isEmpty(favouriteJobList)) {
+                    response.setError(AppCode.NotFound);
+                    response.send(res);
+                } else {
+
+                    response.setData(AppCode.Success, favouriteJobList);
+                    response.send(res);
+                }
+            });
         }
-    });
-}
     } catch (exception) {
         console.log("*&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&", exception)
         response.setError(AppCode.InternalServerError);
@@ -1292,7 +1326,7 @@ userCtrl.favouriteUserList1 = (req, res) => {
                     $expr: {
                         $and: [
                             {
-                                $eq: ["$_id",ObjectID(req.body.userId)],
+                                $eq: ["$_id", ObjectID(req.body.userId)],
                             },
                         ],
                     },
@@ -1307,8 +1341,8 @@ userCtrl.favouriteUserList1 = (req, res) => {
                         },
 
                     ],
-                    
-                   
+
+
 
                 },
             },
@@ -1328,11 +1362,11 @@ userCtrl.favouriteUserList1 = (req, res) => {
                                         },
                                     ],
                                 },
-                                
+
 
                             },
                         },
-                       
+
                         {
                             $project: {
                                 _id: 1,
@@ -1355,8 +1389,8 @@ userCtrl.favouriteUserList1 = (req, res) => {
             {
                 $project: {
                     _id: 0,
-                    favouriteData:1
-                 
+                    favouriteData: 1
+
 
 
                 },
