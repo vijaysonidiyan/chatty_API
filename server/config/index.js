@@ -50,6 +50,7 @@
     CONF.DEFAULT_ALBUM_PHOTO = "/images/no-photo.png";
     CONF.DEFAULT_COVER_PHOTO = "/images/cover-img-user.jpeg";
     CONF.DEFAULT_VIDEO_IMAGE = "/images/gray.png";
+    CONF.DEFAULT_PROFILE_PHOTO = "/uploads/images/no-profile-Image.png";
 
     //JWT token
     CONF.JWTTOKENKEY = "bnRox$@2019";
