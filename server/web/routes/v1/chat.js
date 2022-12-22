@@ -74,4 +74,9 @@ router
 .route("/getChatUsersListttt")
 .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersListttt);
 
+//Check OnChatOrNot : http://localhost:3000/v1/chat/getChatUsersList2
+router
+.route("/getChatUsersList2")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersList2);
+
 module.exports = router;

@@ -8,8 +8,6 @@ const CONFIG = require("../../config");
 const _ = require("lodash");
 const async = require("async");
 const AppCode = require("../../common/constant/appCods");
-
-
 const MasterUserModel = new (require("../../common/model/userModel"))();
 const BlockUserModel = new (require("../../common/model/blockUserModel"))();
 const NotificationModel =
@@ -37,7 +35,7 @@ blockUserCtrl.blockUser = (req, res) => {
         } else if (_.isEmpty(blockedUserFind)) {
           BlockUserModel.create(
             {
-              userId: ObjectID(req.payload.userId),
+              userId: ObjectID(req.auth._id),
               blockedUserId: ObjectID(req.body.blockedUserId),
             },
             (err, blockedUser) => {
@@ -71,16 +69,17 @@ blockUserCtrl.getBlockUserList = (req, res) => {
   searchKey = !!req.query.searchKey ? req.query.searchKey : "";
   let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
   // let loginUserId = ObjectID(req.payload.userId);
-  const limit = 1;
+  const limit = 10;
   const skip = limit * parseInt(pageNumber);
   options.skip = skip;
   options.limit = limit;
-  getBlockedUserList(req.payload.userId).then((user) => {
-    const buddyRequest = [];
+  getBlockedUserList(req.auth._id).then((user) =>  {
+    console.log(",,,,,,,,,,",user)
+    const blockuser = [];
     _.forEach(user.blockedUserData, (follower) => {
-      console.log("-----------------------", follower);
-      buddyRequest.push(ObjectID(follower.blockedUserId));
-      console.log("-----------------------", buddyRequest);
+      console.log("------follower-----------------", follower);
+      blockuser.push(ObjectID(follower.blockedUserId));
+      console.log("---------buddyRequest--------------", blockuser);
     });
 
     let query = [
@@ -88,15 +87,13 @@ blockUserCtrl.getBlockUserList = (req, res) => {
         $match: {
           $or: [
             {
-              userName: new RegExp(
-                ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-              "i"
-              ),
+              userName: new RegExp('^' + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'),
             },
+           
           ],
 
           $expr: {
-            $in: ["$userId", buddyRequest],
+            $in: ["$_id", blockuser],
           },
           // status: { $ne: 2 },
           // isdeleted: { $ne: true },
@@ -107,37 +104,37 @@ blockUserCtrl.getBlockUserList = (req, res) => {
       { $limit: limit },
       {
         $project: {
-          _id: 0,
+          _id: 1,
           userId: 1,
           userName: 1,
           firstName: 1,
           lastName: 1,
-          profileUrl: { $ifNull: ["$profileUrl", ""] },
+          profile_image: { $ifNull: ["$profile_image", ""] },
 
-          qualityRating: { $ifNull: ["$qualityRating", 0] },
-          rolies: { $ifNull: ["$roliesRating", 0] },
-          statusType: 1,
-          quntities: { $ifNull: ["$quntitiesRating", 0] },
-          Rating: {
-            $ifNull: [
-              {
-                $divide: [
-                  {
-                    $sum: [
-                      "$qualityRating",
-                      "$roliesRating",
-                      "$quntitiesRating",
-                    ],
-                  },
-                  3,
-                ],
-              },
-              0,
-            ],
-          },
-          about: 1,
-          isBuddy: "false",
-          isBuddyRequested: "false",
+          // qualityRating: { $ifNull: ["$qualityRating", 0] },
+          // rolies: { $ifNull: ["$roliesRating", 0] },
+          // statusType: 1,
+          // quntities: { $ifNull: ["$quntitiesRating", 0] },
+          // Rating: {
+          //   $ifNull: [
+          //     {
+          //       $divide: [
+          //         {
+          //           $sum: [
+          //             "$qualityRating",
+          //             "$roliesRating",
+          //             "$quntitiesRating",
+          //           ],
+          //         },
+          //         3,
+          //       ],
+          //     },
+          //     0,
+          //   ],
+          // },
+        //  about: 1,
+         // isBuddy: "false",
+        //  isBuddyRequested: "false",
         },
       },
     ];
@@ -152,7 +149,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
       ],
 
       $expr: {
-        $in: ["$userId", buddyRequest],
+        $in: ["$_id", blockuser],
       },
     }
     try {
@@ -169,9 +166,11 @@ blockUserCtrl.getBlockUserList = (req, res) => {
               } else if (options.skip > 0 && countData === 0) {
                 cb(null);
               } else {
+                console.log("....coundata",countData)
                 if (countData <= skip + limit) {
                 } else {
                   result.nextPage = parseInt(pageNumber) + 1;
+                  result.totalblockuser = countData;
                 }
                 cb(null);
               }
@@ -214,12 +213,14 @@ blockUserCtrl.getBlockUserList = (req, res) => {
   });
 };
 
+
+
 blockUserCtrl.unblockUser = (req, res) => {
   var response = new HttpRespose();
   try {
     BlockUserModel.findOne(
       {
-        userId: ObjectID(req.payload.userId),
+        userId: ObjectID(req.auth._id),
         blockedUserId: ObjectID(req.body.blockedUserId),
       },
       (err, blockedUserFind) => {
@@ -228,38 +229,15 @@ blockUserCtrl.unblockUser = (req, res) => {
         } else {
           BlockUserModel.remove(
             {
-              userId: ObjectID(req.payload.userId),
+              userId: ObjectID(req.auth._id),
               blockedUserId: ObjectID(req.body.blockedUserId),
             },
             (err, newId) => {
               if (err) {
                 throw err;
               } else {
-                BlockUserModel.findOne(
-                  {
-                    blockedUserId: ObjectID(req.payload.userId),
-                    userId: ObjectID(req.body.blockedUserId),
-                  },
-                  (err, blockedUserFind) => {
-                    if (err) {
-                      throw err;
-                    } else {
-                      BlockUserModel.remove(
-                        {
-                          blockedUserId: ObjectID(req.payload.userId),
-                          userId: ObjectID(req.body.blockedUserId),
-                        },
-                        (err, newId) => {
-                          if (err) {
-                            throw err;
-                          } else {
-                          }
-                        }
-                      );
-                    }
-                  }
-                ),
-                  response.setData(AppCode.userunBlockSucess);
+               
+                  response.setData(AppCode.Success);
                 response.send(res);
               }
             }
@@ -287,6 +265,7 @@ const getBlockedUserList = (userId) => {
         $lookup: {
           from: "blockedUser",
           as: "blockedUserData",
+          let: { userId: "$_id" },
           pipeline: [
             {
               $match: {
@@ -319,7 +298,7 @@ const getBlockedUserList = (userId) => {
         },
       },
     ];
-    MasterUserModel.advancedAggregate(query, {}, (err, user) => {
+    UserModel.advancedAggregate(query, {}, (err, user) => {
       if (err) {
         return reject(err);
       }

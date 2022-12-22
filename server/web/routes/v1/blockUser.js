@@ -15,7 +15,10 @@ const CONFIG = require("../../../config");
 router.route("/blockUser").post(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.blockUser);
 
 // Get Interest  details: http://localhost:3001/v1/blockUser/get-blockeduserList-Byid
-router.route("/get-blockeduserList-byid").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockUserList);
+router.route("/getBlockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockUserList);
+
+// Get Interest  details: http://localhost:3001/v1/blockUser/getBlockedList
+//router.route("/getBlockedList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockedList);
 
 // save seshType details: http://localhost:3001/v1/blockUser/unblockUser
 router.route("/unblockUser").post(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.unblockUser);

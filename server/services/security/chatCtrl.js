@@ -4,6 +4,7 @@ const UserModel =
   new (require("../../common/model/userModel"))();
 const chatModel = new (require("./../../common/model/chatModel"))();
 const ChatScreenManagementModel = new (require("./../../common/model/ChatScreenManagementModel"))();
+const NotificationModel = new (require("./../../common/model/NotificationModel"))();
 
 const HttpRespose = require("./../../common/httpResponse");
 const AppCode = require("../../common/constant/appCods");
@@ -777,6 +778,8 @@ ChatCtrl.getMessagesAll = (req, res) => {
     response.send(res);
   }
 };
+
+
 ChatCtrl.getChatWithUsersList = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
@@ -982,7 +985,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
     response.send(res);
   }
 };
-//ajay sir
+//ajay sir - done.
 ChatCtrl.getChatUsersListttt = (req, res) => {
       const response = new HttpRespose();
       let data = req.body;
@@ -1009,7 +1012,7 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
                       $lookup: {
                           from: "user",
                           localField: "sender_id",
-                          foreignField: "masterUserId",
+                          foreignField: "_id",
                           as: "senderData"
                       }
                   },
@@ -1037,7 +1040,7 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
                       $lookup: {
                           from: "user",
                           localField: "reciver_id",
-                          foreignField: "masterUserId",
+                          foreignField: "_id",
                           as: "receiverData"
                       }
                   },
@@ -1072,10 +1075,10 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
                               }
                           },
                           "senderData": {
-                              _id: "$senderData.masterUserId", profileHeader: 1, name: 1, profileImage: { $ifNull: ["$senderData.profileImageId.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO] }
+                              _id: "$senderData._id", profileHeader: 1, userName: 1, profileImage: { $ifNull: ["$senderData.profile_image", CONFIG.DEFAULT_PROFILE_PHOTO] }
                           },
                           "receiverData": {
-                              _id: "$receiverData.masterUserId", profileHeader: 1, name: 1, profileImage: { $ifNull: ["$receiverData.profileImageId.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO] }
+                              _id: "$receiverData._id", profileHeader: 1, userName: 1, profileImage: { $ifNull: ["$receiverData.profile_image", CONFIG.DEFAULT_PROFILE_PHOTO] }
                           },
                           reciver_id: 1,
                           sender_id: 1,
@@ -1191,17 +1194,18 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
                           } else if (options.skip > 0 && _.isEmpty(messages)) {
                               cb(null);
                           } else {
+                            console.log("..........",messages)
                               let msg = [];
                               if (!!data.searchKey) {
                                   _.forEach(messages, (chatData) => {
                                       var re = new RegExp('^' + data.searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
                                       if (ObjectID(chatData.sender_id) !== ObjectID(req.auth._id)) {
-                                          if (re.test(chatData.receiverData.name)) {
+                                          if (re.test(chatData.receiverData.userName)) {
                                               msg.push(chatData);
                                           }
                                       }
                                       else {
-                                          if (re.test(chatData.senderData.name)) {
+                                          if (re.test(chatData.senderData.userName)) {
                                               msg.push(chatData);
                                           }
                                       }
@@ -1286,33 +1290,35 @@ ChatCtrl.getChatUsersList2 = (req, res) => {
     let query = [
       {
         $match: {
-          _id: ObjectID(req.auth._id)
+          $expr: {
+            $eq: ["$_id", ObjectID(req.auth._id)],
+          },
 
         },
       },
-      // {
-      //   $lookup: {
-      //     from: "user",
-      //     as: "isDeleted",
-      //     let: { userId : "$userId" },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               {
-      //                 $eq: ["$_id", "$$userId"],
-      //               },
-      //               {
-      //                 $eq: ["$isdeleted", true],
-      //               },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
+      {
+        $lookup: {
+          from: "user",
+          as: "isDeleted",
+          let: { userId : "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$userId"],
+                    },
+                    {
+                      $eq: ["$isdeleted", true],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
       {
         $lookup: {
           from: "chat",
@@ -1482,7 +1488,7 @@ ChatCtrl.getChatUsersList2 = (req, res) => {
       response.send(res);
     }
     //buddilist breket
-  });
+ });
 };
 ChatCtrl.getChatUsersList = (req, res) => {
   const response = new HttpRespose();
@@ -1499,465 +1505,228 @@ ChatCtrl.getChatUsersList = (req, res) => {
   options.skip = skip;
   options.limit = limit;
   options.sort = { messageAt: -1 };
+  getBuddiesList(req.payload.userId).then((user) => {
+    const buddyRequest = [];
+    _.forEach(user.BuddiesFriends, (follower) => {
+      console.log(follower);
+      buddyRequest.push(ObjectID(follower.buddiesId));
+    });
 
+    if (searchKey == "") {
+      condition = {
+        $expr: {
+          $in: ["$_id", buddyRequest],
+        },
+      };
+    } else {
+      condition = {
+        userName: new RegExp(
+          ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+          "i"
+        ),
+        $expr: {
+          $in: ["$_id", buddyRequest],
+        },
+      };
+    }
 
-  // if (searchKey == "") {
-  //   condition = {
-  //     $expr: {
-  //       $in: ["$userId", buddyRequest],
-  //     },
-  //   };
-  // } else {
-  //   condition = {
-  //     userName: new RegExp(
-  //       ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-  //       "i"
-  //     ),
-  //     $expr: {
-  //       $in: ["$userId", buddyRequest],
-  //     },
-  //   };
-  // }
-
-  let query = [
-    {
-      
-    },
-
-    {
-      $lookup: {
-        from: "chat",
-        as: "chat",
-        let: { userId: "$_id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $or: [
-                  {
-                    $and: [
-                      { $eq: ["$sender_id", ObjectID(req.auth._id)] },
-                      { $eq: ["$reciver_id", "$$userId"] },
-                    ],
-                  },
-                  {
-                    $and: [
-                      { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
-                      { $eq: ["$sender_id", "$$userId"] },
-                    ],
-                  },
-                ],
+    let query = [
+      {
+        $match: condition,
+      },
+      {
+        $lookup: {
+          from: "user",
+          as: "isDeleted",
+          let: { userId : "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$userId"],
+                    },
+                    {
+                      $eq: ["$isdeleted", true],
+                    },
+                  ],
+                },
               },
             },
-          },
-          {
-            $group: {
-              _id: null,
-              message: { $last: "$message" },
-              type: { $last: "$type" },
-              messageAt: { $last: "$createdAt" },
-              senderId: { $last: "$sender_id" },
-              receiverId: { $last: "$reciver_id" },
-            },
-          },
-        ],
+          ],
+        },
       },
-    },
-    {
-      $unwind: {
-        path: "$chat",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    { $sort: { "chat.messageAt": -1, userName: 1 } },
-    { $skip: skip },
-    { $limit: limit },
-    {
-      $lookup: {
-        from: "chat",
-        as: "unreadCount",
-        let: { userId: "$userId" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
-                  { $eq: ["$sender_id", "$$userId"] },
-                  { $ne: ["$isRead", true] },
-                ],
+      {
+        $lookup: {
+          from: "chat",
+          as: "chat",
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    {
+                      $and: [
+                        { $eq: ["$sender_id", ObjectID(req.payload.userId)] },
+                        { $eq: ["$reciver_id", "$$userId"] },
+                      ],
+                    },
+                    {
+                      $and: [
+                        { $eq: ["$reciver_id", ObjectID(req.payload.userId)] },
+                        { $eq: ["$sender_id", "$$userId"] },
+                      ],
+                    },
+                  ],
+                },
               },
             },
-          },
-          {
-            $group: {
-              _id: null,
-              count: { $sum: 1 },
+            {
+              $group: {
+                _id: null,
+                message: { $last: "$message" },
+                type: { $last: "$type" },
+                messageAt: { $last: "$createdAt" },
+                senderId: { $last: "$sender_id" },
+                receiverId: { $last: "$reciver_id" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$chat",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $sort: { "chat.messageAt": -1, userName: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "chat",
+          as: "unreadCount",
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$reciver_id", ObjectID(req.payload.userId)] },
+                    { $eq: ["$sender_id", "$$userId"] },
+                    { $ne: ["$isRead", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$unreadCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          userId: 1,
+          userName: 1,
+          firstName: 1,
+          lastName: 1,
+          profileUrl: { $ifNull: ["$profileUrl", ""] },
+          statusType: 1,
+          // "chat": "$chat.message",
+          chat: {
+            $cond: {
+              if: { $eq: ["$chat.type", "post"] },
+              then: "Shared a post",
+              else: "$chat.message",
             },
           },
-        ],
-      },
-    },
-    {
-      $unwind: {
-        path: "$unreadCount",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        userId: 1,
-        userName: 1,
-        firstName: 1,
-        lastName: 1,
-        profileUrl: { $ifNull: ["$profileUrl", ""] },
-        statusType: 1,
-        // "chat": "$chat.message",
-        chat: {
-          $cond: {
-            if: { $eq: ["$chat.type", "post"] },
-            then: "Shared a post",
-            else: "$chat.message",
+          isDeleted: {
+            $cond: {
+              if: { $isArray: "$isDeleted" },
+              then: { $size: "$isDeleted" },
+              else: 0,
+            },
           },
+          messageAt: "$chat.messageAt",
+          senderId: "$chat.senderId",
+          receiverId: "$chat.receiverId",
+          unreadCount: { $ifNull: ["$unreadCount.count", 0] },
         },
-        isDeleted: {
-          $cond: {
-            if: { $isArray: "$isDeleted" },
-            then: { $size: "$isDeleted" },
-            else: 0,
-          },
-        },
-        messageAt: "$chat.messageAt",
-        senderId: "$chat.senderId",
-        receiverId: "$chat.receiverId",
-        unreadCount: { $ifNull: ["$unreadCount.count", 0] },
       },
-    },
-  ];
+    ];
 
-  try {
-    let result = {};
-    async.parallel(
-      [
-        function (cb) {
-          // UserModel.advancedAggregate(query, {}, (err, countData) => {
-          UserModel.count(condition, (err, countData) => {
-            if (err) {
-              throw err;
-            } else if (options.skip === 0 && countData == 0) {
-              cb(null);
-            } else if (options.skip > 0 && countData == 0) {
-              cb(null);
-            } else {
-              if (countData <= skip + limit) {
+    try {
+      let result = {};
+      async.parallel(
+        [
+          function (cb) {
+            // UserModel.advancedAggregate(query, {}, (err, countData) => {
+            UserModel.count(condition, (err, countData) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && countData == 0) {
+                cb(null);
+              } else if (options.skip > 0 && countData == 0) {
+                cb(null);
               } else {
-                result.nextPage = parseInt(pageNumber) + 1;
+                if (countData <= skip + limit) {
+                } else {
+                  result.nextPage = parseInt(pageNumber) + 1;
+                }
+                cb(null);
               }
-              cb(null);
-            }
-          });
-        },
-        function (cb) {
-          UserModel.aggregate(query, (err, followers) => {
-            if (err) {
-              throw err;
-            } else if (options.skip === 0 && _.isEmpty(followers)) {
-              cb(null);
-            } else if (options.skip > 0 && _.isEmpty(followers)) {
-              cb(null);
-            } else {
-              result.result = followers;
-              cb(null);
-            }
-          });
-        },
-      ],
-      function (err) {
-        if (err) {
-          throw err;
-        } else if (options.skip === 0 && _.isEmpty(result.result)) {
-          response.setData(AppCode.NoBuddiesFound, result);
-          response.send(res);
-        } else if (options.skip > 0 && _.isEmpty(result.result)) {
-          response.setData(AppCode.NoMoreBuddiesFound, result);
-          response.send(res);
-        } else {
-          response.setData(AppCode.Success, result);
-          response.send(res);
+            });
+          },
+          function (cb) {
+            UserModel.aggregate(query, (err, followers) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else if (options.skip > 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else {
+                result.result = followers;
+                cb(null);
+              }
+            });
+          },
+        ],
+        function (err) {
+          if (err) {
+            throw err;
+          } else if (options.skip === 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoBuddiesFound, result);
+            response.send(res);
+          } else if (options.skip > 0 && _.isEmpty(result.result)) {
+            response.setData(AppCode.NoMoreBuddiesFound, result);
+            response.send(res);
+          } else {
+            response.setData(AppCode.Success, result);
+            response.send(res);
+          }
         }
-      }
-    );
-  } catch (exception) {
-    response.setError(AppCode.InternalServerError);
-    response.send(res);
-  }
-
+      );
+    } catch (exception) {
+      response.setError(AppCode.InternalServerError);
+      response.send(res);
+    }
+  });
 };
-
-
-
-
-
-
-// ChatCtrl.getChatUsersList = (req, res) => {
-//     const response = new HttpRespose();
-//     let data = req.body;
-//     if (!!req.payload && !!req.payload._id) {
-//         let sort = -1;
-//         if (data.sortBy === "oldest") {
-//             sort = 1;
-//         }
-//         let query =
-//             [
-//                 {
-//                     $match: {
-//                         $or: [
-//                             {
-//                                 "sender_id": ObjectID(req.payload._id)
-//                             },
-//                             {
-//                                 "reciver_id": ObjectID(req.payload._id)
-//                             }
-//                         ]
-//                     }
-//                 },
-//                 {
-//                     $lookup: {
-//                         from: "user",
-//                         localField: "sender_id",
-//                         foreignField: "masterUserId",
-//                         as: "senderData"
-//                     }
-//                 },
-//                 {
-//                     "$unwind": {
-//                         "path": "$senderData",
-//                         "preserveNullAndEmptyArrays": true
-//                     }
-//                 },
-//                 {
-//                     $lookup: {
-//                         from: "photo",
-//                         localField: "senderData.profileImageId",
-//                         foreignField: "_id",
-//                         as: "senderData.profileImageId"
-//                     }
-//                 },
-//                 {
-//                     "$unwind": {
-//                         "path": "$senderData.profileImageId",
-//                         "preserveNullAndEmptyArrays": true
-//                     }
-//                 },
-//                 {
-//                     $lookup: {
-//                         from: "user",
-//                         localField: "reciver_id",
-//                         foreignField: "masterUserId",
-//                         as: "receiverData"
-//                     }
-//                 },
-//                 {
-//                     "$unwind": {
-//                         "path": "$receiverData",
-//                         "preserveNullAndEmptyArrays": true
-//                     }
-//                 },
-//                 {
-//                     $lookup: {
-//                         from: "photo",
-//                         localField: "receiverData.profileImageId",
-//                         foreignField: "_id",
-//                         as: "receiverData.profileImageId"
-//                     }
-//                 },
-//                 {
-//                     "$unwind": {
-//                         "path": "$receiverData.profileImageId",
-//                         "preserveNullAndEmptyArrays": true
-//                     }
-//                 },
-//                 {
-//                     "$project": {
-//                         "userData": {
-//                             $cond: {
-//                                 if: { $ne: ["$sender_id", ObjectID(req.payload._id)] }, then: "sender",
-//                                 else: {
-//                                     $cond: { if: { $ne: ["$reciver_id", ObjectID(req.payload._id)] }, then: "receiver", else: "" }
-//                                 }
-//                             }
-//                         },
-//                         "senderData": {
-//                             _id: "$senderData.masterUserId", profileHeader: 1, name: 1, profileImage: { $ifNull: ["$senderData.profileImageId.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO] }
-//                         },
-//                         "receiverData": {
-//                             _id: "$receiverData.masterUserId", profileHeader: 1, name: 1, profileImage: { $ifNull: ["$receiverData.profileImageId.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO] }
-//                         },
-//                         reciver_id: 1,
-//                         sender_id: 1,
-//                         message: 1,
-//                         createdAt: 1,
-//                         fromToUser: [
-//                             "$sender_id",
-//                             "$reciver_id"
-//                         ]
-//                     }
-//                 },
-//                 {
-//                     $unwind: "$fromToUser"
-//                 },
-//                 {
-//                     $sort: {
-//                         "fromToUser": 1
-//                     }
-//                 },
-//                 {
-//                     $group: {
-//                         _id: "$_id",
-//                         "fromToUser": {
-//                             $push: "$fromToUser"
-//                         },
-//                         "sender_id": {
-//                             "$first": "$sender_id"
-//                         },
-//                         "reciver_id": {
-//                             "$first": "$reciver_id"
-//                         },
-//                         "message": {
-//                             "$first": "$message"
-//                         },
-//                         "createdAt": {
-//                             "$first": "$createdAt"
-//                         },
-//                         "senderData": {
-//                             "$first": "$senderData"
-//                         },
-//                         "receiverData": {
-//                             "$first": "$receiverData"
-//                         },
-//                         "userData": {
-//                             "$first": "$userData"
-//                         }
-//                     }
-//                 },
-//                 {
-//                     "$sort": {
-//                         "createdAt": -1
-//                     }
-//                 },
-//                 {
-//                     "$group": {
-//                         "_id": "$fromToUser",
-//                         "sender_id": {
-//                             "$first": "$sender_id"
-//                         },
-//                         "reciver_id": {
-//                             "$first": "$reciver_id"
-//                         },
-//                         "message": {
-//                             "$first": "$message"
-//                         },
-//                         "createdAt": {
-//                             "$first": "$createdAt"
-//                         },
-//                         "senderData": {
-//                             "$first": "$senderData"
-//                         },
-//                         "receiverData": {
-//                             "$first": "$receiverData"
-//                         },
-//                         "userData": {
-//                             "$first": "$userData"
-//                         }
-//                     }
-//                 }
-//             ]
-//         const options = {}
-//         if (!data.searchKey) {
-//             options.limit = !!data.recordsPerPage ? parseInt(data.recordsPerPage) : 10;
-//             options.skip = !!data.recordsOffset ? parseInt(data.recordsOffset) : 0;
-//             options.sort = { createdAt: sort }
-//         }
-//         else {
-//             options.limit = 1000;
-//             options.skip = 0;
-//             options.sort = { createdAt: sort }
-//         }
-//         try {
-//             let result = {};
-//             async.parallel([
-//                 function (cb) {
-//                     chatModel.advancedAggregate(query, {}, (err, messages) => {
-//                         if (err) {
-//                             throw err;
-//                         } else {
-//                             if (!data.searchKey) {
-//                                 result.recordsTotal = messages.length;
-//                             }
-//                             cb(null);
-//                         }
-//                     });
-//                 },
-//                 function (cb) {
-//                     chatModel.advancedAggregate(query, options, (err, messages) => {
-//                         if (err) {
-//                             throw err;
-//                         } else if (options.skip === 0 && _.isEmpty(messages)) {
-//                             cb(null)
-//                         } else if (options.skip > 0 && _.isEmpty(messages)) {
-//                             cb(null);
-//                         } else {
-//                             let msg = [];
-//                             if (!!data.searchKey) {
-//                                 _.forEach(messages, (chatData) => {
-//                                     var re = new RegExp('^' + data.searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
-//                                     if (ObjectID(chatData.sender_id) !== ObjectID(req.payload._id)) {
-//                                         if (re.test(chatData.receiverData.name)) {
-//                                             msg.push(chatData);
-//                                         }
-//                                     }
-//                                     else {
-//                                         if (re.test(chatData.senderData.name)) {
-//                                             msg.push(chatData);
-//                                         }
-//                                     }
-//                                 });
-//                                 result.messages = msg;
-//                                 result.recordsTotal = msg.length;
-//                             }
-//                             else {
-//                                 result.messages = messages;
-//                             }
-//                             cb(null);
-//                         }
-//                     });
-//                 }
-//             ], function (err) {
-//                 if (err) {
-//                     throw err;
-//                 } else if (options.skip === 0 && _.isEmpty(result.messages)) {
-//                     response.setData(AppCode.Success, {});
-//                     response.send(res);
-//                 } else if (options.skip > 0 && _.isEmpty(result.messages)) {
-//                     response.setData(AppCode.Success, {});
-//                     response.send(res);
-//                 } else {
-//                     response.setData(AppCode.Success, result);
-//                     response.send(res);
-//                 }
-//             });
-//         } catch (exception) {
-//             Logger.error(AppCode.InternalServerError.message, exception);
-//             response.setError(AppCode.InternalServerError);
-//             response.send(res);
-//         }
-//     }
-//     else {
-//         response.setData(AppCode.LoginAgain, {});
-//         response.send(res);
-//     }
-// }
 
 ChatCtrl.getChatUsersListFilter = (req, res) => {
   const response = new HttpRespose();
@@ -2307,7 +2076,7 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
       let result = {};
       let query = {
         sender_id: ObjectID(req.body.senderId),
-        reciver_id: ObjectID(req.payload.userId),
+        reciver_id: ObjectID(req.auth._id),
       };
 
       chatModel.findOne(query, function (err, data) {
@@ -2326,7 +2095,7 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
                 response.setError(AppCode.Fail);
               } else {
                 NotificationModel.count(
-                  { reciverId: ObjectID(req.payload.userId), isView: false },
+                  { reciverId: ObjectID(req.auth._id), isView: false },
                   function (err, totalrecords) {
                     if (err) {
                       AppCode.Fail.error = err.message;
@@ -2342,7 +2111,7 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
                                 $expr: {
                                   $eq: [
                                     "$reciver_id",
-                                    ObjectID(req.payload.userId),
+                                    ObjectID(req.auth._id),
                                   ],
                                 },
                                 isRead: { $ne: true },
@@ -2379,7 +2148,9 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
           );
         }
       });
-    } catch (exception) { }
+    } catch (exception) {
+      console.log(".......",exception)
+     }
   } else {
     response.setError(AppCode.Fail);
     response.send(res);
