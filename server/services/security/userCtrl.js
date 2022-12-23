@@ -614,10 +614,49 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         response.setError(err);
                                                         response.send(res);
                                                     } else {
+                                                        
+
+                                                        let query = [
+                                                            {
+                                                                $match: {
+                                                                    _id: ObjectID(varificationCode.userId)
+                                                                }
+                                                            },
+                                                            {
+                                                                $project:{
+                                                                    _id:1,
+                                                                    mobileNo:1,
+                                                                    countryName:1,
+                                                                    countryCode:1,
+                                                                    isverified:1,
+                                                                    status:1,
+                                                                    createdAt:1,
+                                                                    updatedAt:1,
+                                                                    profile_image:1,
+                                                                    userName:1,
+
+
+                                                                }
+                                                            }
+                                                        ];
+                                                        UserModel.advancedAggregate(query, {}, (err, user) => {
+                                                            if (err) {
+                                                                throw err;
+                                                            } else if (_.isEmpty(user)) {
+                                                                response.setError(AppCode.NotFound);
+                                                                response.send(res);
+                                                            } else {
+                                                                response.setData(AppCode.Success, user[0]);
+                                                                response.send(res);
+                                                            }
+                                                        });
+
+                                                        
+
 
                                                         console.log("generate session")
-                                                        response.setData(AppCode.Success, varificationCode);
-                                                        response.send(res);
+                                                      //  response.setData(AppCode.Success, data);
+                                                      //  response.send(res);
                                                     }
                                                 });
 
