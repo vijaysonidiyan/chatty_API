@@ -782,6 +782,23 @@ userCtrl.userDetailsById = (req, res) => {
                 }
 
             },
+            {
+                $project:{
+                    _id:1,
+                    mobileNo:1,
+                    isverified:1,
+                    status:1,
+                    createdAt:1,
+                    updatedAt:1,
+                    profile_image:1,
+                    userName:1,
+
+
+
+
+
+                }
+            }
         ];
         UserModel.advancedAggregate(query, {}, (err, userData) => {
             if (err) {
@@ -826,12 +843,8 @@ userCtrl.getUserList = (req, res) => {
             userName: sortDirection
         }
     }
-    if (req.query.sortField == "accountType") {
-        condition = {
-            accountType: sortDirection
-        }
-    }
-    if (req.query.sortField == "mobile") {
+    
+    if (req.query.sortField == "mobileNo") {
         condition = {
             mobileNo: sortDirection
         }
