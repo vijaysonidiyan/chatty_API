@@ -67,7 +67,7 @@ userCtrl.countryList = (req, res) => {
         var customObj = {
             'isoCode': countryData.isoCode,
             'name': countryData.name,
-            'countryCode':"+"+ countryData.phonecode,
+            'countryCode': "+" + countryData.phonecode,
         }
         countryList.push(customObj)
     });
@@ -206,15 +206,13 @@ userCtrl.countryList = (req, res) => {
 //     });
 // };
 
-/*user Registration for admin*/
-userCtrl.userLoginForWeb = (req, res) => {
+/*user Registration */
+userCtrl.userLoginForWeb= (req, res) => {
     var response = new HttpRespose();
     var data = req.body;
     // let password = req.body.pwd;
     console.log(data);
-    let query = { mobileNo: req.body.mobileNo ,
-        countryCode:req.body.countryCode,
-        
+    let query = { mobileNo: req.body.mobileNo ,countryCode:req.body.countryCode
     };
     UserModel.findOne(query, function (err, UserData) {
         if (err) {
@@ -240,6 +238,7 @@ userCtrl.userLoginForWeb = (req, res) => {
 
                     let activity = 1;
                     var params = {
+                        mobileNo: req.body.mobileNo,
                         userId: ObjectID(UserData._id),
                         activity: activity
                     };
@@ -249,6 +248,21 @@ userCtrl.userLoginForWeb = (req, res) => {
                             response.setError(AppCode.Fail);
                             response.send(res);
                         } else {
+                            let bodyData = {
+                                isverified: false
+                            }
+                            UserModel.update(query, bodyData, function (err, userdata) {
+                                if (err) {
+                                    console.log(err)
+                                    response.setError(AppCode.Fail);
+                                    response.send(res);
+                                } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
+                                    response.setError(AppCode.NotFound);
+                                } else {
+                                    // response.setData(AppCode.Success, req.body);
+                                    // response.send(res);
+                                }
+                            });
                             console.log("................", newVarificationId)
                             response.setData(AppCode.Success);
                             response.send(res);
@@ -257,75 +271,87 @@ userCtrl.userLoginForWeb = (req, res) => {
                     });
                 }
             });
+
         } else {
-            let activity = 1;
-            var params = {
-                userId: ObjectID(UserData._id),
-                activity: activity
-            };
-            VarificationCodeModel.create(params, function (err, newVarificationId) {
+            console.log(".....else part exicuted")
+            data.isverified = false
+            UserModel.create(data, (err, userData) => {
                 if (err) {
-                    console.log("verificationerr", err)
+                    console.log(err);
                     response.setError(AppCode.Fail);
                     response.send(res);
-                } else {
-                    // var transporter = nodemailer.createTransport({
-                    //     service: CONFIG.MAIL.SERVICEPROVIDER,
-                    //     auth: {
+                }
+                else {
+                    let activity = 1;
+                    var params = {
+                        mobileNo: req.body.mobileNo,
+                        userId: ObjectID(userData._id),
+                        activity: activity
+                    };
+                    VarificationCodeModel.create(params, function (err, newVarificationId) {
+                        if (err) {
+                            console.log("verificationerr", err)
+                            response.setError(AppCode.Fail);
+                            response.send(res);
+                        } else {
+                            // var transporter = nodemailer.createTransport({
+                            //     service: CONFIG.MAIL.SERVICEPROVIDER,
+                            //     auth: {
 
-                    //         user: CONFIG.MAIL.MAILID,
-                    //         pass: CONFIG.MAIL.PASSWORD
-                    //     }
-                    // });
-                    // var readHTMLFile = function (path, callback) {
-                    //     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
-                    //         if (err) {
-                    //             throw err;
-                    //             callback(err);
-                    //         }
-                    //         else {
-                    //             callback(null, html);
-                    //         }
-                    //     });
-                    // };
-                    // readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
-                    //     var template = handlebars.compile(html);
-                    //     var replacements = {
+                            //         user: CONFIG.MAIL.MAILID,
+                            //         pass: CONFIG.MAIL.PASSWORD
+                            //     }
+                            // });
+                            // var readHTMLFile = function (path, callback) {
+                            //     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
+                            //         if (err) {
+                            //             throw err;
+                            //             callback(err);
+                            //         }
+                            //         else {
+                            //             callback(null, html);
+                            //         }
+                            //     });
+                            // };
+                            // readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
+                            //     var template = handlebars.compile(html);
+                            //     var replacements = {
 
-                    //         otp: newVarificationId.token,
-                    //     };
-                    //     var htmlToSend = template(replacements);
+                            //         otp: newVarificationId.token,
+                            //     };
+                            //     var htmlToSend = template(replacements);
 
-                    //     var mailOptions = {
-                    //         from: CONFIG.MAIL.MAILID,
-                    //         to: staff.email,
-                    //         subject: 'resend OTP for user',
-                    //         html: htmlToSend,
-                    //         text: 'Your OTP Is ' + newVarificationId.token
-                    //     };
+                            //     var mailOptions = {
+                            //         from: CONFIG.MAIL.MAILID,
+                            //         to: staff.email,
+                            //         subject: 'resend OTP for user',
+                            //         html: htmlToSend,
+                            //         text: 'Your OTP Is ' + newVarificationId.token
+                            //     };
 
-                    //     transporter.sendMail(mailOptions, function (error, info) {
-                    //         if (error) {
-                    //         } else {
-                    //             console.log('Email sent: ' + info.response);
-                    //         }
+                            //     transporter.sendMail(mailOptions, function (error, info) {
+                            //         if (error) {
+                            //         } else {
+                            //             console.log('Email sent: ' + info.response);
+                            //         }
 
-                    //     });
-                    // });
-                    // response.setData(AppCode.Success, staff._id);
-                    // response.send(res);
-                    console.log("........", newVarificationId)
+                            //     });
+                            // });
+                            // response.setData(AppCode.Success, staff._id);
+                            // response.send(res);
+                            console.log("........", newVarificationId)
+                        }
+                    });
+
+
+                    let result = {
+                        _id: userData._id,
+                    };
+
+                    response.setData(AppCode.Success, result);
+                    response.send(res);
                 }
             });
-
-
-            let result = {
-                _id: UserData._id,
-            };
-
-            response.setData(AppCode.Success, result);
-            response.send(res);
-
 
         }
     });
@@ -588,15 +614,15 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         response.setError(err);
                                                         response.send(res);
                                                     } else {
-                                                       
+
                                                         console.log("generate session")
-                                                           response.setData(AppCode.Success, varificationCode);
-                                                          response.send(res);
+                                                        response.setData(AppCode.Success, varificationCode);
+                                                        response.send(res);
                                                     }
                                                 });
 
                                                 console.log(" update verification true");
-                                               
+
                                             }
                                         });
 
@@ -783,15 +809,15 @@ userCtrl.userDetailsById = (req, res) => {
 
             },
             {
-                $project:{
-                    _id:1,
-                    mobileNo:1,
-                    isverified:1,
-                    status:1,
-                    createdAt:1,
-                    updatedAt:1,
-                    profile_image:1,
-                    userName:1,
+                $project: {
+                    _id: 1,
+                    mobileNo: 1,
+                    isverified: 1,
+                    status: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    profile_image: 1,
+                    userName: 1,
 
 
 
@@ -819,7 +845,7 @@ userCtrl.userDetailsById = (req, res) => {
 
 userCtrl.getUserList = (req, res) => {
     const response = new HttpRespose();
- 
+
     let searchKey = "";
     let sortField = "";
     let sortDirection = "";
@@ -834,7 +860,7 @@ userCtrl.getUserList = (req, res) => {
     const limit = parseInt(req.query.pageSize);
     const skip = limit * parseInt(pageNumber);
     // skip = limit * parseInt(pageNumber);
-    options.skip =parseInt(skip) ;
+    options.skip = parseInt(skip);
     options.limit = limit;
     let condition = {};
 
@@ -843,13 +869,13 @@ userCtrl.getUserList = (req, res) => {
             userName: sortDirection
         }
     }
-    
+
     if (req.query.sortField == "mobileNo") {
         condition = {
             mobileNo: sortDirection
         }
     }
-      
+
     let query = [
         {
             $match: {
@@ -873,98 +899,98 @@ userCtrl.getUserList = (req, res) => {
 
         },
         {
-          $sort: { createdAt: -1 },
+            $sort: { createdAt: -1 },
         },
         { $skip: skip },
         { $limit: limit },
         {
             $project: {
-                _id:1,
-                mobileNo:1,
-                isverified:1,
-                status:1,
-                createdAt:1,
-                updatedAt:1,
-                profile_image:1,
-                userName:1
+                _id: 1,
+                mobileNo: 1,
+                isverified: 1,
+                status: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                profile_image: 1,
+                userName: 1
 
 
-                
+
             }
         }
-       
-      ];
-      let countQuery = {
+
+    ];
+    let countQuery = {
         $or: [
-          {
-            userName: new RegExp(
-              ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-            "i"
-            ),
-          },
+            {
+                userName: new RegExp(
+                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                    "i"
+                ),
+            },
         ],
-  
-      }
-      try {
+
+    }
+    try {
         let result = {};
         async.parallel(
-          [
-            function (cb) {
-              //UserModel.advancedAggregate(query, {}, (err, countData) => {
-              UserModel.count(countQuery, (err, countData) => {
+            [
+                function (cb) {
+                    //UserModel.advancedAggregate(query, {}, (err, countData) => {
+                    UserModel.count(countQuery, (err, countData) => {
+                        if (err) {
+                            throw err;
+                        } else if (options.skip === 0 && countData === 0) {
+                            cb(null);
+                        } else if (options.skip > 0 && countData === 0) {
+                            cb(null);
+                        } else {
+                            console.log("....coundata", countData)
+                            if (countData <= skip + limit) {
+                            } else {
+                                result.nextPage = parseInt(pageNumber) + 1;
+                                result.totaluser = countData;
+                            }
+                            cb(null);
+                        }
+                    });
+                },
+                function (cb) {
+                    UserModel.aggregate(query, (err, followers) => {
+                        if (err) {
+                            throw err;
+                        } else if (options.skip === 0 && _.isEmpty(followers)) {
+                            cb(null);
+                        } else if (options.skip > 0 && _.isEmpty(followers)) {
+                            cb(null);
+                        } else {
+                            result.result = followers;
+                            cb(null);
+                        }
+                    });
+                },
+            ],
+            function (err) {
                 if (err) {
-                  throw err;
-                } else if (options.skip === 0 && countData === 0) {
-                  cb(null);
-                } else if (options.skip > 0 && countData === 0) {
-                  cb(null);
+                    throw err;
+                } else if (options.skip === 0 && _.isEmpty(result.result)) {
+                    response.setData(AppCode.NoUserFound, result);
+                    response.send(res);
+                } else if (options.skip > 0 && _.isEmpty(result.result)) {
+                    response.setData(AppCode.NoMoreBlockUserFound, result);
+                    response.send(res);
                 } else {
-                  console.log("....coundata",countData)
-                  if (countData <= skip + limit) {
-                  } else {
-                    result.nextPage = parseInt(pageNumber) + 1;
-                    result.totaluser = countData;
-                  }
-                  cb(null);
+                    response.setData(AppCode.Success, result);
+                    response.send(res);
                 }
-              });
-            },
-            function (cb) {
-              UserModel.aggregate(query, (err, followers) => {
-                if (err) {
-                  throw err;
-                } else if (options.skip === 0 && _.isEmpty(followers)) {
-                  cb(null);
-                } else if (options.skip > 0 && _.isEmpty(followers)) {
-                  cb(null);
-                } else {
-                  result.result = followers;
-                  cb(null);
-                }
-              });
-            },
-          ],
-          function (err) {
-            if (err) {
-              throw err;
-            } else if (options.skip === 0 && _.isEmpty(result.result)) {
-              response.setData(AppCode.NoUserFound, result);
-              response.send(res);
-            } else if (options.skip > 0 && _.isEmpty(result.result)) {
-              response.setData(AppCode.NoMoreBlockUserFound, result);
-              response.send(res);
-            } else {
-              response.setData(AppCode.Success, result);
-              response.send(res);
             }
-          }
         );
-      } catch (exception) {
+    } catch (exception) {
         response.setError(AppCode.InternalServerError);
         response.send(res);
-      }
-   
-  };
+    }
+
+};
 
 // favorite added Like 
 userCtrl.favoriteCreate = (req, res) => {
