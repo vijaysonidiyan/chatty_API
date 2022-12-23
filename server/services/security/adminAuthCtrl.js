@@ -385,6 +385,7 @@ AdminAuthCtrl.resendOtpAdmin = (req, res) => {
                                         response.setError(AppCode.Fail);
                                         response.send(res);
                                     } else {
+                                        console.log("////////////////",newVarificationId)
 
                                         // let userName = [User.firstName + " " + User.lastName]
                                         // console.log("---------------------", userName)
@@ -438,7 +439,7 @@ AdminAuthCtrl.resendOtpAdmin = (req, res) => {
                                             });
                                         });
 
-                                        response.setData(AppCode.Success, User._id);
+                                        response.setData(AppCode.Success, newVarificationId.userId);
                                         response.send(res);
                                     }
                                 });
