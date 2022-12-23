@@ -214,7 +214,7 @@ userCtrl.userLoginForWeb = (req, res) => {
     console.log(data);
     let query = { mobileNo: req.body.mobileNo ,
         countryCode:req.body.countryCode,
-        isverified:true
+        
     };
     UserModel.findOne(query, function (err, UserData) {
         if (err) {
@@ -222,9 +222,41 @@ userCtrl.userLoginForWeb = (req, res) => {
             AppCode.Fail.error = err.message;
             response.setError(AppCode.Fail);
             response.send(res);
-        } else if (UserData == null) {
-            response.setData(AppCode.NotFound);
-            response.send(res);
+        } else if (UserData !== null) {
+            console.log(".....................................", UserData)
+            let activity = parseInt(req.body.activity);
+            console.log("------------------------------------", activity);
+            VarificationCodeModel.removeMany({
+                userId: ObjectID(UserData._id), activity: 1
+            }, function (err, removecode) {
+                if (err) {
+                    console.log("-------------", err)
+                    AppCode.Fail.error = err.message;
+                    response.setError(AppCode.Fail);
+                    response.send(res);;
+
+                    // });
+                } else {
+
+                    let activity = 1;
+                    var params = {
+                        userId: ObjectID(UserData._id),
+                        activity: activity
+                    };
+                    VarificationCodeModel.create(params, function (err, newVarificationId) {
+                        if (err) {
+                            console.log("verificationerr_elseif", err)
+                            response.setError(AppCode.Fail);
+                            response.send(res);
+                        } else {
+                            console.log("................", newVarificationId)
+                            response.setData(AppCode.Success);
+                            response.send(res);
+
+                        }
+                    });
+                }
+            });
         } else {
             let activity = 1;
             var params = {
