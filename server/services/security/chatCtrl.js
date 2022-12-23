@@ -1161,11 +1161,13 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
               ]
           const options = {}
           if (!data.searchKey) {
+    console.log("....searchKeysearchKeysearchKeysearchKey....",data.searchkey)
               options.limit = !!data.recordsPerPage ? parseInt(data.recordsPerPage) : 10;
               options.skip = !!data.recordsOffset ? parseInt(data.recordsOffset) : 0;
               options.sort = { createdAt: sort }
           }
           else {
+    console.log(",,,,,,,without,,,,,,,")
               options.limit = 1000;
               options.skip = 0;
               options.sort = { createdAt: sort }
@@ -1246,6 +1248,317 @@ ChatCtrl.getChatUsersListttt = (req, res) => {
       }
   }
   
+  
+ChatCtrl.getChatUsersListFilter = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.body;
+  let searchKey = "";
+  searchKey = !!req.body.searchKey ? req.body.searchKey : "";
+  let loginUserId = req.auth._id;
+  getCHatUserDetails(loginUserId).then((chat) => {
+    const userChat = [];
+    _.forEach(chat, (chatData) => {
+      console.log("..chatDatachatData...",chatData);
+      if (ObjectID(chatData.sender_id) !== ObjectID(req.auth._id)) {
+        userChat.push(ObjectID(chatData.reciver_id));
+      } else {
+        userChat.push(ObjectID(chatData.sender_id));
+      }
+      console.log("...",userChat);
+    });
+    console.log("userChatuserChatuserChat",userChat);
+    let query = [
+      {
+        $match: {
+          $and:[
+            {
+              $or: [
+                {
+                  userName: new RegExp(
+                    ".*" +
+                      searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") +
+                      ".*",
+                    "i"
+                  ),
+                },
+                // {
+                //   locationName: new RegExp(
+                //     "^" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
+                //     "i"
+                //   ),
+                // },
+             ],
+            },
+            {
+              $expr: {
+                $in: ["$_id", userChat],
+              },
+            }
+
+          ]
+        
+          // status: 1,
+          
+          // masterUserId: ObjectID(data.user_id)
+        },
+      },
+      {
+        $lookup: {
+          from: "photo",
+          as: "profileImage",
+          let: { profileImageId: "$profileImageId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$profileImageId"] },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                photo_name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$profileImage",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "chat",
+          as: "chatData",
+          let: { userId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $or: [
+                  {
+                    $expr: {
+                      $and: [
+                        {
+                          $eq: ["$sender_id", ObjectID(req.auth._id)],
+                        },
+                        {
+                          $eq: ["$reciver_id", "$$userId"],
+                        },
+                      ],
+                    },
+                    $expr: {
+                      $and: [
+                        {
+                          $eq: ["$reciver_id", ObjectID(req.auth._id)],
+                        },
+                        {
+                          $eq: ["$sender_id", "$$userId"],
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                reciver_id: 1,
+                sender_id: 1,
+                message: 1,
+                createdAt: 1,
+                fromToUser: ["$sender_id", "$reciver_id"],
+              },
+            },
+            {
+              $unwind: "$fromToUser",
+            },
+            {
+              $sort: {
+                fromToUser: 1,
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                fromToUser: {
+                  $push: "$fromToUser",
+                },
+                sender_id: {
+                  $first: "$sender_id",
+                },
+                reciver_id: {
+                  $first: "$reciver_id",
+                },
+                message: {
+                  $first: "$message",
+                },
+                createdAt: {
+                  $first: "$createdAt",
+                },
+              },
+            },
+            {
+              $sort: {
+                createdAt: -1,
+              },
+            },
+            {
+              $group: {
+                _id: "$fromToUser",
+                sender_id: {
+                  $first: "$sender_id",
+                },
+                reciver_id: {
+                  $first: "$reciver_id",
+                },
+                message: {
+                  $first: "$message",
+                },
+                createdAt: {
+                  $first: "$createdAt",
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$chatData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          profileImage: {
+            $ifNull: ["$profileImage.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO],
+          },
+          userName: 1,
+          profileHeader: 1,
+          chatData: 1,
+        },
+      },
+    ];
+    const options = {};
+    options.limit = !!req.body.recordsPerPage
+      ? parseInt(req.body.recordsPerPage)
+      : 10;
+    options.skip = !!req.body.recordsOffset
+      ? parseInt(req.body.recordsOffset)
+      : 0;
+    try {
+      let result = {};
+      async.parallel(
+        [
+          function (cb) {
+            const countQuery = [
+              {
+                $match: {
+                  $and:[
+                    {
+                      $or: [
+                        {
+                          userName: new RegExp(
+                            "^" +
+                              searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
+                            "i"
+                          ),
+                        },
+                        // {
+                        //   locationName: new RegExp(
+                        //     "^" +
+                        //       searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
+                        //     "i"
+                        //   ),
+                        // },
+                      ],
+                    },
+                    {
+                      $expr: {
+                        $in: ["$_id", userChat],
+                      },
+                    }
+                  ]
+                 
+                  // status: 1,
+                  
+                  // masterUserId: ObjectID(data.user_id)
+                },
+              },
+              {
+                $lookup: {
+                  from: "user",
+                  localField: "followerId",
+                  foreignField: "_id",
+                  as: "details",
+                },
+              },
+              {
+                $unwind: {
+                  path: "$details",
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+              {
+                $count: "followersCount",
+              },
+            ];
+            UserModel.advancedAggregate(countQuery, {}, (err, followers) => {
+              if (err) {
+                throw err;
+              } else if (_.isEmpty(followers)) {
+                cb(null);
+              } else {
+                Logger.info(AppCode.Success.message);
+                result.followersCount = followers[0].followersCount;
+                cb(null);
+              }
+            });
+          },
+          function (cb) {
+            UserModel.advancedAggregate(query, options, (err, followers) => {
+              if (err) {
+                throw err;
+              } else if (options.skip === 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else if (options.skip > 0 && _.isEmpty(followers)) {
+                cb(null);
+              } else {
+                console.log("followersfollowersfollowersfollowersfollowers",followers)
+
+                result.followers = followers;
+                cb(null);
+              }
+            });
+          },
+        ],
+        function (err) {
+          if (err) {
+            throw err;
+          } else if (options.skip === 0 && _.isEmpty(result.followers)) {
+            response.setData(AppCode.Success, {});
+            response.send(res);
+          } else if (options.skip > 0 && _.isEmpty(result.followers)) {
+            response.setData(AppCode.Success, {});
+            response.send(res);
+          } else {
+            response.setData(AppCode.Success, result);
+            response.send(res);
+          }
+        }
+      );
+    } catch (exception) {
+      Logger.error(AppCode.InternalServerError.message, exception);
+      response.setError(AppCode.InternalServerError);
+      response.send(res);
+    }
+  });
+};
+
+
 // shweta
 ChatCtrl.getChatUsersList2 = (req, res) => {
   const response = new HttpRespose();
@@ -1499,23 +1812,29 @@ ChatCtrl.getChatUsersList = (req, res) => {
   searchKey = !!req.query.searchKey ? req.query.searchKey : "";
   let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
   let limit = !!req.query.limit ? parseInt(req.query.limit) : 100000000;
-  let loginUserId = ObjectID(req.payload.userId);
+  let loginUserId = ObjectID(req.auth._id);
   // const limit = 100000;
   const skip = limit * parseInt(pageNumber);
   options.skip = skip;
   options.limit = limit;
   options.sort = { messageAt: -1 };
-  getBuddiesList(req.payload.userId).then((user) => {
-    const buddyRequest = [];
-    _.forEach(user.BuddiesFriends, (follower) => {
-      console.log(follower);
-      buddyRequest.push(ObjectID(follower.buddiesId));
+  getCHatUserDetails(req.auth._id).then((chat) => {
+    const userChat = [];
+    _.forEach(chat, (chatData) => {
+      console.log("..chatDatachatData...",chatData);
+      if (ObjectID(chatData.sender_id) == ObjectID(req.auth._id)) {
+        userChat.push(ObjectID(chatData.reciver_id));
+      } 
+      else{
+        userChat.push(ObjectID(chatData.sender_id));
+      }
+      console.log("..*****.",userChat);
     });
 
     if (searchKey == "") {
       condition = {
         $expr: {
-          $in: ["$_id", buddyRequest],
+          $in: ["$_id", userChat],
         },
       };
     } else {
@@ -1525,7 +1844,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
           "i"
         ),
         $expr: {
-          $in: ["$_id", buddyRequest],
+          $in: ["$_id", userChat],
         },
       };
     }
@@ -1561,7 +1880,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
         $lookup: {
           from: "chat",
           as: "chat",
-          let: { userId: "$userId" },
+          let: { userId: "$_id" },
           pipeline: [
             {
               $match: {
@@ -1569,13 +1888,13 @@ ChatCtrl.getChatUsersList = (req, res) => {
                   $or: [
                     {
                       $and: [
-                        { $eq: ["$sender_id", ObjectID(req.payload.userId)] },
+                        { $eq: ["$sender_id", ObjectID(req.auth._id)] },
                         { $eq: ["$reciver_id", "$$userId"] },
                       ],
                     },
                     {
                       $and: [
-                        { $eq: ["$reciver_id", ObjectID(req.payload.userId)] },
+                        { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
                         { $eq: ["$sender_id", "$$userId"] },
                       ],
                     },
@@ -1609,13 +1928,13 @@ ChatCtrl.getChatUsersList = (req, res) => {
         $lookup: {
           from: "chat",
           as: "unreadCount",
-          let: { userId: "$userId" },
+          let: { userId: "$_id" },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$reciver_id", ObjectID(req.payload.userId)] },
+                    { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
                     { $eq: ["$sender_id", "$$userId"] },
                     { $ne: ["$isRead", true] },
                   ],
@@ -1728,294 +2047,6 @@ ChatCtrl.getChatUsersList = (req, res) => {
   });
 };
 
-ChatCtrl.getChatUsersListFilter = (req, res) => {
-  const response = new HttpRespose();
-  let data = req.body;
-  let searchKey = "";
-  searchKey = !!req.body.searchKey ? req.body.searchKey : "";
-  let loginUserId = req.payload._id;
-  getCHatUserDetails(loginUserId).then((chat) => {
-    const userChat = [];
-    _.forEach(chat, (chatData) => {
-      console.log(chatData);
-      if (ObjectID(chatData.sender_id) !== ObjectID(req.payload._id)) {
-        userChat.push(ObjectID(chatData.reciver_id));
-      } else {
-        userChat.push(ObjectID(chatData.sender_id));
-      }
-      console.log(userChat);
-    });
-    let query = [
-      {
-        $match: {
-          $or: [
-            {
-              userName: new RegExp(
-                ".*" +
-                searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") +
-                ".*",
-                "i"
-              ),
-            },
-            {
-              locationName: new RegExp(
-                "^" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
-                "i"
-              ),
-            },
-          ],
-          // status: 1,
-          $expr: {
-            $in: ["$masterUserId", userChat],
-          },
-          // masterUserId: ObjectID(data.user_id)
-        },
-      },
-      {
-        $lookup: {
-          from: "photo",
-          as: "profileImage",
-          let: { profileImageId: "$profileImageId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$_id", "$$profileImageId"] },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                photo_name: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$profileImage",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "chat",
-          as: "chatData",
-          let: { userId: "$masterUserId" },
-          pipeline: [
-            {
-              $match: {
-                $or: [
-                  {
-                    $expr: {
-                      $and: [
-                        {
-                          $eq: ["$sender_id", ObjectID(req.payload._id)],
-                        },
-                        {
-                          $eq: ["$reciver_id", "$$userId"],
-                        },
-                      ],
-                    },
-                    $expr: {
-                      $and: [
-                        {
-                          $eq: ["$reciver_id", ObjectID(req.payload._id)],
-                        },
-                        {
-                          $eq: ["$sender_id", "$$userId"],
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                reciver_id: 1,
-                sender_id: 1,
-                message: 1,
-                createdAt: 1,
-                fromToUser: ["$sender_id", "$reciver_id"],
-              },
-            },
-            {
-              $unwind: "$fromToUser",
-            },
-            {
-              $sort: {
-                fromToUser: 1,
-              },
-            },
-            {
-              $group: {
-                _id: "$_id",
-                fromToUser: {
-                  $push: "$fromToUser",
-                },
-                sender_id: {
-                  $first: "$sender_id",
-                },
-                reciver_id: {
-                  $first: "$reciver_id",
-                },
-                message: {
-                  $first: "$message",
-                },
-                createdAt: {
-                  $first: "$createdAt",
-                },
-              },
-            },
-            {
-              $sort: {
-                createdAt: -1,
-              },
-            },
-            {
-              $group: {
-                _id: "$fromToUser",
-                sender_id: {
-                  $first: "$sender_id",
-                },
-                reciver_id: {
-                  $first: "$reciver_id",
-                },
-                message: {
-                  $first: "$message",
-                },
-                createdAt: {
-                  $first: "$createdAt",
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$chatData",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          profileImage: {
-            $ifNull: ["$profileImage.photo_name", CONFIG.DEFAULT_PROFILE_PHOTO],
-          },
-          name: 1,
-          profileHeader: 1,
-          chatData: 1,
-        },
-      },
-    ];
-    const options = {};
-    options.limit = !!req.body.recordsPerPage
-      ? parseInt(req.body.recordsPerPage)
-      : 10;
-    options.skip = !!req.body.recordsOffset
-      ? parseInt(req.body.recordsOffset)
-      : 0;
-    try {
-      let result = {};
-      async.parallel(
-        [
-          function (cb) {
-            const countQuery = [
-              {
-                $match: {
-                  $or: [
-                    {
-                      name: new RegExp(
-                        "^" +
-                        searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
-                        "i"
-                      ),
-                    },
-                    {
-                      locationName: new RegExp(
-                        "^" +
-                        searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
-                        "i"
-                      ),
-                    },
-                  ],
-                  // status: 1,
-                  $expr: {
-                    $in: ["$masterUserId", userChat],
-                  },
-                  // masterUserId: ObjectID(data.user_id)
-                },
-              },
-              {
-                $lookup: {
-                  from: "user",
-                  localField: "followerId",
-                  foreignField: "_id",
-                  as: "details",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$details",
-                  preserveNullAndEmptyArrays: true,
-                },
-              },
-              {
-                $count: "followersCount",
-              },
-            ];
-            UserModel.advancedAggregate(countQuery, {}, (err, followers) => {
-              if (err) {
-                throw err;
-              } else if (_.isEmpty(followers)) {
-                cb(null);
-              } else {
-                Logger.info(AppCode.Success.message);
-                result.followersCount = followers[0].followersCount;
-                cb(null);
-              }
-            });
-          },
-          function (cb) {
-            UserModel.advancedAggregate(query, options, (err, followers) => {
-              if (err) {
-                throw err;
-              } else if (options.skip === 0 && _.isEmpty(followers)) {
-                cb(null);
-              } else if (options.skip > 0 && _.isEmpty(followers)) {
-                cb(null);
-              } else {
-                result.followers = followers;
-                cb(null);
-              }
-            });
-          },
-        ],
-        function (err) {
-          if (err) {
-            throw err;
-          } else if (options.skip === 0 && _.isEmpty(result.followers)) {
-            response.setData(AppCode.Success, {});
-            response.send(res);
-          } else if (options.skip > 0 && _.isEmpty(result.followers)) {
-            response.setData(AppCode.Success, {});
-            response.send(res);
-          } else {
-            response.setData(AppCode.Success, result);
-            response.send(res);
-          }
-        }
-      );
-    } catch (exception) {
-      Logger.error(AppCode.InternalServerError.message, exception);
-      response.setError(AppCode.InternalServerError);
-      response.send(res);
-    }
-  });
-};
 ChatCtrl.manageChatScreenData = (req, res) => {
   console.log(req.body);
   var response = new HttpRespose();
@@ -2434,62 +2465,8 @@ const getCHatUserDetails = (userId) => {
       if (err) {
         return reject(err);
       }
+      console.log("chatchatchat",chats)
       return resolve(chats);
-    });
-  });
-
-  return promise;
-};
-const getBuddiesList = (userId) => {
-  console.log(userId);
-  const promise = new Promise((resolve, reject) => {
-    let query = [
-      {
-        $match: {
-          _id: ObjectID(userId),
-
-          // "privacyStatus": { $ne: true }
-        },
-      },
-      {
-        $lookup: {
-          from: "buddies",
-          as: "BuddiesFriends",
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {
-                      $eq: ["$userId", ObjectID(userId)],
-                    },
-                    {
-                      $eq: ["$status", 1],
-                    },
-                  ],
-                },
-              },
-            },
-            {
-              $project: {
-                buddiesId: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          BuddiesFriends: 1,
-        },
-      },
-    ];
-    UserModel.advancedAggregate(query, {}, (err, user) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(user[0]);
     });
   });
 

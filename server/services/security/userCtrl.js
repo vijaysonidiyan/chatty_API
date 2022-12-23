@@ -463,19 +463,10 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         response.setError(err);
                                                         response.send(res);
                                                     } else {
-                                                        UserModel.findOne(query, {}, (err, data) => {
-                                                            if (err) {
-                                                                console.log(err)
-                                                                response.setError(AppCode.Fail);
-                                                                response.send(res);
-                                                            } else {
-                                                                response.setData(AppCode.Success, req.body);
-                                                                response.send(res);
-                                                            }
-                                                        });
+                                                       
                                                         console.log("generate session")
-                                                        //   response.setData(AppCode.Success, userResData);
-                                                        //  response.send(res);
+                                                           response.setData(AppCode.Success, varificationCode);
+                                                          response.send(res);
                                                     }
                                                 });
 
@@ -683,90 +674,6 @@ userCtrl.userDetailsById = (req, res) => {
         response.send(res);
     }
 }
-
-// get user List
-// userCtrl.getUserList1 = (req, res) => {
-//     const response = new HttpRespose();
-//     let data = {};
-//     let options = {};
-//     let length
-//     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
-//     let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
-//    // let loginUserId = ObjectID(req.auth._id);
-//     const limit = 20;
-//     const skip = limit * parseInt(pageNumber);
-//     options.skip = skip;
-//     options.limit = limit;
-
-
- 
-//         let query = [
-//             {
-//                 $match: {
-//                     $and: [
-//                         {
-//                             status: 1
-//                         },
-//                         {
-//                             isverified: true
-//                         }
-//                     ]
-
-//                 }
-
-//             },
-//             {
-//                 $sort: { createdAt: -1 },
-//               },
-//               { $skip: skip },
-//               { $limit: limit },
-
-//         ];
-//         async.parallel(
-//             [
-//               function (callback) {
-//                 UserModel.advancedAggregate(query, (err, userdata) => {
-//                   if (err) {
-//                     callback(err);
-//                   } else {
-//                     data.userdata = userdata;
-//                   //  length=userdata.length
-//                     callback(null);
-//                   }
-//                 });
-//               },
-//               function (callback) {
-//                 UserModel.count(
-//                   { status:1 , isverified: true},
-//                   function (err, totalrecords) {
-//                     if (err) {
-//                       throw err;
-//                     } else {
-//                       if (totalrecords <= skip + limit) {
-//                       } else {
-//                         data.nextPage = parseInt(pageNumber) + 1;
-//                       }
-//                       data.recordsTotal = totalrecords;
-//                       callback(null);
-//                     }
-//                   }
-//                 );
-//               },
-//             ],
-//             function (err) {
-//               if (err) {
-//                 AppCode.Fail.error = err.message;
-//                 response.setError(AppCode.Fail);
-//                 response.send(res);
-//               } else {
-//                 //console.log("datadatadatadatadata;",JSON.stringify(data,null,4));
-//                 response.setData(AppCode.Success, data);
-//                 response.send(res);
-//               }
-//             }
-//           );
-    
-// };
 
 userCtrl.getUserList = (req, res) => {
     const response = new HttpRespose();
