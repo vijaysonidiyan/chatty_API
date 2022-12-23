@@ -212,95 +212,88 @@ userCtrl.userLoginForWeb = (req, res) => {
     var data = req.body;
     // let password = req.body.pwd;
     console.log(data);
-    let query = { mobileNo: req.body.mobileNo };
+    let query = { mobileNo: req.body.mobileNo ,
+        countryCode:req.body.countryCode,
+        isverified:true
+    };
     UserModel.findOne(query, function (err, UserData) {
         if (err) {
             //TODO: Log the error here
             AppCode.Fail.error = err.message;
             response.setError(AppCode.Fail);
             response.send(res);
-        } else if (UserData !== null) {
-            response.setData(AppCode.AllreadyExist, data);
+        } else if (UserData == null) {
+            response.setData(AppCode.NotFound);
             response.send(res);
-           
-
         } else {
-            UserModel.create(data, (err, userData) => {
+            let activity = 1;
+            var params = {
+                userId: ObjectID(UserData._id),
+                activity: activity
+            };
+            VarificationCodeModel.create(params, function (err, newVarificationId) {
                 if (err) {
-                    console.log(err);
+                    console.log("verificationerr", err)
                     response.setError(AppCode.Fail);
                     response.send(res);
-                }
-                else {
-                    let activity = 1;
-                    var params = {
-                        userId: ObjectID(userData._id),
-                        activity: activity
-                    };
-                    VarificationCodeModel.create(params, function (err, newVarificationId) {
-                        if (err) {
-                            console.log("verificationerr", err)
-                            response.setError(AppCode.Fail);
-                            response.send(res);
-                        } else {
-                            // var transporter = nodemailer.createTransport({
-                            //     service: CONFIG.MAIL.SERVICEPROVIDER,
-                            //     auth: {
+                } else {
+                    // var transporter = nodemailer.createTransport({
+                    //     service: CONFIG.MAIL.SERVICEPROVIDER,
+                    //     auth: {
 
-                            //         user: CONFIG.MAIL.MAILID,
-                            //         pass: CONFIG.MAIL.PASSWORD
-                            //     }
-                            // });
-                            // var readHTMLFile = function (path, callback) {
-                            //     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
-                            //         if (err) {
-                            //             throw err;
-                            //             callback(err);
-                            //         }
-                            //         else {
-                            //             callback(null, html);
-                            //         }
-                            //     });
-                            // };
-                            // readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
-                            //     var template = handlebars.compile(html);
-                            //     var replacements = {
+                    //         user: CONFIG.MAIL.MAILID,
+                    //         pass: CONFIG.MAIL.PASSWORD
+                    //     }
+                    // });
+                    // var readHTMLFile = function (path, callback) {
+                    //     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
+                    //         if (err) {
+                    //             throw err;
+                    //             callback(err);
+                    //         }
+                    //         else {
+                    //             callback(null, html);
+                    //         }
+                    //     });
+                    // };
+                    // readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
+                    //     var template = handlebars.compile(html);
+                    //     var replacements = {
 
-                            //         otp: newVarificationId.token,
-                            //     };
-                            //     var htmlToSend = template(replacements);
+                    //         otp: newVarificationId.token,
+                    //     };
+                    //     var htmlToSend = template(replacements);
 
-                            //     var mailOptions = {
-                            //         from: CONFIG.MAIL.MAILID,
-                            //         to: staff.email,
-                            //         subject: 'resend OTP for user',
-                            //         html: htmlToSend,
-                            //         text: 'Your OTP Is ' + newVarificationId.token
-                            //     };
+                    //     var mailOptions = {
+                    //         from: CONFIG.MAIL.MAILID,
+                    //         to: staff.email,
+                    //         subject: 'resend OTP for user',
+                    //         html: htmlToSend,
+                    //         text: 'Your OTP Is ' + newVarificationId.token
+                    //     };
 
-                            //     transporter.sendMail(mailOptions, function (error, info) {
-                            //         if (error) {
-                            //         } else {
-                            //             console.log('Email sent: ' + info.response);
-                            //         }
+                    //     transporter.sendMail(mailOptions, function (error, info) {
+                    //         if (error) {
+                    //         } else {
+                    //             console.log('Email sent: ' + info.response);
+                    //         }
 
-                            //     });
-                            // });
-                            // response.setData(AppCode.Success, staff._id);
-                            // response.send(res);
-                            console.log("........", newVarificationId)
-                        }
-                    });
-
-
-                    let result = {
-                        _id: userData._id,
-                    };
-
-                    response.setData(AppCode.Success, result);
-                    response.send(res);
+                    //     });
+                    // });
+                    // response.setData(AppCode.Success, staff._id);
+                    // response.send(res);
+                    console.log("........", newVarificationId)
                 }
             });
+
+
+            let result = {
+                _id: UserData._id,
+            };
+
+            response.setData(AppCode.Success, result);
+            response.send(res);
+
 
         }
     });
