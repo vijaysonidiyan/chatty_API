@@ -651,9 +651,6 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                             }
                                                         });
 
-                                                        
-
-
                                                         console.log("generate session")
                                                       //  response.setData(AppCode.Success, data);
                                                       //  response.send(res);
@@ -882,6 +879,7 @@ userCtrl.userDetailsById = (req, res) => {
     }
 }
 
+//userList_final_with_searchfield
 userCtrl.getUserList = (req, res) => {
     const response = new HttpRespose();
 
@@ -992,6 +990,8 @@ userCtrl.getUserList = (req, res) => {
                         } else {
                             console.log("....coundata", countData)
                             if (countData <= skip + limit) {
+                                result.totaluser = countData;
+
                             } else {
                                 result.nextPage = parseInt(pageNumber) + 1;
                                 result.totaluser = countData;
