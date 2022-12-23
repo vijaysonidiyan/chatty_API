@@ -33,6 +33,7 @@ router.route("/userDetailsById").post(userCtrl.userDetailsById)
 //Create user Data : http://localhost:5001/v1/user/getUserList
 router.route("/getUserList").get(userCtrl.getUserList)
 
+
 /*........favoriteList........*/
 //Create favorite userList : http://localhost:5001/v1/user/favoriteCreate
 router.route("/favoriteCreate").post(userCtrl.favoriteCreate)

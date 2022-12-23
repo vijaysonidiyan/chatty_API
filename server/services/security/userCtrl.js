@@ -771,31 +771,58 @@ userCtrl.userDetailsById = (req, res) => {
 userCtrl.getUserList = (req, res) => {
     const response = new HttpRespose();
  
-      let data = {};
-      let options = {};
-      let searchKey = "";
-      searchKey = !!req.query.searchKey ? req.query.searchKey : "";
-      let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
-      //let loginUserId = ObjectID(req.payload.userId);
-      const limit = 20;
-      const skip = limit * parseInt(pageNumber);
-      options.skip = skip;
-      options.limit = limit;
-      let condition = {};
-      console.log(".............",searchKey)
+    let searchKey = "";
+    let sortField = "";
+    let sortDirection = "";
+    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+    sortField = !!req.query.sortField ? req.query.sortField.toString() : "";
+    sortDirection = !!req.query.sortDirection ? parseInt(req.query.sortDirection) : "";
+
+
+    let options = {};
+    let pageNumber = !!req.query.pageNumber ? (parseInt(req.query.pageNumber) - 1) : 0;
+
+    const limit = parseInt(req.query.pageSize);
+    const skip = limit * parseInt(pageNumber);
+    // skip = limit * parseInt(pageNumber);
+    options.skip =parseInt(skip) ;
+    options.limit = limit;
+    let condition = {};
+
+    if (req.query.sortField == "userName") {
+        condition = {
+            userName: sortDirection
+        }
+    }
+    if (req.query.sortField == "accountType") {
+        condition = {
+            accountType: sortDirection
+        }
+    }
+    if (req.query.sortField == "mobile") {
+        condition = {
+            mobileNo: sortDirection
+        }
+    }
       
       let query = [
         {
             $match: {
-                $or: [
-                  {
-                    userName: new RegExp(
-                      ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                    "i"
-                    ),
-                  },
-                ],
-    
+               
+                        $or: [
+                            {
+                                userName: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                            {
+                                mobileNo: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                          ],
               },
            
           
