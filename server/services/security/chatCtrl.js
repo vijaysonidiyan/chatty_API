@@ -986,7 +986,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
   }
 };
 //ajay sir - done.
-ChatCtrl.getChatUsersListttt = (req, res) => {
+ChatCtrl.getChatUsersList= (req, res) => {
       const response = new HttpRespose();
       let data = req.body;
       if (!!req.auth && !!req.auth._id) {
@@ -1803,7 +1803,7 @@ ChatCtrl.getChatUsersList2 = (req, res) => {
     //buddilist breket
  });
 };
-ChatCtrl.getChatUsersList = (req, res) => {
+ChatCtrl.getChatUserList = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
   let searchKey = "";
@@ -1832,6 +1832,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
     });
 
     if (searchKey == "") {
+      console.log("........searchkeynull")
       condition = {
         $expr: {
           $in: ["$_id", userChat],
@@ -1839,13 +1840,29 @@ ChatCtrl.getChatUsersList = (req, res) => {
       };
     } else {
       condition = {
-        userName: new RegExp(
-          ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-          "i"
-        ),
-        $expr: {
-          $in: ["$_id", userChat],
-        },
+        $and:[
+          {
+            $or:[
+              {
+                
+                  userName: new RegExp(
+                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                    "i"
+                  ),
+                
+              }
+            ]
+          },
+         
+         
+          {
+            $expr: {
+              $in: ["$_id", userChat],
+            },
+          }
+        ]
+       
+       
       };
     }
 

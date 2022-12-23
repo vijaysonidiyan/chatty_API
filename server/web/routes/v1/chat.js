@@ -69,10 +69,10 @@ router
 .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
 
 
-//Check OnChatOrNot : http://localhost:3000/v1/chat/getChatUsersListttt
+//Check OnChatOrNot : http://localhost:3000/v1/chat/getChatUserList
 router
-.route("/getChatUsersListttt")
-.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUsersListttt);
+.route("/getChatUserList")
+.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatUserList);
 
 //Check OnChatOrNot : http://localhost:3000/v1/chat/getChatUsersList2
 router

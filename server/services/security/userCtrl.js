@@ -928,6 +928,12 @@ userCtrl.getUserList = (req, res) => {
                     "i"
                 ),
             },
+            {
+                mobileNo: new RegExp(
+                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                    "i"
+                ),
+            },
         ],
 
     }
