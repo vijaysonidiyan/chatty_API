@@ -65,7 +65,7 @@ router
 
   //Check OnChatOrNot : http://localhost:3000/v1/chat/check-chat-live
 router
-.route("/check-chat-live")
+.route("/onChatScreen")
 .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
 
 

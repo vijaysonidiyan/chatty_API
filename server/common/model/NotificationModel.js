@@ -9,6 +9,11 @@ class notificationModel extends ModelBase {
             message: { type: String, allowNullEmpty: true },
             senderId: { type: Object, allowNullEmpty: false },
             reciverId: { type: Object, allowNullEmpty: false },
+            status: {
+                type: Number,
+                allowNullEmpty: false,
+                enum: { 1: "active", 2: "inactive" }
+            },
             SehshionId: { type: Object, allowNullEmpty: true },
             postId: { type: Object, allowNullEmpty: true },
             commentId: { type: Object, allowNullEmpty: true },

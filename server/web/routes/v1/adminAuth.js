@@ -32,6 +32,9 @@ router.route("/resendOtpUser").post(AdminAuthCtrl.resendOtpAdmin)
 //List country Data : http://localhost:3017/v1/adminAuth/passwordResetForUser
 router.route("/passwordResetForUser").post(AdminAuthCtrl.passwordResetForUser)
 
+//List country Data : http://localhost:3017/v1/adminAuth/userCreate
+router.route("/userCreate").post(AdminAuthCtrl.userCreate)
+
 
 module.exports = router;
 

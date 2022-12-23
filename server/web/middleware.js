@@ -154,9 +154,11 @@ module.exports = (app) => {
 
   app.use("/v1/blog", cpUpload, require("../web/routes/v1/blog"));
   app.use("/v1/user", cpUpload, require("./routes/v1/user"));
+  app.use("/v1/notifications", cpUpload, require("./routes/v1/notifications"));
   app.use("/v1/chat", cpUpload, require("./routes/v1/chat"));
   app.use("/v1/blockUser", cpUpload, require("./routes/v1/blockUser"));
   app.use("/v1/adminAuth", cpUpload, require("./routes/v1/adminAuth"));
+ 
 
   app.get(
     /^\/(?!.*assets\/.*|.*resize\/.*|.*vendor\/.*|.*css\/.*|.*admin\/.*).*$/,

@@ -469,7 +469,7 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                 response.setError(AppCode.Fail);
                                                                 response.send(res);
                                                             } else {
-                                                                response.setData(AppCode.Success, data);
+                                                                response.setData(AppCode.Success, req.body);
                                                                 response.send(res);
                                                             }
                                                         });
@@ -685,43 +685,214 @@ userCtrl.userDetailsById = (req, res) => {
 }
 
 // get user List
+// userCtrl.getUserList1 = (req, res) => {
+//     const response = new HttpRespose();
+//     let data = {};
+//     let options = {};
+//     let length
+//     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+//     let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
+//    // let loginUserId = ObjectID(req.auth._id);
+//     const limit = 20;
+//     const skip = limit * parseInt(pageNumber);
+//     options.skip = skip;
+//     options.limit = limit;
+
+
+ 
+//         let query = [
+//             {
+//                 $match: {
+//                     $and: [
+//                         {
+//                             status: 1
+//                         },
+//                         {
+//                             isverified: true
+//                         }
+//                     ]
+
+//                 }
+
+//             },
+//             {
+//                 $sort: { createdAt: -1 },
+//               },
+//               { $skip: skip },
+//               { $limit: limit },
+
+//         ];
+//         async.parallel(
+//             [
+//               function (callback) {
+//                 UserModel.advancedAggregate(query, (err, userdata) => {
+//                   if (err) {
+//                     callback(err);
+//                   } else {
+//                     data.userdata = userdata;
+//                   //  length=userdata.length
+//                     callback(null);
+//                   }
+//                 });
+//               },
+//               function (callback) {
+//                 UserModel.count(
+//                   { status:1 , isverified: true},
+//                   function (err, totalrecords) {
+//                     if (err) {
+//                       throw err;
+//                     } else {
+//                       if (totalrecords <= skip + limit) {
+//                       } else {
+//                         data.nextPage = parseInt(pageNumber) + 1;
+//                       }
+//                       data.recordsTotal = totalrecords;
+//                       callback(null);
+//                     }
+//                   }
+//                 );
+//               },
+//             ],
+//             function (err) {
+//               if (err) {
+//                 AppCode.Fail.error = err.message;
+//                 response.setError(AppCode.Fail);
+//                 response.send(res);
+//               } else {
+//                 //console.log("datadatadatadatadata;",JSON.stringify(data,null,4));
+//                 response.setData(AppCode.Success, data);
+//                 response.send(res);
+//               }
+//             }
+//           );
+    
+// };
+
 userCtrl.getUserList = (req, res) => {
     const response = new HttpRespose();
-    try {
-        let query = [
-            {
-                $match: {
-                    $and: [
-                        {
-                            status: 1
-                        },
-                        {
-                            isverified: true
-                        }
-                    ]
+ 
+      let data = {};
+      let options = {};
+      let searchKey = "";
+      searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+      let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
+      //let loginUserId = ObjectID(req.payload.userId);
+      const limit = 20;
+      const skip = limit * parseInt(pageNumber);
+      options.skip = skip;
+      options.limit = limit;
+      let condition = {};
+      console.log(".............",searchKey)
+      
+      let query = [
+        {
+            $match: {
+                $or: [
+                  {
+                    userName: new RegExp(
+                      ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                    "i"
+                    ),
+                  },
+                ],
+    
+              },
+           
+          
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+        { $skip: skip },
+        { $limit: limit },
+        {
+            $project: {
+                _id:1,
+                mobileNo:1,
+                isverified:1,
+                status:1,
+                createdAt:1,
+                updatedAt:1,
+                profile_image:1,
+                userName:1
 
-                }
 
-            },
-
-        ];
-        UserModel.advancedAggregate(query, {}, (err, getuserList) => {
-            if (err) {
-                throw err;
-            } else if (_.isEmpty(getuserList)) {
-                response.setError(AppCode.NotFound);
-                response.send(res);
-            } else {
-                console.log("............", getuserList.length)
-                response.setData(AppCode.Success, getuserList);
-                response.send(res);
+                
             }
-        });
-    } catch (exception) {
+        }
+       
+      ];
+      let countQuery = {
+        $or: [
+          {
+            userName: new RegExp(
+              ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+            "i"
+            ),
+          },
+        ],
+  
+      }
+      try {
+        let result = {};
+        async.parallel(
+          [
+            function (cb) {
+              //UserModel.advancedAggregate(query, {}, (err, countData) => {
+              UserModel.count(countQuery, (err, countData) => {
+                if (err) {
+                  throw err;
+                } else if (options.skip === 0 && countData === 0) {
+                  cb(null);
+                } else if (options.skip > 0 && countData === 0) {
+                  cb(null);
+                } else {
+                  console.log("....coundata",countData)
+                  if (countData <= skip + limit) {
+                  } else {
+                    result.nextPage = parseInt(pageNumber) + 1;
+                    result.totaluser = countData;
+                  }
+                  cb(null);
+                }
+              });
+            },
+            function (cb) {
+              UserModel.aggregate(query, (err, followers) => {
+                if (err) {
+                  throw err;
+                } else if (options.skip === 0 && _.isEmpty(followers)) {
+                  cb(null);
+                } else if (options.skip > 0 && _.isEmpty(followers)) {
+                  cb(null);
+                } else {
+                  result.result = followers;
+                  cb(null);
+                }
+              });
+            },
+          ],
+          function (err) {
+            if (err) {
+              throw err;
+            } else if (options.skip === 0 && _.isEmpty(result.result)) {
+              response.setData(AppCode.NoUserFound, result);
+              response.send(res);
+            } else if (options.skip > 0 && _.isEmpty(result.result)) {
+              response.setData(AppCode.NoMoreBlockUserFound, result);
+              response.send(res);
+            } else {
+              response.setData(AppCode.Success, result);
+              response.send(res);
+            }
+          }
+        );
+      } catch (exception) {
         response.setError(AppCode.InternalServerError);
         response.send(res);
-    }
-};
+      }
+   
+  };
 
 // favorite added Like 
 userCtrl.favoriteCreate = (req, res) => {
