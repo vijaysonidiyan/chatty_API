@@ -21,6 +21,11 @@ router.route("/userCreate").post(userCtrl.userCreate)
 //Create user Data : http://localhost:5001/v1/user/userUpdate
 router.route("/userUpdate").post(userCtrl.userUpdate)
 
+
+//Create user Data : http://localhost:5001/v1/user/userLoginForWeb
+router.route("/userLoginForWeb").post(userCtrl.userLoginForWeb)
+
+
 //Create user Data : http://localhost:5001/v1/user/checkOtpVerificationForUser
 router.route("/checkOtpVerificationForUser").post(userCtrl.checkOtpVerificationForUser)
 

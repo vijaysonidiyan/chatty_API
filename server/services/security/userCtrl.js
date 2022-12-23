@@ -206,8 +206,8 @@ userCtrl.userCreate = (req, res) => {
     });
 };
 
-/*user Registration */
-userCtrl.userCreate = (req, res) => {
+/*user Registration for admin*/
+userCtrl.userLoginForWeb = (req, res) => {
     var response = new HttpRespose();
     var data = req.body;
     // let password = req.body.pwd;
@@ -220,60 +220,11 @@ userCtrl.userCreate = (req, res) => {
             response.setError(AppCode.Fail);
             response.send(res);
         } else if (UserData !== null) {
-            console.log(".....................................", UserData)
-            let activity = parseInt(req.body.activity);
-            console.log("------------------------------------", activity);
-            VarificationCodeModel.removeMany({
-                userId: ObjectID(UserData._id), activity: 1
-            }, function (err, removecode) {
-                if (err) {
-                    console.log("-------------", err)
-                    AppCode.Fail.error = err.message;
-                    response.setError(AppCode.Fail);
-                    response.send(res);;
-
-                    // });
-                } else {
-
-                    let activity = 1;
-                    var params = {
-                        mobileNo: req.body.mobileNo,
-                        userId: ObjectID(UserData._id),
-                        activity: activity
-                    };
-                    VarificationCodeModel.create(params, function (err, newVarificationId) {
-                        if (err) {
-                            console.log("verificationerr_elseif", err)
-                            response.setError(AppCode.Fail);
-                            response.send(res);
-                        } else {
-                            let bodyData = {
-                                isverified: false
-                            }
-                            UserModel.update(query, bodyData, function (err, userdata) {
-                                if (err) {
-                                    console.log(err)
-                                    response.setError(AppCode.Fail);
-                                    response.send(res);
-                                } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
-                                    response.setError(AppCode.NotFound);
-                                } else {
-                                    // response.setData(AppCode.Success, req.body);
-                                    // response.send(res);
-                                }
-                            });
-                            console.log("................", newVarificationId)
-                            response.setData(AppCode.Success);
-                            response.send(res);
-
-                        }
-                    });
-                }
-            });
+            response.setData(AppCode.AllreadyExist, data);
+            response.send(res);
+           
 
         } else {
-            console.log(".....else part exicuted")
-            data.isverified = false
             UserModel.create(data, (err, userData) => {
                 if (err) {
                     console.log(err);
@@ -283,7 +234,6 @@ userCtrl.userCreate = (req, res) => {
                 else {
                     let activity = 1;
                     var params = {
-                        mobileNo: req.body.mobileNo,
                         userId: ObjectID(userData._id),
                         activity: activity
                     };
@@ -355,6 +305,156 @@ userCtrl.userCreate = (req, res) => {
         }
     });
 };
+
+/*user Registration */
+// userCtrl.userCreate = (req, res) => {
+//     var response = new HttpRespose();
+//     var data = req.body;
+//     // let password = req.body.pwd;
+//     console.log(data);
+//     let query = { mobileNo: req.body.mobileNo };
+//     UserModel.findOne(query, function (err, UserData) {
+//         if (err) {
+//             //TODO: Log the error here
+//             AppCode.Fail.error = err.message;
+//             response.setError(AppCode.Fail);
+//             response.send(res);
+//         } else if (UserData !== null) {
+//             console.log(".....................................", UserData)
+//             let activity = parseInt(req.body.activity);
+//             console.log("------------------------------------", activity);
+//             VarificationCodeModel.removeMany({
+//                 userId: ObjectID(UserData._id), activity: 1
+//             }, function (err, removecode) {
+//                 if (err) {
+//                     console.log("-------------", err)
+//                     AppCode.Fail.error = err.message;
+//                     response.setError(AppCode.Fail);
+//                     response.send(res);;
+
+//                     // });
+//                 } else {
+
+//                     let activity = 1;
+//                     var params = {
+//                         mobileNo: req.body.mobileNo,
+//                         userId: ObjectID(UserData._id),
+//                         activity: activity
+//                     };
+//                     VarificationCodeModel.create(params, function (err, newVarificationId) {
+//                         if (err) {
+//                             console.log("verificationerr_elseif", err)
+//                             response.setError(AppCode.Fail);
+//                             response.send(res);
+//                         } else {
+//                             let bodyData = {
+//                                 isverified: false
+//                             }
+//                             UserModel.update(query, bodyData, function (err, userdata) {
+//                                 if (err) {
+//                                     console.log(err)
+//                                     response.setError(AppCode.Fail);
+//                                     response.send(res);
+//                                 } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
+//                                     response.setError(AppCode.NotFound);
+//                                 } else {
+//                                     // response.setData(AppCode.Success, req.body);
+//                                     // response.send(res);
+//                                 }
+//                             });
+//                             console.log("................", newVarificationId)
+//                             response.setData(AppCode.Success);
+//                             response.send(res);
+
+//                         }
+//                     });
+//                 }
+//             });
+
+//         } else {
+//             console.log(".....else part exicuted")
+//             data.isverified = false
+//             UserModel.create(data, (err, userData) => {
+//                 if (err) {
+//                     console.log(err);
+//                     response.setError(AppCode.Fail);
+//                     response.send(res);
+//                 }
+//                 else {
+//                     let activity = 1;
+//                     var params = {
+//                         mobileNo: req.body.mobileNo,
+//                         userId: ObjectID(userData._id),
+//                         activity: activity
+//                     };
+//                     VarificationCodeModel.create(params, function (err, newVarificationId) {
+//                         if (err) {
+//                             console.log("verificationerr", err)
+//                             response.setError(AppCode.Fail);
+//                             response.send(res);
+//                         } else {
+//                             // var transporter = nodemailer.createTransport({
+//                             //     service: CONFIG.MAIL.SERVICEPROVIDER,
+//                             //     auth: {
+
+//                             //         user: CONFIG.MAIL.MAILID,
+//                             //         pass: CONFIG.MAIL.PASSWORD
+//                             //     }
+//                             // });
+//                             // var readHTMLFile = function (path, callback) {
+//                             //     fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
+//                             //         if (err) {
+//                             //             throw err;
+//                             //             callback(err);
+//                             //         }
+//                             //         else {
+//                             //             callback(null, html);
+//                             //         }
+//                             //     });
+//                             // };
+//                             // readHTMLFile('../common/HtmlTemplate/OTP.html', function (err, html) {
+//                             //     var template = handlebars.compile(html);
+//                             //     var replacements = {
+
+//                             //         otp: newVarificationId.token,
+//                             //     };
+//                             //     var htmlToSend = template(replacements);
+
+//                             //     var mailOptions = {
+//                             //         from: CONFIG.MAIL.MAILID,
+//                             //         to: staff.email,
+//                             //         subject: 'resend OTP for user',
+//                             //         html: htmlToSend,
+//                             //         text: 'Your OTP Is ' + newVarificationId.token
+//                             //     };
+
+//                             //     transporter.sendMail(mailOptions, function (error, info) {
+//                             //         if (error) {
+//                             //         } else {
+//                             //             console.log('Email sent: ' + info.response);
+//                             //         }
+
+//                             //     });
+//                             // });
+//                             // response.setData(AppCode.Success, staff._id);
+//                             // response.send(res);
+//                             console.log("........", newVarificationId)
+//                         }
+//                     });
+
+
+//                     let result = {
+//                         _id: userData._id,
+//                     };
+
+//                     response.setData(AppCode.Success, result);
+//                     response.send(res);
+//                 }
+//             });
+
+//         }
+//     });
+// };
 
 /* user details Update*/
 userCtrl.userUpdate = (req, res) => {
@@ -712,27 +812,27 @@ userCtrl.getUserList = (req, res) => {
         }
     }
       
-      let query = [
+    let query = [
         {
             $match: {
-               
-                        $or: [
-                            {
-                                userName: new RegExp(
-                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                                    "i"
-                                ),
-                            },
-                            {
-                                mobileNo: new RegExp(
-                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                                    "i"
-                                ),
-                            },
-                          ],
-              },
-           
-          
+
+                $or: [
+                    {
+                        userName: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                    {
+                        mobileNo: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                ],
+            },
+
+
         },
         {
           $sort: { createdAt: -1 },
