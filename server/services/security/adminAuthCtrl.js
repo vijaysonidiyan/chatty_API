@@ -439,7 +439,7 @@ AdminAuthCtrl.resendOtpAdmin = (req, res) => {
                                             });
                                         });
 
-                                        response.setData(AppCode.Success, newVarificationId.userId);
+                                        response.setData(AppCode.Success, newVarificationId);
                                         response.send(res);
                                     }
                                 });
