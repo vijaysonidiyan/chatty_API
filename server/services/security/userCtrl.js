@@ -1057,6 +1057,147 @@ userCtrl.getUserList = (req, res) => {
 
 };
 
+//userList_final_with_searchfield
+userCtrl.getActiveUserList = (req, res) => {
+    const response = new HttpRespose();
+
+    let searchKey = "";
+    let sortField = "";
+    let sortDirection = "";
+    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+   
+   
+    let condition = {};
+
+
+    let query = [
+        {
+            $match: {
+                $and:[
+                    {
+                        $or: [
+                            {
+                                userName: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                            {
+                                mobileNo: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                        ],
+                    },
+                    {
+                        status: { $eq: 1 }
+                       
+                    },
+                    {
+                        isverified: { $eq: true }
+                      
+                    }
+                ]
+
+                
+            },
+
+
+        },
+       
+        {
+            $project: {
+                _id: 1,
+                mobileNo: 1,
+                isverified: 1,
+                status: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                profile_image: 1,
+                userName: 1
+
+
+
+            }
+        }
+
+    ];
+    let countQuery = {
+        $and:[
+            {
+                $or: [
+                    {
+                        userName: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                    {
+                        mobileNo: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                ],
+            },
+            {
+                status: { $eq: 1 }
+               
+            },
+            {
+                isverified: { $eq: true }
+              
+            }
+        ]
+
+    }
+    try {
+        let result = {};
+        async.parallel(
+            [
+                function (cb) {
+                    //UserModel.advancedAggregate(query, {}, (err, countData) => {
+                    UserModel.count(countQuery, (err, countData) => {
+                        if (err) {
+                            throw err;
+                        } else {
+                            console.log("....coundata", countData)
+                            result.totaluser = countData;
+                            
+                            cb(null);
+                        }
+                    });
+                },
+                function (cb) {
+                    UserModel.aggregate(query, (err, followers) => {
+                        if (err) {
+                            throw err;
+                        }else {
+                            result.result = followers;
+                            cb(null);
+                        }
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    throw err;
+                }else {
+                    response.setData(AppCode.Success, result);
+                    response.send(res);
+                }
+            }
+        );
+    } catch (exception) {
+        response.setError(AppCode.InternalServerError);
+        response.send(res);
+    }
+
+};
+
+
+
 // favorite added Like 
 userCtrl.favoriteCreate = (req, res) => {
     var response = new HttpRespose()
