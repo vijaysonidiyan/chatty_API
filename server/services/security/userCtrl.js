@@ -936,7 +936,7 @@ userCtrl.getUserList = (req, res) => {
 
         },
         {
-            $sort: { createdAt: -1 },
+            $sort: condition ,
         },
         { $skip: skip },
         { $limit: limit },
