@@ -646,7 +646,7 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                 response.setError(AppCode.NotFound);
                                                                 response.send(res);
                                                             } else {
-                                                                response.setData(AppCode.Success, user[0]);
+                                                                response.setData(AppCode.Success, userResData);
                                                                 response.send(res);
                                                             }
                                                         });
