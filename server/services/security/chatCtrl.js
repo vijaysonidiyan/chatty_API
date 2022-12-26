@@ -506,10 +506,10 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           if (err) {
             throw err;
           } else if (skip === 0 && _.isEmpty(result.messages)) {
-            response.setData(AppCode.NoMoreDataFound);
+            response.setData(AppCode.NotFound);
             response.send(res);
           } else if (skip > 0 && _.isEmpty(result.messages)) {
-            response.setData(AppCode.NoMoreDataFound);
+            response.setData(AppCode.NotFound);
             response.send(res);
           } else {
             response.setData(AppCode.Success, result);
@@ -1560,6 +1560,7 @@ ChatCtrl.manageChatScreenData = (req, res) => {
                 console.log(err);
                 response.setError(AppCode.Fail);
               } else {
+                console.log(".............................")
                 response.setData(AppCode.Success, newData);
                 response.send(res);
               }
@@ -1573,7 +1574,8 @@ ChatCtrl.manageChatScreenData = (req, res) => {
                   console.log(err);
                   response.setError(AppCode.Fail);
                 } else {
-                  response.setData(AppCode.Success, updatedData);
+                  console.log(".............................")
+                  response.setData(AppCode.Success);
                   response.send(res);
                 }
               }
@@ -1768,34 +1770,7 @@ ChatCtrl.onChatScreen = (req, res) => {
 const getCHatUserDetails = (userId) => {
   const promise = new Promise((resolve, reject) => {
 
-    let query1 = [
-
-      {
-        $lookup: {
-          from: "user",
-          as: "isDeleted",
-          let: { userId: "$userId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {
-                      $eq: ["$reciver_id", ObjectID(userId)],
-                    },
-                    {
-                      $eq: ["$sender_id", "$$userId"],
-                    },
-                    { $ne: ["$isRead", true] },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      },
-
-    ]
+   
 
     let query = [
       {
@@ -1814,7 +1789,7 @@ const getCHatUserDetails = (userId) => {
         $lookup: {
           from: "user",
           localField: "sender_id",
-          foreignField: "masterUserId",
+          foreignField: "_id",
           as: "senderData",
         },
       },
@@ -1842,7 +1817,7 @@ const getCHatUserDetails = (userId) => {
         $lookup: {
           from: "user",
           localField: "reciver_id",
-          foreignField: "masterUserId",
+          foreignField: "_id",
           as: "receiverData",
         },
       },
@@ -1882,7 +1857,7 @@ const getCHatUserDetails = (userId) => {
             },
           },
           senderData: {
-            _id: "$senderData.masterUserId",
+            _id: "$senderData._id",
             profileHeader: 1,
             name: 1,
             profileImage: {
@@ -1893,7 +1868,7 @@ const getCHatUserDetails = (userId) => {
             },
           },
           receiverData: {
-            _id: "$receiverData.masterUserId",
+            _id: "$receiverData._id",
             profileHeader: 1,
             name: 1,
             profileImage: {
@@ -1983,21 +1958,18 @@ const getCHatUserDetails = (userId) => {
     ];
 
 
-    chatModel.advancedAggregate(query1, {}, (err, Chats) => {
-      if (err) {
-        return reject(err);
-      }
+    
       chatModel.advancedAggregate(query, {}, (err, chats) => {
         if (err) {
           return reject(err);
         }
         console.log("chatchatchat", chats)
-        console.log("Count", Chats.length)
+       // console.log("Count", Chats.length)
         return resolve(chats);
       });
       // console.log("chatchatchat", chats)
       // return resolve(chats);
-    });
+   
 
 
   });

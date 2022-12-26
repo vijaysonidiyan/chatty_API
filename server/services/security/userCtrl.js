@@ -559,6 +559,58 @@ userCtrl.userUpdate = (req, res) => {
     }
 };
 
+
+/* user details Update*/
+userCtrl.removeProfile = (req, res) => {
+    var response = new HttpRespose();
+    var _id = ObjectID(req.auth._id);
+    
+    let bodydata ={}
+    if (!!req.body) {
+        try {
+            let query = { _id: _id };
+            delete bodydata._id
+            UserModel.findOne(query, function (err, userdata) {
+                if (err) {
+                    response.setError(AppCode.Fail);
+                    response.send(res);
+                } else {
+                    if (userdata === null) {
+                        response.setError(AppCode.NotFound);
+                        response.send(res);
+                    } else {
+                       
+                     
+                            bodydata.profile_image = "";
+                        
+
+                        UserModel.update(query, bodydata, function (err, userdata) {
+                            if (err) {
+                                console.log(err)
+                                response.setError(AppCode.Fail);
+                                response.send(res);
+                            } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
+                                response.setError(AppCode.NotFound);
+                            } else {
+                                response.setData(AppCode.Success);
+                                response.send(res);
+                            }
+                        });
+                    }
+                }
+            });
+        } catch (exception) {
+            response.setError(AppCode.Fail);
+            response.send(res);
+        }
+    }
+    else {
+        AppCode.Fail.error = "Oops! something went wrong, please try again later";
+        response.setError(AppCode.Fail);
+        response.send(res);
+    }
+};
+
 // Otp Verification For userregistration
 userCtrl.checkOtpVerificationForUser = (req, res) => {
     var response = new HttpRespose();
