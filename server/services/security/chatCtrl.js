@@ -1000,10 +1000,12 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           if (err) {
             throw err;
           } else if (options.skip === 0 && _.isEmpty(result.result)) {
-            response.setData(AppCode.NoBuddiesFound, result);
+            console.log(",,,,,,,,else 1")
+            response.setData(AppCode.NotFound, result);
             response.send(res);
           } else if (options.skip > 0 && _.isEmpty(result.result)) {
-            response.setData(AppCode.NoMoreBuddiesFound, result);
+            console.log(",,,,,,,,else if")
+            response.setData(AppCode.NotFound, result);
             response.send(res);
           } else {
             response.setData(AppCode.Success, result);
