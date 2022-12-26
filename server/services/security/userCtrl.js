@@ -563,8 +563,8 @@ userCtrl.userUpdate = (req, res) => {
 /* user details Update*/
 userCtrl.removeProfile = (req, res) => {
     var response = new HttpRespose();
-    var _id = ObjectID(req.auth._id);
-    
+    var _id = ObjectID(req.body._id);
+
     let bodydata ={}
     if (!!req.body) {
         try {

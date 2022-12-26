@@ -22,7 +22,7 @@ router.route("/userCreate").post(userCtrl.userCreate)
 router.route("/userUpdate").post(userCtrl.userUpdate)
 
 //Create user Data : http://localhost:5001/v1/user/removeProfile
-router.route("/removeProfile").post(CONFIG.JWTTOKENALLOWACCESS,userCtrl.removeProfile)
+router.route("/removeProfile").post(userCtrl.removeProfile)
 
 
 //Create user Data : http://localhost:5001/v1/user/userLoginForWeb
