@@ -614,6 +614,7 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         response.setError(err);
                                                         response.send(res);
                                                     } else {
+                                                        console.log("tokennnnnnnnnnn",userResData)
                                                         
 
                                                         let query = [
@@ -634,6 +635,7 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                     updatedAt:1,
                                                                     profile_image:1,
                                                                     userName:1,
+                                                                    //deviceTokens:1,
 
 
                                                                 }
@@ -646,7 +648,25 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                 response.setError(AppCode.NotFound);
                                                                 response.send(res);
                                                             } else {
-                                                                response.setData(AppCode.Success, userResData);
+                                                                userList=[],
+                                                                userList.push({
+                                                                    mytoken:userResData.myToken,
+                                                                   _id:user[0]._id,
+                                                                   mobileNo:user[0].mobileNo,
+                                                                   countryName:user[0].countryName,
+                                                                   countryCode:user[0].countryCode,
+                                                                   isverified:user[0].isverified,
+                                                                   status:user[0].status,
+                                                                   createdAt:user[0].createdAt,
+                                                                   updatedAt:user[0].updatedAt,
+                                                                   profile_image:user[0].profile_image,
+                                                                   userName:user[0].userName
+                                                                })
+                                                                // userList.push(user)
+                                                              
+                                                          
+                                                                //user.push(userResData.myToken)
+                                                                response.setData(AppCode.Success, userList[0]);
                                                                 response.send(res);
                                                             }
                                                         });
