@@ -1,4 +1,4 @@
-let blockUserCtrl = {};
+let favoriteUserCtrl = {};
 const HttpRespose = require("../../common/httpResponse");
 const Logger = require("../../common/logger");
 const bcrypt = require("bcryptjs");
@@ -8,44 +8,47 @@ const CONFIG = require("../../config");
 const _ = require("lodash");
 const async = require("async");
 const AppCode = require("../../common/constant/appCods");
+const userModel = require("../../common/model/userModel");
+
 const MasterUserModel = new (require("../../common/model/userModel"))();
 const BlockUserModel = new (require("../../common/model/blockUserModel"))();
+const FavouriteModel = new (require("../../common/model/favouriteModel"))();
 const NotificationModel =
   new (require("../../common/model/NotificationModel"))();
 const UserModel =
   new (require("../../common/model/userModel"))();
 
-blockUserCtrl.blockUser = (req, res) => {
+favoriteUserCtrl.favoriteUser = (req, res) => {
   var response = new HttpRespose();
   // let data = {
   //     userId: ObjectID(req.payload.userId),
   //     blockedUserId: ObjectID(req.body.blockedUserId)
   // }
   try {
-    BlockUserModel.findOne(
+    FavouriteModel.findOne(
       {
         userId: ObjectID(req.auth._id),
-        blockedUserId: ObjectID(req.body.blockedUserId),
+        favId: ObjectID(req.body.favId),
         status: 1,
       },
-      (err, blockedUserFind) => {
+      (err, favoriteUserFind) => {
         if (err) {
           console.log(err);
           throw err;
-        } else if (_.isEmpty(blockedUserFind)) {
-          BlockUserModel.create(
+        } else if (_.isEmpty(favoriteUserFind)) {
+          FavouriteModel.create(
             {
               userId: ObjectID(req.auth._id),
-              blockedUserId: ObjectID(req.body.blockedUserId),
+              favId: ObjectID(req.body.favId),
             },
-            (err, blockedUser) => {
+            (err, favoriteUser) => {
               if (err) {
                 console.log(err);
                 throw err;
               } else {
-                response.setError(AppCode.Success,blockedUser);
+                response.setError(AppCode.Success, favoriteUser);
                 response.send(res);
-               
+
               }
             }
           );
@@ -61,7 +64,7 @@ blockUserCtrl.blockUser = (req, res) => {
   }
 };
 
-blockUserCtrl.getBlockUserList = (req, res) => {
+favoriteUserCtrl.getFavoriteUserList = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
   let searchKey = "";
@@ -73,13 +76,13 @@ blockUserCtrl.getBlockUserList = (req, res) => {
   const skip = limit * parseInt(pageNumber);
   options.skip = skip;
   options.limit = limit;
-  getBlockedUserList(req.auth._id).then((user) =>  {
+  getFavoriteUserList(req.auth._id).then((user) =>  {
     console.log(",,,,,,,,,,",user)
-    const blockuser = [];
-    _.forEach(user.blockedUserData, (follower) => {
+    const favUser = [];
+    _.forEach(user.favouriteData, (follower) => {
       console.log("------follower-----------------", follower);
-      blockuser.push(ObjectID(follower.blockedUserId));
-      console.log("---------buddyRequest--------------", blockuser);
+      favUser.push(ObjectID(follower.favId));
+      console.log("---------favoriteuser--------------", favUser);
     });
 
     let query = [
@@ -87,7 +90,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
         $match: {
           $or: [
             {
-              //userName: new RegExp('^' + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'),
+             // userName: new RegExp('^' + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'),
               userName: new RegExp(
                 ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
                 "i"
@@ -97,7 +100,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
           ],
 
           $expr: {
-            $in: ["$_id", blockuser],
+            $in: ["$_id", favUser],
           },
           // status: { $ne: 2 },
           // isdeleted: { $ne: true },
@@ -109,36 +112,12 @@ blockUserCtrl.getBlockUserList = (req, res) => {
       {
         $project: {
           _id: 1,
-          userId: 1,
+        
           userName: 1,
           firstName: 1,
           lastName: 1,
           profile_image: { $ifNull: ["$profile_image", ""] },
 
-          // qualityRating: { $ifNull: ["$qualityRating", 0] },
-          // rolies: { $ifNull: ["$roliesRating", 0] },
-          // statusType: 1,
-          // quntities: { $ifNull: ["$quntitiesRating", 0] },
-          // Rating: {
-          //   $ifNull: [
-          //     {
-          //       $divide: [
-          //         {
-          //           $sum: [
-          //             "$qualityRating",
-          //             "$roliesRating",
-          //             "$quntitiesRating",
-          //           ],
-          //         },
-          //         3,
-          //       ],
-          //     },
-          //     0,
-          //   ],
-          // },
-        //  about: 1,
-         // isBuddy: "false",
-        //  isBuddyRequested: "false",
         },
       },
     ];
@@ -153,7 +132,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
       ],
 
       $expr: {
-        $in: ["$_id", blockuser],
+        $in: ["$_id", favUser],
       },
     }
     try {
@@ -162,7 +141,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
         [
           function (cb) {
             //UserModel.advancedAggregate(query, {}, (err, countData) => {
-            UserModel.count(countQuery, (err, countData) => {
+              UserModel.count(countQuery, (err, countData) => {
               if (err) {
                 throw err;
               } else if (options.skip === 0 && countData === 0) {
@@ -172,10 +151,11 @@ blockUserCtrl.getBlockUserList = (req, res) => {
               } else {
                 console.log("....coundata",countData)
                 if (countData <= skip + limit) {
-                  result.totalblockuser = countData;
+                  result.totalfavoriteuser = countData;
+
                 } else {
                   result.nextPage = parseInt(pageNumber) + 1;
-                  result.totalblockuser = countData;
+                  result.totalfavoriteuser = countData;
                 }
                 cb(null);
               }
@@ -200,9 +180,11 @@ blockUserCtrl.getBlockUserList = (req, res) => {
           if (err) {
             throw err;
           } else if (options.skip === 0 && _.isEmpty(result.result)) {
+            console.log("...................else if 1")
             response.setData(AppCode.NotFound, result);
             response.send(res);
           } else if (options.skip > 0 && _.isEmpty(result.result)) {
+            console.log("...................else if 2")
             response.setData(AppCode.NotFound, result);
             response.send(res);
           } else {
@@ -219,30 +201,29 @@ blockUserCtrl.getBlockUserList = (req, res) => {
 };
 
 
-
-blockUserCtrl.unblockUser = (req, res) => {
+favoriteUserCtrl.unFavoriteUser = (req, res) => {
   var response = new HttpRespose();
   try {
-    BlockUserModel.findOne(
+    FavouriteModel.findOne(
       {
         userId: ObjectID(req.auth._id),
-        blockedUserId: ObjectID(req.body.blockedUserId),
+        favId: ObjectID(req.body.favId),
       },
-      (err, blockedUserFind) => {
+      (err, favoriteuserFind) => {
         if (err) {
           throw err;
         } else {
-          BlockUserModel.remove(
+          FavouriteModel.remove(
             {
               userId: ObjectID(req.auth._id),
-              blockedUserId: ObjectID(req.body.blockedUserId),
+              favId: ObjectID(req.body.favId),
             },
             (err, newId) => {
               if (err) {
                 throw err;
               } else {
-               
-                  response.setData(AppCode.Success);
+
+                response.setData(AppCode.Success);
                 response.send(res);
               }
             }
@@ -257,7 +238,7 @@ blockUserCtrl.unblockUser = (req, res) => {
   }
 };
 
-const getBlockedUserList = (userId) => {
+const getFavoriteUserList = (userId) => {
   console.log(userId);
   const promise = new Promise((resolve, reject) => {
     let query = [
@@ -268,8 +249,8 @@ const getBlockedUserList = (userId) => {
       },
       {
         $lookup: {
-          from: "blockedUser",
-          as: "blockedUserData",
+          from: "favourite",
+          as: "favouriteData",
           let: { userId: "$_id" },
           pipeline: [
             {
@@ -290,7 +271,7 @@ const getBlockedUserList = (userId) => {
             {
               $project: {
                 userId: 1,
-                blockedUserId: 1,
+                favId: 1,
               },
             },
           ],
@@ -299,7 +280,7 @@ const getBlockedUserList = (userId) => {
       {
         $project: {
           _id: 0,
-          blockedUserData: 1,
+          favouriteData: 1,
         },
       },
     ];
@@ -315,4 +296,4 @@ const getBlockedUserList = (userId) => {
   return promise;
 };
 
-module.exports = blockUserCtrl;
+module.exports = favoriteUserCtrl;

@@ -209,7 +209,7 @@ io.on("connection", function (socket) {
       if (err) {
         console.log("......err.....")
         //TODO: Log the error here
-        console.log(err.message);
+        console.log(err.message); 
         console.log(err);
       } else {
         console.log(".....else.....")

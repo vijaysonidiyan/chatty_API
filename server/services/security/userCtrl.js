@@ -1688,9 +1688,6 @@ userCtrl.favouriteUserList = (req, res) => {
                             console.log(",,,,,else")
 
                         }
-
-
-
                     }
 
                     response.setData(AppCode.Success, jobMasterData);

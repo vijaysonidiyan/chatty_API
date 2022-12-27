@@ -158,6 +158,7 @@ module.exports = (app) => {
   app.use("/v1/chat", cpUpload, require("./routes/v1/chat"));
   app.use("/v1/blockUser", cpUpload, require("./routes/v1/blockUser"));
   app.use("/v1/adminAuth", cpUpload, require("./routes/v1/adminAuth"));
+  app.use("/v1/favoriteUser", cpUpload, require("./routes/v1/favoriteUser"));
  
 
   app.get(
