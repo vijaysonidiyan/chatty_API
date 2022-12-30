@@ -386,7 +386,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           chat: { $push: "$$ROOT" },
         },
       },
-      { $sort: { Date: 1 } },
+      { $sort: { Date: -1 } },
       { $sort: { createdAt: 1 } },
     ];
 
