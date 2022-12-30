@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const userCtrl = require("../../../services/security/userCtrl");
-const BlogCtrl = require("../../../services/security/BlogCtrl");
 const uniqueCtrl = require("../../../services/security/uniqueCtrl");
 const CONFIG = require("../../../config");
 
@@ -58,7 +57,8 @@ router.route("/favouriteUserList1").post(userCtrl.favouriteUserList1)
 //Create user Data : http://localhost:5001/v1/user/resendOtpUser
 router.route("/resendOtpUser").post(userCtrl.resendOtpUser)
 
-
+//Create user Data : http://localhost:5001/v1/user/verifyContactList
+router.route("/verifyContactList").post(userCtrl.verifyContactList)
 
 
 module.exports = router;

@@ -374,7 +374,7 @@ userCtrl.userCreate = (req, res) => {
             response.send(res);
         } else if (UserData !== null) {
             console.log(".....................................", UserData)
-            let activity = parseInt(req.body.activity);
+            //let activity = parseInt(req.body.activity);
             console.log("------------------------------------", activity);
             VarificationCodeModel.removeMany({
                 userId: ObjectID(UserData._id), activity: 1

@@ -184,6 +184,7 @@ io.on("connection", function (socket) {
       sender_id:msg.sender_id,
       reciver_id:  msg.reciver_id,
       type: "message",
+      createdAt:new Date()
     };
     console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query1);
     console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
@@ -221,6 +222,7 @@ io.on("connection", function (socket) {
             sender_id: msg.sender_id,
             reciver_id: msg.reciver_id,
             type: "message",
+            createdAt:chat.createdAt
           });
 
           let isSendNotification = true;
@@ -246,6 +248,7 @@ io.on("connection", function (socket) {
                   // }
                 }
                 if (isSendNotification == true) {
+                  console.log("..................isnotification== true")
                   UserModel.findOne(
                     { _id: ObjectID(msg.sender_id) },
                     (err, user) => {
@@ -328,11 +331,12 @@ io.on("connection", function (socket) {
                                   message: mesg,
                                   type: type
                               }
+                              console.log("notificationQuerynotificationQuerynotificationQuery",notificationQuery)
                               NotificationModel.create(notificationQuery, (err, notification) => {
                                   if (err) {
                                       throw err;
                                   } else {
-                                    console.log(".....notificationModel")
+                                    console.log("..........................notificationModel")
 
                                   }
                               });
@@ -577,6 +581,8 @@ io.on("connection", function (socket) {
                                 }
                               );
                             }
+                            response.setData(AppCode.Success);
+                            response.send(res);
                           }
                         );
                       }
