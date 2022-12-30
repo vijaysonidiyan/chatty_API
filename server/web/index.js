@@ -186,7 +186,7 @@ io.on("connection", function (socket) {
       type: "message",
     };
     console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query1);
-    console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
+   // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
     var socket_id = users[msg.reciver_id];
     console.log("m socketId: reciverID ", socket_id);
     var socket_id1 = users[msg.sender_id];
@@ -194,12 +194,12 @@ io.on("connection", function (socket) {
    // broadcast message to everyone in port:5000 except yourself.
     
     
-    io.to(socket_id).emit("new_message", {
-      message: msg.message,
-      sender_id: msg.sender_id,
-      reciver_id: msg.reciver_id,
-      type: "message",
-    });
+    // io.to(socket_id).emit("new_message", {
+    //   message: msg.message,
+    //   sender_id: msg.sender_id,
+    //   reciver_id: msg.reciver_id,
+    //   type: "message",
+    // });
 
    // socket.broadcast.emit("new_message", { message: msg });
    // save chat to the database
