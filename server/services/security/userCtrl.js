@@ -24,6 +24,7 @@ const nodemailer = require("nodemailer");
 const { Console } = require("console");
 const handlebars = require('handlebars');
 const userModel = require("./../../common/model/userModel");
+const { result } = require("lodash");
 
 // import { Country, State, City } from 'country-state-city';
 //import { ICountry, IState, ICity } from 'country-state-city';
@@ -207,12 +208,13 @@ userCtrl.countryList = (req, res) => {
 // };
 
 /*user Registration */
-userCtrl.userLoginForWeb= (req, res) => {
+userCtrl.userLoginForWeb = (req, res) => {
     var response = new HttpRespose();
     var data = req.body;
     // let password = req.body.pwd;
     console.log(data);
-    let query = { mobileNo: req.body.mobileNo ,countryCode:req.body.countryCode
+    let query = {
+        mobileNo: req.body.mobileNo, countryCode: req.body.countryCode
     };
     UserModel.findOne(query, function (err, UserData) {
         if (err) {
@@ -565,7 +567,7 @@ userCtrl.removeProfile = (req, res) => {
     var response = new HttpRespose();
     var _id = ObjectID(req.body._id);
 
-    let bodydata ={}
+    let bodydata = {}
     if (!!req.body) {
         try {
             let query = { _id: _id };
@@ -579,10 +581,10 @@ userCtrl.removeProfile = (req, res) => {
                         response.setError(AppCode.NotFound);
                         response.send(res);
                     } else {
-                       
-                     
-                            bodydata.profile_image = "";
-                        
+
+
+                        bodydata.profile_image = "";
+
 
                         UserModel.update(query, bodydata, function (err, userdata) {
                             if (err) {
@@ -666,8 +668,8 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         response.setError(err);
                                                         response.send(res);
                                                     } else {
-                                                        console.log("tokennnnnnnnnnn",userResData)
-                                                        
+                                                        console.log("tokennnnnnnnnnn", userResData)
+
 
                                                         let query = [
                                                             {
@@ -676,17 +678,17 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                 }
                                                             },
                                                             {
-                                                                $project:{
-                                                                    _id:1,
-                                                                    mobileNo:1,
-                                                                    countryName:1,
-                                                                    countryCode:1,
-                                                                    isverified:1,
-                                                                    status:1,
-                                                                    createdAt:1,
-                                                                    updatedAt:1,
-                                                                    profile_image:1,
-                                                                    userName:1,
+                                                                $project: {
+                                                                    _id: 1,
+                                                                    mobileNo: 1,
+                                                                    countryName: 1,
+                                                                    countryCode: 1,
+                                                                    isverified: 1,
+                                                                    status: 1,
+                                                                    createdAt: 1,
+                                                                    updatedAt: 1,
+                                                                    profile_image: 1,
+                                                                    userName: 1,
                                                                     //deviceTokens:1,
 
 
@@ -700,23 +702,23 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                                 response.setError(AppCode.NotFound);
                                                                 response.send(res);
                                                             } else {
-                                                                userList=[],
-                                                                userList.push({
-                                                                    mytoken:userResData.myToken,
-                                                                   _id:user[0]._id,
-                                                                   mobileNo:user[0].mobileNo,
-                                                                   countryName:user[0].countryName,
-                                                                   countryCode:user[0].countryCode,
-                                                                   isverified:user[0].isverified,
-                                                                   status:user[0].status,
-                                                                   createdAt:user[0].createdAt,
-                                                                   updatedAt:user[0].updatedAt,
-                                                                   profile_image:user[0].profile_image,
-                                                                   userName:user[0].userName
-                                                                })
+                                                                userList = [],
+                                                                    userList.push({
+                                                                        mytoken: userResData.myToken,
+                                                                        _id: user[0]._id,
+                                                                        mobileNo: user[0].mobileNo,
+                                                                        countryName: user[0].countryName,
+                                                                        countryCode: user[0].countryCode,
+                                                                        isverified: user[0].isverified,
+                                                                        status: user[0].status,
+                                                                        createdAt: user[0].createdAt,
+                                                                        updatedAt: user[0].updatedAt,
+                                                                        profile_image: user[0].profile_image,
+                                                                        userName: user[0].userName
+                                                                    })
                                                                 // userList.push(user)
-                                                              
-                                                          
+
+
                                                                 //user.push(userResData.myToken)
                                                                 response.setData(AppCode.Success, userList[0]);
                                                                 response.send(res);
@@ -724,8 +726,8 @@ userCtrl.checkOtpVerificationForUser = (req, res) => {
                                                         });
 
                                                         console.log("generate session")
-                                                      //  response.setData(AppCode.Success, data);
-                                                      //  response.send(res);
+                                                        //  response.setData(AppCode.Success, data);
+                                                        //  response.send(res);
                                                     }
                                                 });
 
@@ -1008,7 +1010,7 @@ userCtrl.getUserList = (req, res) => {
 
         },
         {
-            $sort: condition ,
+            $sort: condition,
         },
         { $skip: skip },
         { $limit: limit },
@@ -1117,15 +1119,15 @@ userCtrl.getActiveUserList = (req, res) => {
     let sortField = "";
     let sortDirection = "";
     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
-   
-   
+
+
     let condition = {};
 
 
     let query = [
         {
             $match: {
-                $and:[
+                $and: [
                     {
                         $or: [
                             {
@@ -1144,20 +1146,20 @@ userCtrl.getActiveUserList = (req, res) => {
                     },
                     {
                         status: { $eq: 1 }
-                       
+
                     },
                     {
                         isverified: { $eq: true }
-                      
+
                     }
                 ]
 
-                
+
             },
 
 
         },
-       
+
         {
             $project: {
                 _id: 1,
@@ -1176,7 +1178,7 @@ userCtrl.getActiveUserList = (req, res) => {
 
     ];
     let countQuery = {
-        $and:[
+        $and: [
             {
                 $or: [
                     {
@@ -1195,11 +1197,11 @@ userCtrl.getActiveUserList = (req, res) => {
             },
             {
                 status: { $eq: 1 }
-               
+
             },
             {
                 isverified: { $eq: true }
-              
+
             }
         ]
 
@@ -1216,7 +1218,7 @@ userCtrl.getActiveUserList = (req, res) => {
                         } else {
                             console.log("....coundata", countData)
                             result.totaluser = countData;
-                            
+
                             cb(null);
                         }
                     });
@@ -1225,7 +1227,7 @@ userCtrl.getActiveUserList = (req, res) => {
                     UserModel.aggregate(query, (err, followers) => {
                         if (err) {
                             throw err;
-                        }else {
+                        } else {
                             result.result = followers;
                             cb(null);
                         }
@@ -1235,7 +1237,7 @@ userCtrl.getActiveUserList = (req, res) => {
             function (err) {
                 if (err) {
                     throw err;
-                }else {
+                } else {
                     response.setData(AppCode.Success, result);
                     response.send(res);
                 }
@@ -1967,7 +1969,402 @@ userCtrl.stateListForAdmin = (req, res) => {
     response.send(res);
 };
 
+//-------------------------------
+userCtrl.getActiveUserList2 = (req, res) => {
+    const response = new HttpRespose();
+
+    let searchKey = "";
+    let sortField = "";
+    let sortDirection = "";
+    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+    console.log("............", req.body.data)
+
+    let condition = {};
+    const userChat = req.body.data;
+    console.log("............", userChat)
 
 
 
+
+    let query = [
+        {
+            $match: {
+                $and: [
+                    {
+                        $or: [
+                            {
+                                userName: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                            {
+                                mobileNo: new RegExp(
+                                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                                    "i"
+                                ),
+                            },
+                        ],
+                    },
+
+                    {
+                        $expr: {
+                            $in: ["$mobileNo", userChat],
+                        }
+
+
+
+                    }
+                ]
+
+
+            },
+
+
+        },
+
+        {
+            $project: {
+                _id: 1,
+                mobileNo: 1,
+                isverified: 1,
+                status: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                profile_image: 1,
+                userName: 1
+
+
+
+            }
+        }
+
+    ];
+    let countQuery = {
+        $and: [
+            {
+                $or: [
+                    {
+                        userName: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                    {
+                        mobileNo: new RegExp(
+                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
+                            "i"
+                        ),
+                    },
+                ],
+            },
+            {
+                status: { $eq: 1 }
+
+            },
+            {
+                isverified: { $eq: true }
+
+            }
+        ]
+
+    }
+    try {
+        let result = {};
+        async.parallel(
+            [
+                function (cb) {
+                    //UserModel.advancedAggregate(query, {}, (err, countData) => {
+                    UserModel.count(query, (err, countData) => {
+                        if (err) {
+                            throw err;
+                        } else {
+                            console.log("....coundata", countData)
+                            result.totaluser = countData;
+
+                            cb(null);
+                        }
+                    });
+                },
+                function (cb) {
+                    UserModel.aggregate(query, (err, followers) => {
+                        if (err) {
+                            throw err;
+                        } else {
+
+                        }
+                        if (err) {
+                            throw err;
+                        } else if (_.isEmpty(followers)) {
+                            response.setError(AppCode.NotFound);
+                            response.send(res);
+                        } else {
+                            result.result = followers;
+                            cb(null);
+                            // response.setData(AppCode.Success, clientinquiry);
+                            //response.send(res);
+                        }
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    throw err;
+                } else {
+                    response.setData(AppCode.Success, result);
+                    response.send(res);
+                }
+            }
+        );
+    } catch (exception) {
+        response.setError(AppCode.InternalServerError);
+        response.send(res);
+    }
+
+};
+
+/* Employee List Technology Id */
+userCtrl.getActiveUserList3 = (req, res) => {
+    const response = new HttpRespose();
+    let resultList = [];
+    for (i = 0; i < req.body.data.length; i++) {
+
+        var i;
+        var dataaaa = req.body
+        console.log(".....mobileeeeeeeeeeeeeee....", dataaaa.data[i])
+        let query = [
+            {
+                $match: {
+                    $and: [
+                        {
+                            mobileNo: dataaaa.data[i]
+                        },
+
+
+                    ]
+                },
+            },
+
+
+            {
+                $project: {
+                    _id: 1,
+                    mobileNo: 1,
+                    isverified: 1,
+                    status: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    profile_image: 1,
+                    userName: 1
+
+                }
+            }
+        ];
+        try {
+            UserModel.advancedAggregate(query, {}, (err, assignTeam) => {
+                if (err) {
+                    throw err;
+                }
+                else if (_.isEmpty(assignTeam)) {
+                    console.log(".......", dataaaa.data[i])
+
+                    resultList.push({
+
+                        mobileNo: req.body.data[i],
+                        isverified: "false",
+
+
+                    })
+                    // console.log("not found mobileno", resultList);
+                    //  response.setError(AppCode.NotFound);
+                    // response.send(res);
+                }
+                else {
+
+
+                    resultList.push({
+
+                        _id: assignTeam[0]._id,
+                        mobileNo: assignTeam[0].mobileNo,
+                        countryName: assignTeam[0].countryName,
+                        countryCode: assignTeam[0].countryCode,
+                        isverified: assignTeam[0].isverified,
+                        status: assignTeam[0].status,
+                        createdAt: assignTeam[0].createdAt,
+                        updatedAt: assignTeam[0].updatedAt,
+                        profile_image: assignTeam[0].profile_image,
+                        userName: assignTeam[0].userName
+                    })
+                    console.log(",,,,,,success,,,", resultList)
+                    //  response.setData(AppCode.Success, userList);
+                    //   response.send(res);
+
+
+                }
+
+            });
+
+
+        } catch (exception) {
+            response.setError(AppCode.InternalServerError);
+            response.send(res);
+        }
+    }
+    console.log("...........................................", resultList)
+    response.setData(AppCode.Success, resultList);
+    response.send(res);
+
+
+};
+
+
+/* Employee List Technology Id */
+userCtrl.getActiveUserList1111 = (req, res) => {
+    const response = new HttpRespose();
+    var resultList = []
+    for (var i = 0; i < req.body.data.length; i++) {
+        console.log(".....55555555555555..........", req.body.data[i]);
+        var m1 = req.body.data[i]
+        console.log(".....m111111111111..........", m1);
+        var resultList1 = []
+
+        let query = [
+            {
+                $match: {
+                    $and: [
+                        {
+                            mobileNo: req.body.data[i]
+                        },
+
+
+                    ]
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    mobileNo: 1,
+                    isverified: 1,
+                    status: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    profile_image: 1,
+                    userName: 1
+
+                }
+            }
+
+
+        ];
+        try {
+            UserModel.advancedAggregate(query, {}, (err, assignTeam) => {
+                if (err) {
+                    throw err;
+                }
+                else if (_.isEmpty(assignTeam)) {
+                    console.log("not found employe");
+
+                    resultList.push({
+
+                        mobileNo: m1,
+                        isverified: "false",
+
+
+                    })
+                    console.log(",,,,,,success,,,", resultList)
+
+                    //  response.setError(AppCode.NotFound);
+                    // response.send(res);
+                }
+                else {
+                    console.log(".........bfhjasdfbhjsadbfhjsdbf", assignTeam)
+                    console.log("********************", assignTeam.length)
+                    resultList.push({
+
+                        _id: assignTeam[0]._id,
+                        mobileNo: assignTeam[0].mobileNo,
+                        countryName: assignTeam[0].countryName,
+                        countryCode: assignTeam[0].countryCode,
+                        isverified: assignTeam[0].isverified,
+                        status: assignTeam[0].status,
+                        createdAt: assignTeam[0].createdAt,
+                        updatedAt: assignTeam[0].updatedAt,
+                        profile_image: assignTeam[0].profile_image,
+                        userName: assignTeam[0].userName
+                    })
+                    console.log(",,,,,,success,,,", resultList)
+                }
+
+            });
+        } catch (exception) {
+            response.setError(AppCode.InternalServerError);
+            response.send(res);
+        }
+
+
+    }
+
+
+};
+
+
+
+
+//--roleMaster  save Api
+userCtrl.verifyContactList = (req, res) => {
+    var response = new HttpRespose()
+    var data = req.body;
+    var resultList = []
+    for (let i = 0; i < req.body.data.length; i++) {
+        console.log("datadatadatadtadtadtadat",req.body.data[i])
+
+       
+        let query = {
+            mobileNo: req.body.data[i]
+        }
+        UserModel.findOne(query, (err, roleFind) => {
+            if (err) {
+                response.setError(AppCode.Fail);
+                response.send(res);
+            } else if (roleFind !== null) {
+                console.log("..........",roleFind)
+                resultList.push({
+
+                    mobileNo: roleFind.mobileNo,
+                    userName:roleFind.userName,
+                    isverified: roleFind.isverified,
+
+
+                })
+                if ((req.body.data.length - 1) == i) {
+                    response.setData(AppCode.Success, resultList);
+                    response.send(res);
+                }
+
+                console.log(",,,,,,,,,,,else iff", resultList)
+            } else {
+                var m1 = req.body.data[i]
+                resultList.push({
+
+                    mobileNo: m1,
+                    isverified: false,
+
+
+                })
+                console.log(",,,,,,,,,,,else ", resultList)
+                if ((req.body.data.length - 1) == i) {
+                    response.setData(AppCode.Success, resultList);
+                    response.send(res);
+                }
+
+            }
+        })
+
+
+
+
+    }
+
+
+};
 module.exports = userCtrl;
