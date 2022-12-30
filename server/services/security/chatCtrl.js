@@ -296,7 +296,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           ],
         },
       },
-      { $sort: { createdAt: 1 } },
+    //  { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
 
@@ -376,6 +376,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           },
         },
       },
+      { $sort: { createdAt: 1 } },
 
       {
         $group: {
@@ -387,7 +388,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
         },
       },
       { $sort: { Date: -1 } },
-      { $sort: { createdAt: 1 } },
+      //{ $sort: { createdAt: 1 } },
     ];
 
     try {
