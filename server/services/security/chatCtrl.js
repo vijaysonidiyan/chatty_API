@@ -294,6 +294,10 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
               sender_id: ObjectID(data.user_id),
             },
           ],
+          isDeleted: { $ne: true },
+          
+           
+          
         },
       },
       { $sort: { createdAt: -1 } },
@@ -344,6 +348,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
             CONFIG.DEFAULT_PROFILE_PHOTO,
           ],} ,
           userName:"$senderData.userName",
+          isDeleted:1,
           
           // senderData: {
           //   _id: "$senderData._id",
@@ -407,6 +412,8 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
                   sender_id: ObjectID(data.user_id),
                 },
               ],
+              isDeleted: { $ne: true },
+
             };
             chatModel.count(countQuery, function (err, totalMessages) {
               if (err) {
@@ -878,6 +885,12 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
         $project: {
           _id: 1,
           userId: 1,
+          mobileNo:1,
+          countryName:1,
+          countryCode:1,
+          isverified:1,
+          status:1,
+          
           userName: 1,
           firstName: 1,
           lastName: 1,
@@ -1468,6 +1481,28 @@ ChatCtrl.onChatScreen = (req, res) => {
     response.setError(AppCode.Fail);
     response.send(res);
   }
+};
+
+// user chat Delete
+ChatCtrl.chatDelete = (req, res) => {
+  const response = new HttpRespose();
+  let updateDataQuery = {
+    isDeleted: true,
+  };
+  chatModel.updateOne(
+    { _id: ObjectID(req.query._id) },
+    { $set: updateDataQuery },
+    function (err, deletechat) {
+      if (err) {
+        console.log(err);
+        response.setError(AppCode.Fail);
+        response.send(res);
+      } else {
+        response.setData(AppCode.Success);
+        response.send(res);
+      }
+    }
+  );
 };
 
 const getCHatUserDetails = (userId) => {
