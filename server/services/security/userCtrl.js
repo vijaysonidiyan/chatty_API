@@ -1271,6 +1271,8 @@ userCtrl.getActiveUserList = (req, res) => {
     let sortDirection = "";
     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
 
+    var userId=ObjectID(req.auth._id)
+    console.log("userIduserIduserIduserId",userId)
 
     let condition = {};
 
@@ -1302,6 +1304,12 @@ userCtrl.getActiveUserList = (req, res) => {
                     {
                         isverified: { $eq: true }
 
+                    },
+                    {
+                        
+                     _id: { $ne: ObjectID(req.auth._id) },
+                          
+
                     }
                 ]
 
@@ -1320,7 +1328,10 @@ userCtrl.getActiveUserList = (req, res) => {
                 createdAt: 1,
                 updatedAt: 1,
                 profile_image: 1,
-                userName: 1
+                userName: 1,
+                countryCode:1,
+                countryName:1
+
 
 
 
@@ -1352,6 +1363,12 @@ userCtrl.getActiveUserList = (req, res) => {
             },
             {
                 isverified: { $eq: true }
+
+            },
+            {
+                        
+             _id: { $ne: ObjectID(req.auth._id) },
+                     
 
             }
         ]
