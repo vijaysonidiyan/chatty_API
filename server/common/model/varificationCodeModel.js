@@ -20,10 +20,19 @@ const _ = require("lodash");
 class varificationCodeModel extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "varificationCode", {
+            userId: { type: Object, allowNullEmpty: true },
+            token: { type: String, allowNullEmpty: true },
+            mobileNo:{type: String, allowNullEmpty: true},
+            activity: {
+                type: Number,
+                allowNullEmpty: true,
+                enum: { 1: "register", 2: "forgotpassword", 3: "socialLogin" }
+            },
            // userId: { type: Object, allowNullEmpty: true },
             createdFrom: { type: Number, allowNullEmpty: true },
             hashTag:{type: String, allowNullEmpty: true},
             createdAt: { type: Object },
+            expiredAt: { type: Object },
             //expiredAt: { type: Object },
         });
     }
