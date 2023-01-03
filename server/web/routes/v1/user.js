@@ -41,7 +41,7 @@ router.route("/userDetailsById").post(userCtrl.userDetailsById)
 router.route("/getUserList").get(userCtrl.getUserList)
 
 //Create user Data : http://localhost:5001/v1/user/getActiveUserList
-router.route("/getActiveUserList").get(userCtrl.getActiveUserList)
+router.route("/getActiveUserList").get(CONFIG.JWTTOKENALLOWACCESS,userCtrl.getActiveUserList)
 
 /*........favoriteList........*/
 //Create favorite userList : http://localhost:5001/v1/user/favoriteCreate
