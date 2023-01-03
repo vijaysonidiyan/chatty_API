@@ -17,14 +17,15 @@ const _ = require("lodash");
 /*
 *For store user registration varification code
 */
-class varificationCodeModel extends ModelBase {
+class hashtagModel extends ModelBase {
     constructor() {
-        super(CONFIG.DB.MONGO.DB_NAME, "varificationCode", {
-           // userId: { type: Object, allowNullEmpty: true },
-            createdFrom: { type: Number, allowNullEmpty: true },
+        super(CONFIG.DB.MONGO.DB_NAME, "hashtag", {
+            userId: { type: Object, allowNullEmpty: true },
+            token: { type: String, allowNullEmpty: true },
             hashTag:{type: String, allowNullEmpty: true},
+            createdBy:{type: Object, allowNullEmpty: true},
             createdAt: { type: Object },
-            //expiredAt: { type: Object },
+           // expiredAt: { type: Object },
         });
     }
 
@@ -60,4 +61,4 @@ class varificationCodeModel extends ModelBase {
 }
 
 
-module.exports = varificationCodeModel;
+module.exports = hashtagModel;

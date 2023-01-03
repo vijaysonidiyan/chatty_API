@@ -855,7 +855,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           let: { userId: "$_id" },
           pipeline: [
             {
-              $match: {
+              $match: {  
                 $expr: {
                   $and: [
                     { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
@@ -890,7 +890,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           countryCode:1,
           isverified:1,
           status:1,
-          
+
           userName: 1,
           firstName: 1,
           lastName: 1,

@@ -21,7 +21,8 @@ const storage = multer.diskStorage({
         file.fieldname === "image" ||
         file.fieldname === "profile_image" ||
         file.fieldname === "logo" ||
-        file.fieldname === "Image"
+        file.fieldname === "Image" ||
+        file.fieldname === "storyImages"
       ) {
         dirPath = CONFIG.UPLOADS.DIR_PATH_PHOTOS;
         if (!!dirPath) {
@@ -152,13 +153,14 @@ module.exports = (app) => {
     },
   ]);
 
-  app.use("/v1/blog", cpUpload, require("../web/routes/v1/blog"));
+  app.use("/v1/post", cpUpload, require("../web/routes/v1/post"));
   app.use("/v1/user", cpUpload, require("./routes/v1/user"));
   app.use("/v1/notifications", cpUpload, require("./routes/v1/notifications"));
   app.use("/v1/chat", cpUpload, require("./routes/v1/chat"));
   app.use("/v1/blockUser", cpUpload, require("./routes/v1/blockUser"));
   app.use("/v1/adminAuth", cpUpload, require("./routes/v1/adminAuth"));
   app.use("/v1/favoriteUser", cpUpload, require("./routes/v1/favoriteUser"));
+  app.use("/v1/story", cpUpload, require("./routes/v1/story"));
  
 
   app.get(

@@ -19,4 +19,7 @@ router.route("/viewNotifications").post(CONFIG.JWTTOKENALLOWACCESS, Notification
 
 //Un Read Notification Count API : http://localhost:3017/v1/notifications/readNotification
 router.route("/readNotification").post(CONFIG.JWTTOKENALLOWACCESS, NotificationCtrl.readNotification);
+
+//Un Read Notification Count API : http://localhost:3017/v1/notifications/deleteNotification
+router.route("/deleteNotification").post(CONFIG.JWTTOKENALLOWACCESS, NotificationCtrl.deleteNotification);
 module.exports = router;

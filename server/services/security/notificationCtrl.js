@@ -76,7 +76,7 @@ NotificationCtrl.notificationData = (req, res) => {
       {
         $project: {
           senderId: "$senderData._id",
-          senderUserName: "$senderData.name",
+          senderUserName: "$senderData.userName",
          // senderFirstName: "$senderData.firstName",
          // senderLastName: "$senderData.lastName",
           senderImage: "$senderData.profile_image",
@@ -142,9 +142,9 @@ NotificationCtrl.notificationData = (req, res) => {
 NotificationCtrl.unReadNotificationCount = (req, res) => {
   const response = new HttpRespose();
   let result = {};
-  if (!!req.payload) {
+  if (!!req.auth) {
     NotificationModel.count(
-      { reciverId: ObjectID(req.payload.userId), isView: false },
+      { reciverId: ObjectID(req.auth._id), isView: false },
       function (err, totalrecords) {
         if (err) {
           AppCode.Fail.error = err.message;
@@ -158,7 +158,7 @@ NotificationCtrl.unReadNotificationCount = (req, res) => {
                 $and: [
                   {
                     $expr: {
-                      $eq: ["$reciver_id", ObjectID(req.payload.userId)],
+                      $eq: ["$reciver_id", ObjectID(req.auth._id)],
                     },
                     isRead: { $ne: true },
                   },
@@ -177,6 +177,7 @@ NotificationCtrl.unReadNotificationCount = (req, res) => {
               response.setError(AppCode.InternalServerError);
               response.send(res);
             } else {
+              console.log("...................",countData)
               result.ChatCount = countData.length;
               response.setData(AppCode.Success, result);
               response.send(res);
@@ -193,10 +194,10 @@ NotificationCtrl.unReadNotificationCount = (req, res) => {
 
 NotificationCtrl.viewNotifications = (req, res) => {
   const response = new HttpRespose();
-  if (!!req.payload) {
+  if (!!req.auth) {
     let result = {};
     NotificationModel.viewupdate(
-      { reciverId: ObjectID(req.payload.userId) },
+      { reciverId: ObjectID(req.auth._id) },
       { isView: true },
       (err, updated) => {
         if (err) {
@@ -209,7 +210,7 @@ NotificationCtrl.viewNotifications = (req, res) => {
                 $and: [
                   {
                     $expr: {
-                      $eq: ["$reciver_id", ObjectID(req.payload.userId)],
+                      $eq: ["$reciver_id", ObjectID(req.auth._id)],
                     },
                     isRead: { $ne: true },
                   },
@@ -245,7 +246,7 @@ NotificationCtrl.viewNotifications = (req, res) => {
 };
 NotificationCtrl.readNotification = (req, res) => {
   const response = new HttpRespose();
-  if (!!req.payload) {
+  if (!!req.auth) {
     NotificationModel.readupdate(
       { _id: ObjectID(req.body._id) },
       { isRead: true },
@@ -265,14 +266,14 @@ NotificationCtrl.readNotification = (req, res) => {
 };
 NotificationCtrl.deleteNotification = (req, res) => {
   const response = new HttpRespose();
-  if (!!req.payload) {
+  if (!!req.auth) {
     var id = ObjectID(req.body._id);
     console.log(id);
     NotificationModel.remove({ _id: id }, (err, updated) => {
       if (err) {
         throw err;
       } else {
-        console.log(updated.deletedCount);
+        console.log(updated); 
         response.setData(AppCode.Success);
         response.send(res);
       }
