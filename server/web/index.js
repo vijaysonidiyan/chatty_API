@@ -63,46 +63,85 @@ const io = socketio(server, {
 
 function getkeyByValue(object, value) {
 
-  console.log(users, value);
+  console.log(",,,,,,,,,,,,,,,",users, value);
 
   return Object.keys(object).find((key) => object[key] === value);
 
 }
-var users = [];
+var users = []; 
+var usersss = []; 
 
+var USERS = []; 
 
 
 
 //setup event listener
-io.on("connection", function (socket) {
-  console.log("", socket.id);
+io.on("connection", function (socket)  {
+ //console.log("........socket",socket)
+ // console.log("", socket.id);
+ // console.log("", socket.handshake.query.userId);
   socket.userId = socket.handshake.query.userId;
+  //socket.userId1 = socket.query.userId;
   console.log("user connection Established");
-  users[socket.userId] = socket.id; 
-  console.log("Connected user's", users);
+
+      usersss[socket.userId] = socket.id; 
+      console.log("Connected user's old code", usersss);
+
+// new code
+
+let value = { 
+
+  socketId: socket.id, 
+
+  userId: socket.handshake.query.userId 
+
+} 
+users.push(value) 
+
+console.log("userssssssssssssssss connected.............",users)
+
+  
   socket.broadcast.emit("status", {
     userId: socket.handshake.query.userId,
     status: "Online",
   });
+  
+
   socket.on("disconnect", function () {
-    ans = getkeyByValue(users, socket.id);
-    if (ans) {
-      console.log(ans);
-      delete users[ans];
-      io.emit("user_disconnected", ans);
-    }
-    socket.broadcast.emit("status", {
-      userId: ans,
-      status: "Offline",
-    });
-    console.log("user disconnected", users);
+                // ans = getkeyByValue(usersss, socket.id);
+                // if (ans) {
+                //   console.log(ans);
+                //   delete usersss[ans];
+                //   io.emit("user_disconnected", ans);
+                // }
+                // socket.broadcast.emit("status", {
+                //   userId: ans,
+                //   status: "Offline",
+                // });
+                // console.log("user disconnected", usersss);
+
+    USERS = users;
+    users = []
+    for (let i = 0; i < USERS.length; i++) { 
+      if (socket.id == USERS[i].socketId) {
+      }
+      else {
+        let value1 = {
+          socketId: USERS[i].socketId,
+          userId: USERS[i].userId
+        }
+        users.push(value1)
+      }
+    } 
+    console.log("user disconnected", users); 
+    //console.log("user disconnected", USERS); 
   });
 
   socket.on("user_connected", function (userData) {
     console.log("before Connect", userData);
-    users[userData.senderId] = userData.socketId;
+    usersss[userData.senderId] = userData.socketId;
     io.emit("user_connected", userData.senderId);
-    console.log("Connected user's", users);
+    console.log("Connected user's", usersss);
   });
   socket.on("user_disconnected", function (userData) {
     console.log("before DisConnect", userData);
@@ -114,6 +153,8 @@ io.on("connection", function (socket) {
       console.log("user disconnected", users);
     }
   });
+
+
   //Someone is Online/Offline
   socket.on("checkStatus", function (userId) {
     let status = users[userId];
@@ -185,24 +226,49 @@ io.on("connection", function (socket) {
       reciver_id:  msg.reciver_id,
       type: "message",
     };
-    console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query1);
+    console.log("message data", query1);
    // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
-    var socket_id = users[msg.reciver_id];
-    console.log("m socketId: reciverID ", socket_id);
-    var socket_id1 = users[msg.sender_id];
-    console.log("m socketId: sender_id ", socket_id1);
-   // broadcast message to everyone in port:5000 except yourself.
-    
-    
-    // io.to(socket_id).emit("new_message", {
-    //   message: msg.message,
-    //   sender_id: msg.sender_id,
-    //   reciver_id: msg.reciver_id,
-    //   type: "message",
-    // });
+    var socket_id = usersss[msg.reciver_id];
+    console.log("m old socketId: reciverID ", socket_id);
+    var socket_id1 = usersss[msg.sender_id];
+    console.log("m old socketId: sender_id ", socket_id1);
 
-   // socket.broadcast.emit("new_message", { message: msg });
-   // save chat to the database
+    console.log("new_message call",users)
+                      // for (let i = 0; i < users.length; i++) {
+
+
+
+                      //   if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+
+                      //     io.to(users[i].socketId).emit("new_message", {
+
+                      //       message: msg.message,
+
+                      //       sender_id: msg.sender_id,
+
+                      //       reciver_id: msg.reciver_id,
+
+                      //       type: "message",
+
+                      //     });
+
+                      //   }
+
+                      // }
+
+
+                  // broadcast message to everyone in port:5000 except yourself.
+                    
+                    
+                    // io.to(socket_id).emit("new_message", {
+                    //   message: msg.message,
+                    //   sender_id: msg.sender_id,
+                    //   reciver_id: msg.reciver_id,
+                    //   type: "message",
+                    // });
+
+                  // socket.broadcast.emit("new_message", { message: msg });
+                  // save chat to the database
    
   
     ChatModel.create(query1, function (err, chat) {
@@ -215,14 +281,37 @@ io.on("connection", function (socket) {
         console.log(".....else.....")
         if (!!chat) {
 
-          io.to(socket_id).emit("new_message", {
-            _id:chat._id,
-            message: msg.message,
-            sender_id: msg.sender_id,
-            reciver_id: msg.reciver_id,
-            type: "message",
-            createdAt:new Date()
-          });
+          for (let i = 0; i < users.length; i++) {
+
+
+
+            if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+      
+              io.to(users[i].socketId).emit("new_message", {
+                _id:chat._id,
+      
+                message: msg.message,
+      
+                sender_id: msg.sender_id,
+      
+                reciver_id: msg.reciver_id,
+      
+                type: "message",
+      
+              });
+      
+            }
+      
+          }
+
+                      // io.to(socket_id).emit("new_message", {
+                      //   _id:chat._id,
+                      //   message: msg.message,
+                      //   sender_id: msg.sender_id,
+                      //   reciver_id: msg.reciver_id,
+                      //   type: "message",
+                      //   createdAt:new Date()
+                      // });
 
           let isSendNotification = true;
           ChatScreenManagementModel.findOne(

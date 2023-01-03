@@ -62,7 +62,10 @@ router
 .route("/onChatScreen")
 .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
 
-
+  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDelete
+  router
+  .route("/chatDelete")
+  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDelete);
 
 
 
