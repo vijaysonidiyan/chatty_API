@@ -373,6 +373,8 @@ MongoConnect.init()
 
                     type: "message",
 
+                    createdAt:new Date()
+
                   });
 
 
@@ -390,6 +392,8 @@ MongoConnect.init()
                     reciver_id: msg.reciver_id,
 
                     type: "message",
+                    
+                    createdAt:new Date()
 
                   });
 
