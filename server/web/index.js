@@ -120,21 +120,34 @@ MongoConnect.init()
         // });
         // console.log("user disconnected", usersss);
 
-        USERS = users;
-        users = []
-        for (let i = 0; i < USERS.length; i++) {
-          if (socket.id == USERS[i].socketId) {
+        // USERS = users;
+        // users = []
+        // for (let i = 0; i < USERS.length; i++) {
+        //   if (socket.id == USERS[i].socketId) {
+        //   }
+        //   else {
+        //     let value1 = {
+        //       socketId: USERS[i].socketId,
+        //       userId: USERS[i].userId
+        //     }
+        //     users.push(value1)
+        //   }
+        // }
+
+        for (let i = 0; i < users.length; i++) {
+         
+
+          if (socket.id == users[i].socketId) {
+            console.log("disconneceted user",users[i])
+            io.emit("user_disconnected", users[i]);
+
+            users.splice(i, 1)
+         
           }
-          else {
-            let value1 = {
-              socketId: USERS[i].socketId,
-              userId: USERS[i].userId
-            }
-            users.push(value1)
-          }
+
         }
-        console.log("user disconnected", users);
-        //console.log("user disconnected", USERS); 
+        //console.log("user disconnected", users);
+        console.log("user connected after disconnecting......", users); 
       });
 
       socket.on("user_connected", function (userData) {
@@ -143,14 +156,14 @@ MongoConnect.init()
         io.emit("user_connected", userData.senderId);
         console.log("Connected user's", usersss);
       });
-      socket.on("user_disconnected", function (userData) {
-        console.log("before DisConnect", userData);
+      socket.on("user_disconnected...", function (userData) {
+        console.log("before DisConnect...", userData);
         if (io.sockets.sockets[userData.socketId]) {
           io.sockets.sockets[userData.socketId].disconnect();
-          io.emit("user_disconnected", userData.senderId);
+          io.emit("user_disconnected....", userData.senderId);
           delete users[userData.senderId];
           //users.splice(userData.senderId, 1);
-          console.log("user disconnected", users);
+          console.log("user disconnected....", users);
         }
       });
 
@@ -159,6 +172,7 @@ MongoConnect.init()
       socket.on("checkStatus", function (userId) {
         //USERS = users;
         // users = []
+        //old...............
         //   let status = users[userId];
         //   if (!!status) {
         //     io.to(socket.id).emit("status", {
@@ -174,21 +188,14 @@ MongoConnect.init()
         //     console.log("offline");
         //   }
 
-
         let status = 0
 
         async.waterfall([
-
-
-
           function (callback) {
 
             let AllreadyExist = false;
 
             var bar = new Promise((resolve, reject) => {
-
-
-
               for (let i = 0; i < users.length; i++) {
 
                 if (users[i].userId == userId) {
@@ -196,26 +203,16 @@ MongoConnect.init()
                   status = 1
 
                 }
-
-
-
                 if ((users.length - 1) == i) {
 
                   resolve()
 
-
-
                 }
-
-
-
               }
 
             });
 
             bar.then(() => {
-
-
 
               if (status == 1) {
 
@@ -383,7 +380,7 @@ MongoConnect.init()
                 }
                 if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
 
-                  io.to(users[i].socketId).emit("sended_message", {
+                  io.to(users[i].socketId).emit("return_message", {
                     _id: chat._id,
 
                     message: msg.message,
@@ -401,6 +398,13 @@ MongoConnect.init()
                 }
 
               }
+              
+
+                 
+
+
+                
+
 
               // io.to(socket_id).emit("new_message", {
               //   _id:chat._id,
