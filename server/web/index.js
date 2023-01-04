@@ -2,6 +2,7 @@ const http = require("http");
 const express = require("express");
 const app = express();
 const app2 = express();
+const fs = require("fs");
 var cors = require("cors");
 const ChatModel = new (require("./../../server/common/model/chatModel"))();
 const UserModel = new (require("./../../server/common/model/UserModel"))();
@@ -16,6 +17,7 @@ const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
+const ChatCtrl = require("../services/security/chatCtrl");
 
 
 let server;
@@ -286,6 +288,29 @@ MongoConnect.init()
         socket.broadcast.emit("notifyStopTyping");
       });
 
+      socket.on("updateUnReadCount", function (data) {
+      //  let socketId = users[userId];
+        if (!!data) {
+          let query = { _id: ObjectID(data._id) }
+
+          ChatModel.updateOne(query,{ $set: { isRead: true } }, function (err, chat) {
+            if (err) {
+              console.log("......err.....")
+              //TODO: Log the error here
+              console.log(err.message);
+              console.log(err);
+            } else{
+              console.log(".....chat",chat)
+
+            }
+          });  
+        }
+      });
+
+
+
+
+
       socket.on("message", function (msg) {
         console.log("..........", msg)
         console.log("message Data Before");
@@ -309,13 +334,23 @@ MongoConnect.init()
         console.log("m old socketId: sender_id ", socket_id1);
 
         console.log("new_message call", users)
+
+        fs.readFile('../uploads/photos/story.png', function(err, buf){
+          // it's possible to embed binary data
+          // within arbitrarily-complex objects
+          socket.emit('image', { image: true, buffer: buf });
+          console.log('image file is initialized');
+        });
+        
+
+
         // for (let i = 0; i < users.length; i++) {
 
 
 
         //   if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
 
-        //     io.to(users[i].socketId).emit("new_message", {
+        //     io.to(users[i].socketId).emit("image", {
 
         //       message: msg.message,
 
@@ -392,7 +427,7 @@ MongoConnect.init()
                     reciver_id: msg.reciver_id,
 
                     type: "message",
-                    
+
                     createdAt:new Date()
 
                   });
