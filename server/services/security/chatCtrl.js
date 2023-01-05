@@ -5,6 +5,7 @@ const UserModel =
 const chatModel = new (require("./../../common/model/chatModel"))();
 const ChatScreenManagementModel = new (require("./../../common/model/ChatScreenManagementModel"))();
 const NotificationModel = new (require("./../../common/model/NotificationModel"))();
+const ImageModel = new (require("./../../common/model/imageModel"))();
 
 const HttpRespose = require("./../../common/httpResponse");
 const AppCode = require("../../common/constant/appCods");
@@ -15,7 +16,7 @@ const ObjectID = require("mongodb").ObjectID;
 const CONFIG = require("../../config");
 const userModel = require("../../common/model/userModel");
 
-ChatCtrl.getMessages = (req, res) => { 
+ChatCtrl.getMessages = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
   let options = {};
@@ -295,9 +296,9 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
             },
           ],
           isDeleted: { $ne: true },
-          
-           
-          
+
+
+
         },
       },
       { $sort: { createdAt: -1 } },
@@ -332,7 +333,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
-          
+
       {
         $project: {
           _id: 1,
@@ -343,13 +344,15 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           isRead: 1,
           postId: 1,
           createdAt: 1,
-          profile_image:{$ifNull: [
-            "$senderData.profile_image",
-            CONFIG.DEFAULT_PROFILE_PHOTO,
-          ],} ,
-          userName:"$senderData.userName",
-          isDeleted:1,
-          
+          profile_image: {
+            $ifNull: [
+              "$senderData.profile_image",
+              CONFIG.DEFAULT_PROFILE_PHOTO,
+            ],
+          },
+          userName: "$senderData.userName",
+          isDeleted: 1,
+
           // senderData: {
           //   _id: "$senderData._id",
           //   profileHeader: 1,
@@ -792,7 +795,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
     let query = [
       {
         $match: condition
- 
+
       },
       {
         $lookup: {
@@ -855,7 +858,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           let: { userId: "$_id" },
           pipeline: [
             {
-              $match: {  
+              $match: {
                 $expr: {
                   $and: [
                     { $eq: ["$reciver_id", ObjectID(req.auth._id)] },
@@ -885,18 +888,18 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
         $project: {
           _id: 1,
           userId: 1,
-          mobileNo:1,
-          countryName:1,
-          countryCode:1,
-          isverified:1,
-          status:1,
+          mobileNo: 1,
+          countryName: 1,
+          countryCode: 1,
+          isverified: 1,
+          status: 1,
 
           userName: 1,
           firstName: 1,
           lastName: 1,
           profile_image: { $ifNull: ["$profile_image", "-"] },
           statusType: 1,
-           "chat": "$chat.message",
+          "chat": "$chat.message",
           // chat: {
           //   $cond: {
           //     if: { $eq: ["$chat.type", "post"] },
@@ -952,8 +955,34 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
               } else if (options.skip > 0 && _.isEmpty(followers)) {
                 cb(null);
               } else {
-                result.result = followers;
-                console.log("##########$$$$$$$$$$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", followers)
+                let abc=[]
+
+                followers.filter((x) => {
+
+                  let temp = {
+                    _id: x._id,
+                    mobileNo: x.mobileNo,
+                    countryName: x.countryName,
+                    countryCode: x.countryCode,
+                    isverified: x.isverified,
+                    status: x.status,
+                    userName: x.userName,
+                    profile_image: x.profile_image,
+                    chat: x.chat,
+                    isDeleted: x.isDeleted,
+                    messageAt: x.messageAt,
+                    senderId: x.senderId,
+                    receiverId: x.receiverId,
+                    unreadCount: x.unreadCount,
+                    chat_status:false
+
+                  }
+                  abc.push(temp)
+
+                })
+
+                result.result = abc;
+                console.log("##########$$$$$$$$$$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", abc)
                 cb(null);
               }
             });
@@ -1505,10 +1534,45 @@ ChatCtrl.chatDelete = (req, res) => {
   );
 };
 
+//EMP Info Save API
+ChatCtrl.imageUpload = (req, res) => {
+  var response = new HttpRespose();
+  var data = req.body;
+
+
+  console.log("--------------------", req.file);
+  if (!!req.files.profile_image) {
+    data.profile_image = req.files.profile_image[0].filename;
+  }
+
+  console.log("--------------------", data.profileImage);
+  ImageModel.findOne({}, (err, empInfo) => {
+    if (err) {
+      console.log(err);
+      response.setError(AppCode.Fail);
+      response.send(res);
+    } else {
+
+      ImageModel.create(data, (err, empData) => {
+        if (err) {
+          console.log(err);
+          response.setError(AppCode.Fail);
+          response.send(res);
+        } else {
+          response.setData(AppCode.Success, empData);
+          response.send(res);
+        }
+      });
+
+    }
+  });
+};
+
+
 const getCHatUserDetails = (userId) => {
   const promise = new Promise((resolve, reject) => {
 
-   
+
 
     let query = [
       {
@@ -1696,18 +1760,18 @@ const getCHatUserDetails = (userId) => {
     ];
 
 
-    
-      chatModel.advancedAggregate(query, {}, (err, chats) => {
-        if (err) {
-          return reject(err);
-        }
-        console.log("chatchatchat", chats)
-       // console.log("Count", Chats.length)
-        return resolve(chats);
-      });
-      // console.log("chatchatchat", chats)
-      // return resolve(chats);
-   
+
+    chatModel.advancedAggregate(query, {}, (err, chats) => {
+      if (err) {
+        return reject(err);
+      }
+      console.log("chatchatchat", chats)
+      // console.log("Count", Chats.length)
+      return resolve(chats);
+    });
+    // console.log("chatchatchat", chats)
+    // return resolve(chats);
+
 
 
   });

@@ -68,5 +68,10 @@ router
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDelete);
 
 
+   //Check OnChatOrNot : http://localhost:3000/v1/chat/imageUpload
+   router
+   .route("/imageUpload")
+   .get(ChatCtrl.imageUpload);
+  
 
 module.exports = router;
