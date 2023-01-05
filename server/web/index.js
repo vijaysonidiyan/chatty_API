@@ -105,10 +105,11 @@ MongoConnect.init()
       console.log("userssssssssssssssss connected.....[users]........", users)
 
 
-      socket.broadcast.emit("status", {
-        userId: socket.handshake.query.userId,
-        status: "Online",
-      });
+      // socket.broadcast.emit("status", {
+      //   userId: socket.handshake.query.userId,
+      //   status: "Online",
+      // });
+     
 
 
       socket.on("disconnect", function () {
@@ -140,37 +141,56 @@ MongoConnect.init()
 
         for (let i = 0; i < users.length; i++) {
          
-
           if (socket.id == users[i].socketId) {
             console.log("disconneceted user",users[i])
             io.emit("user_disconnected", users[i]);
 
             users.splice(i, 1)
+
+            // socket.broadcast.emit("status", {
+            //   userId:  users[i].userId,
+            //   status: "Offline",
+            // });
          
           }
 
         }
+
         //console.log("user disconnected", users);
         console.log("user connected after disconnecting......", users); 
+
+
       });
+
+      // socket.on("user_connected", function (userData) {
+      //   console.log("before Connect", userData);
+      //   usersss[userData.senderId] = userData.socketId;
+      //   io.emit("user_connected", userData.senderId);
+      //   console.log("Connected user's", usersss);
+      // });
 
       socket.on("user_connected", function (userData) {
-        console.log("before Connect", userData);
-        usersss[userData.senderId] = userData.socketId;
-        io.emit("user_connected", userData.senderId);
-        console.log("Connected user's", usersss);
+      
+        io.emit("user_connected", users);
+        console.log("Connected user's", users);
       });
-      socket.on("user_disconnected...", function (userData) {
-        console.log("before DisConnect...", userData);
-        if (io.sockets.sockets[userData.socketId]) {
-          io.sockets.sockets[userData.socketId].disconnect();
-          io.emit("user_disconnected....", userData.senderId);
-          delete users[userData.senderId];
-          //users.splice(userData.senderId, 1);
-          console.log("user disconnected....", users);
-        }
+      // socket.on("user_disconnected...", function (userData) {
+      //   console.log("before DisConnect...", userData);
+      //   if (io.sockets.sockets[userData.socketId]) {
+      //     io.sockets.sockets[userData.socketId].disconnect();
+      //     io.emit("user_disconnected....", userData.senderId);
+      //     delete users[userData.senderId];
+      //     //users.splice(userData.senderId, 1);
+      //     console.log("user disconnected....", users);
+      //   }
+      // });
+      socket.on("user_disconnected", function (userData) {
+      
+        io.emit("user_disconnected", users);
+        console.log("Connected user's", users);
       });
 
+    
 
       //Someone is Online/Offline
       socket.on("checkStatus", function (userId) {
