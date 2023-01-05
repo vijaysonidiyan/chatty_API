@@ -17,7 +17,9 @@ const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
+var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
+const chatModel = require("./../../server/common/model/chatModel");
 
 
 let server;
@@ -100,7 +102,7 @@ MongoConnect.init()
       }
       users.push(value)
 
-      console.log("userssssssssssssssss connected.............", users)
+      console.log("userssssssssssssssss connected.....[users]........", users)
 
 
       socket.broadcast.emit("status", {
@@ -253,25 +255,30 @@ MongoConnect.init()
       //Someone is enter in chat
 
       socket.on("onChat", function (userId) {
-        let socketId = users[userId];
+        console.log("userid",userId);
+        let socketId = userId;
+        console.log(".....",socketId)
         if (!!socketId) {
-          io.to(socketId).emit("chatStatus", {
+          io.to(socket.id).emit("chatStatus", {
             userId: userId,
             status: "OnChat",
           });
           console.log("onchat");
-        }
+       }
+       
       });
       //Someone is leave the chat
       socket.on("offChat", function (userId) {
-        let socketId = users[userId];
+        console.log("userid",userId);
+        let socketId = userId;
+        console.log(".....",socketId)
         if (!!socketId) {
-          io.to(socketId).emit("chatStatus", {
+          io.to(socket.id).emit("chatStatus", {
             userId: userId,
-            status: "OffChat",
+            status: "offChat",
           });
-          console.log("OffChat");
-        }
+          console.log("offChat");
+       }
       });
 
       //Someone is typing
@@ -290,30 +297,98 @@ MongoConnect.init()
 
       socket.on("updateUnReadCount", function (data) {
       //  let socketId = users[userId];
-        if (!!data) {
-          let query = { _id: ObjectID(data._id) }
-
-          ChatModel.updateOne(query,{ $set: { isRead: true } }, function (err, chat) {
-            if (err) {
-              console.log("......err.....")
-              //TODO: Log the error here
-              console.log(err.message);
-              console.log(err);
-            } else{
-              console.log(".....chat",chat)
-
-            }
-          });  
+       
+          let query = {
+            _id: ObjectID(data._id)
         }
+        ChatModel.findOne(query, function (err, msg) {
+            if (err) {
+                response.setError(AppCode.Fail);
+                response.send(res);
+            }
+            else if (_.isEmpty(msg)) {
+                response.setError(AppCode.NotFound);
+                response.send(res);
+            }
+            else {
+               
+              ChatModel.updateOne(query,{ $set: { isRead: true } }, function (err, chat) {
+                if (err) {
+                  console.log("......err.....")
+                  //TODO: Log the error here
+                  console.log(err.message);
+                  console.log(err);
+                } else{
+                
+                  for (let i = 0; i < users.length; i++) {
+    
+                    if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+    
+                      io.to(users[i].socketId).emit("return_unreadcount", {
+                        _id: msg._id,
+    
+                        message: msg.message,
+    
+                        sender_id: msg.sender_id,
+    
+                        reciver_id: msg.reciver_id,
+    
+                       
+    
+                     
+                      });
+                    }
+                  }
+                  console.log(".....isRead=true ")
+    
+                }
+              });  
+            }
+        })
+
+        
+        
       });
 
 
+    socket.on("img", function(info) {
+      console.log("inside receiver");
+      console.log(".........",info)
+      io.to(socket.id).emit('base64 image', //exclude sender
+      // io.sockets.emit(
+      //   "base64 file", //include sender
+
+        {
+          file: info.file,
+          fileName: info.fileName,
+        }
+      );
+     // var base64Str = info;
+    //  var buff = new Buffer(base64Str ,"base64");
+     // fs.writeFileSync("test.png", buff)
+  });
+
+     
 
 
 
       socket.on("message", function (msg) {
-        console.log("..........", msg)
-        console.log("message Data Before");
+        console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
+
+
+        // console.log(Buffer.from("SGVsbG8gV29ybGQ=", 'base64').toString('ascii'))
+        // console.log("message Data Before");
+
+        io.to(socket.id).emit('base64 image', //exclude sender
+          // io.sockets.emit(
+          //   "base64 file", //include sender
+
+          {
+            file: msg.file,
+            fileName: msg.fileName,
+          }
+        );
+
         var query = {
           message: msg.message,
           sender_id: msg.sender_id,
@@ -335,12 +410,14 @@ MongoConnect.init()
 
         console.log("new_message call", users)
 
-        fs.readFile('../uploads/photos/story.png', function(err, buf){
-          // it's possible to embed binary data
-          // within arbitrarily-complex objects
-          socket.emit('image', { image: true, buffer: buf });
-          console.log('image file is initialized');
-        });
+        // fs.readFile('../uploads/photos/story.png', function(err, buf){
+        //   // it's possible to embed binary data
+        //   // within arbitrarily-complex objects
+        //   socket.emit('image', { image: true, buffer: buf });
+        //   console.log('image file is initialized');
+
+
+        // });
         
 
 
