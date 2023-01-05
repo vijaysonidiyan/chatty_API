@@ -17,7 +17,7 @@ const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
-var siofu = require("socketio-file-upload");
+//var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
 const chatModel = require("./../../server/common/model/chatModel");
 
@@ -295,6 +295,8 @@ MongoConnect.init()
         socket.broadcast.emit("notifyStopTyping");
       });
 
+
+      //update unreadcount and return data to reciver open in all tab
       socket.on("updateUnReadCount", function (data) {
       //  let socketId = users[userId];
        
@@ -333,9 +335,6 @@ MongoConnect.init()
     
                         reciver_id: msg.reciver_id,
     
-                       
-    
-                     
                       });
                     }
                   }
@@ -366,7 +365,7 @@ MongoConnect.init()
      // var base64Str = info;
     //  var buff = new Buffer(base64Str ,"base64");
      // fs.writeFileSync("test.png", buff)
-  });
+    });
 
      
 
