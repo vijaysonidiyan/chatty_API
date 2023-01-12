@@ -100,13 +100,20 @@ MongoConnect.init()
         userId: socket.handshake.query.userId
 
       }
-      io.emit("socket_connection", value);
-        console.log("Connected user's", value);
+      io.emit("socket_connection", socket.id);
+      console.log("Connected user's", value);
+
+      
       users.push(value)
 
       console.log("userssssssssssssssss connected.....[users]........", users)
 
-      
+      socket.on("user_connected", function () {
+
+
+        io.emit("user_connected");
+        console.log("Connected user's");
+      });
 
 
       // socket.broadcast.emit("status", {
@@ -114,6 +121,30 @@ MongoConnect.init()
       //   status: "Online",
       // });
      
+      
+      socket.on("socket_disconnection", function (socket) {
+
+
+        
+       
+
+        for (let i = 0; i < users.length; i++) {
+         
+          if (socket.id == users[i].socketId ) {
+            console.log("disconneceted user...................",users[i])
+          
+           // io.emit("user_disconnected", users[i]);
+
+            users.splice(i, 1)
+
+           
+          }
+
+        }
+
+        //console.log("user disconnected", users);
+        console.log("user connected after disconnecting......", users); 
+      });
 
 
       socket.on("disconnect", function () {
@@ -165,13 +196,13 @@ MongoConnect.init()
             //   console.log("Connected user's", usersss);
             // });
 
-      socket.on("user_connected", function (userId) {
-        console.log("userid",userId);
-        let socketId = userId;
-        console.log(".....",socketId)
-        io.emit("user_connected", users);
-        console.log("Connected user's", users[0]);
-      });
+      // socket.on("user_connected", function (userId) {
+      //   console.log("userid",userId);
+      //   let socketId = userId;
+      //   console.log(".....",socketId)
+      //   io.emit("user_connected", users);
+      //   console.log("Connected user's", users[0]);
+      // });
           
       socket.on("user_disconnected", function (userId) {
         console.log("userid",userId);
