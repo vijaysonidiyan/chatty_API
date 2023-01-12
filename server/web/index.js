@@ -100,7 +100,7 @@ MongoConnect.init()
         userId: socket.handshake.query.userId
 
       }
-      io.emit("socket_connection", socket.id);
+      io.emit("socket_connection", value);
       console.log("Connected user's", value);
 
       
@@ -124,9 +124,6 @@ MongoConnect.init()
       
       socket.on("socket_disconnection", function (socket) {
 
-
-        
-       
 
         for (let i = 0; i < users.length; i++) {
          
