@@ -64,7 +64,7 @@ userCtrl.countryList = (req, res) => {
     let countryList = []
 
     countryData.forEach(function (countryData) {
-        console.log(countryData);
+        //console.log(countryData);
         var customObj = {
             'isoCode': countryData.isoCode,
             'name': countryData.name,

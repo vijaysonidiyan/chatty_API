@@ -758,9 +758,9 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
   getCHatUserDetails(loginUserId).then((chat) => {
     const userChat = [];
 
-    console.log("%$^&$^^#^^#%&&*^*&&&*((%$$^^#^&#@$&&^*$^&%$#$%&*^&*(%*^&$@#@$^&%&^", req.auth._id)
+   // console.log("%$^&$^^#^^#%&&*^*&&&*((%$$^^#^&#@$&&^*$^&%$#$%&*^&*(%*^&$@#@$^&%&^", req.auth._id)
     _.forEach(chat, (chatData) => {
-      console.log(",,,,,,,,,,,,,", chatData);
+    //  console.log(",,,,,,,,,,,,,", chatData);
 
       if (chatData.sender_id == req.auth._id) {
         userChat.push(ObjectID(chatData.reciver_id));
@@ -771,7 +771,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
       // console.log("...............................................",userChat);
     });
 
-    console.log("...............................................", userChat);
+   // console.log("...............................................", userChat);
 
 
     if (searchKey == "") {
@@ -982,7 +982,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 })
 
                 result.result = abc;
-                console.log("##########$$$$$$$$$$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", abc)
+              //  console.log("##########$$$$$$$$$$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", abc)
                 cb(null);
               }
             });
@@ -1765,7 +1765,7 @@ const getCHatUserDetails = (userId) => {
       if (err) {
         return reject(err);
       }
-      console.log("chatchatchat", chats)
+    //  console.log("chatchatchat", chats)
       // console.log("Count", Chats.length)
       return resolve(chats);
     });
