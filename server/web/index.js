@@ -20,7 +20,7 @@ const _ = require("lodash");
 //var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
 const chatModel = require("./../../server/common/model/chatModel");
-
+const PostModel = new (require("./../../server/common/model/postModel").Post)();
 
 let server;
 if (CONFIG.NODE_ENV === "development") {
@@ -100,9 +100,13 @@ MongoConnect.init()
         userId: socket.handshake.query.userId
 
       }
+      io.emit("socket_connection", value);
+        console.log("Connected user's", value);
       users.push(value)
 
       console.log("userssssssssssssssss connected.....[users]........", users)
+
+      
 
 
       // socket.broadcast.emit("status", {
@@ -113,12 +117,7 @@ MongoConnect.init()
 
 
       socket.on("disconnect", function () {
-        // ans = getkeyByValue(usersss, socket.id);
-        // if (ans) {
-        //   console.log(ans);
-        //   delete usersss[ans];
-        //   io.emit("user_disconnected", ans);
-        // }
+        
         // socket.broadcast.emit("status", {
         //   userId: ans,
         //   status: "Offline",
@@ -141,56 +140,71 @@ MongoConnect.init()
 
         for (let i = 0; i < users.length; i++) {
          
-          if (socket.id == users[i].socketId) {
-            console.log("disconneceted user",users[i])
+          if (socket.id == users[i].socketId ) {
+            console.log("disconneceted user...................",users[i])
+          
             io.emit("user_disconnected", users[i]);
 
             users.splice(i, 1)
 
-            // socket.broadcast.emit("status", {
-            //   userId:  users[i].userId,
-            //   status: "Offline",
-            // });
-         
+           
           }
 
         }
 
         //console.log("user disconnected", users);
         console.log("user connected after disconnecting......", users); 
-
-
       });
 
-      // socket.on("user_connected", function (userData) {
-      //   console.log("before Connect", userData);
-      //   usersss[userData.senderId] = userData.socketId;
-      //   io.emit("user_connected", userData.senderId);
-      //   console.log("Connected user's", usersss);
-      // });
+     
 
-      socket.on("user_connected", function (userData) {
-      
+            // socket.on("user_connected", function (userData) {
+            //   console.log("before Connect", userData);
+            //   usersss[userData.senderId] = userData.socketId;
+            //   io.emit("user_connected", userData.senderId);
+            //   console.log("Connected user's", usersss);
+            // });
+
+      socket.on("user_connected", function (userId) {
+        console.log("userid",userId);
+        let socketId = userId;
+        console.log(".....",socketId)
         io.emit("user_connected", users);
-        console.log("Connected user's", users);
+        console.log("Connected user's", users[0]);
       });
-      // socket.on("user_disconnected...", function (userData) {
-      //   console.log("before DisConnect...", userData);
-      //   if (io.sockets.sockets[userData.socketId]) {
-      //     io.sockets.sockets[userData.socketId].disconnect();
-      //     io.emit("user_disconnected....", userData.senderId);
-      //     delete users[userData.senderId];
-      //     //users.splice(userData.senderId, 1);
-      //     console.log("user disconnected....", users);
-      //   }
-      // });
-      socket.on("user_disconnected", function (userData) {
-      
+          
+      socket.on("user_disconnected", function (userId) {
+        console.log("userid",userId);
+        let socketId = userId;
+        console.log(".....",socketId)
         io.emit("user_disconnected", users);
-        console.log("Connected user's", users);
+        console.log("disconnected user's", users);
       });
+
+     
+    
 
     
+      socket.on('image', async image => {
+        // image is an array of bytes
+        const buffer = Buffer.from(image);
+        await fs.writeFile('/tmp/image', buffer).catch(console.error); // fs.promises
+    });
+    
+
+    socket.on("base64 file", function (msg) {
+      console.log("received base64 file from server: " + msg.fileName);
+      socket.username = msg.username;
+      io.to(roomId).emit('base64 image', //exclude sender
+      // io.sockets.emit(
+      //   "base64 file", //include sender
+
+        {
+          file: msg.file,
+          fileName: msg.fileName,
+        }
+      );
+    });
 
       //Someone is Online/Offline
       socket.on("checkStatus", function (userId) {
@@ -398,15 +412,6 @@ MongoConnect.init()
         // console.log(Buffer.from("SGVsbG8gV29ybGQ=", 'base64').toString('ascii'))
         // console.log("message Data Before");
 
-        io.to(socket.id).emit('base64 image', //exclude sender
-          // io.sockets.emit(
-          //   "base64 file", //include sender
-
-          {
-            file: msg.file,
-            fileName: msg.fileName,
-          }
-        );
 
         var query = {
           message: msg.message,
@@ -418,7 +423,7 @@ MongoConnect.init()
           message: msg.message,
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
-          type: "message",
+          type: msg.type
         };
         console.log("message data", query1);
         // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
@@ -486,61 +491,56 @@ MongoConnect.init()
           } else {
             console.log(".....else.....")
             if (!!chat) {
+              console.log("chatchatchatchatchatchatchatchatchat",chat);
 
-              for (let i = 0; i < users.length; i++) {
-
-
-
-                if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
-
-                  io.to(users[i].socketId).emit("new_message", {
-                    _id: chat._id,
-
-                    message: msg.message,
-
-                    sender_id: msg.sender_id,
-
-                    reciver_id: msg.reciver_id,
-
-                    type: "message",
-
-                    createdAt:new Date()
-
-                  });
+            
+                for (let i = 0; i < users.length; i++) {
 
 
 
+                  if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+  
+                    io.to(users[i].socketId).emit("new_message", {
+                      _id: chat._id,
+  
+                      message: msg.message,
+  
+                      sender_id: msg.sender_id,
+  
+                      reciver_id: msg.reciver_id,
+  
+                      type: "message",
+  
+                      createdAt:new Date()
+  
+                    });
+  
+  
+  
+                  }
+                  if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+  
+                    io.to(users[i].socketId).emit("return_message", {
+                      _id: chat._id,
+  
+                      message: msg.message,
+  
+                      sender_id: msg.sender_id,
+  
+                      reciver_id: msg.reciver_id,
+  
+                      type: "message",
+  
+                      createdAt:new Date()
+  
+                    });
+  
+  
+  
+                  }
+  
                 }
-                if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
-
-                  io.to(users[i].socketId).emit("return_message", {
-                    _id: chat._id,
-
-                    message: msg.message,
-
-                    sender_id: msg.sender_id,
-
-                    reciver_id: msg.reciver_id,
-
-                    type: "message",
-
-                    createdAt:new Date()
-
-                  });
-
-
-
-                }
-
-              }
-              
-
-                 
-
-
                 
-
-
               // io.to(socket_id).emit("new_message", {
               //   _id:chat._id,
               //   message: msg.message,
