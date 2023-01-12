@@ -130,7 +130,7 @@ MongoConnect.init()
 
         for (let i = 0; i < users.length; i++) {
          
-          if (socket.id == users[i].socketId ) {
+          if (socket.socketId == users[i].socketId ) {
             console.log("disconneceted user...................",users[i])
           
            // io.emit("user_disconnected", users[i]);
