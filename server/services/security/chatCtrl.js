@@ -1534,6 +1534,167 @@ ChatCtrl.chatDelete = (req, res) => {
   );
 };
 
+ChatCtrl.chatDeleteAll = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.query;
+ 
+
+  let query = [
+    {
+      $match: {
+        $or: [
+          {
+            sender_id: ObjectID(req.auth._id),
+            reciver_id: ObjectID(req.query.user_id),
+          },
+          {
+            reciver_id: ObjectID(req.auth._id),
+            sender_id: ObjectID(req.query.user_id),
+          },
+        ],
+      },
+    },
+   
+  ];
+
+  console.log("..............................",query)
+
+  chatModel.advancedAggregate(query, {}, (err, menu) => {
+    if (err) {
+        throw err;
+    } else if (_.isEmpty(menu)) {
+        response.setError(AppCode.NoUserFound);
+        response.send(res);
+    } else {
+      console.log("........................",menu);
+      let updateDataquery =
+          {
+           isDeleted:true,
+         
+          }
+
+      chatModel.updateIsRead({
+        reciver_id: ObjectID(req.auth._id),
+        sender_id: ObjectID(data.user_id),
+      }, { $set: updateDataquery }, function (err, eventupdate) {
+        if (err) {
+          response.setError(AppCode.Fail);
+          response.send(res);
+        } else if (eventupdate == undefined || (eventupdate.matchedCount === 0 && eventupdate.modifiedCount === 0)) {
+          response.setError(AppCode.NotFound);
+        } else {
+          chatModel.updateIsRead({
+            sender_id: ObjectID(req.auth._id),
+            reciver_id: ObjectID(data.user_id),
+          }, { $set: updateDataquery}, function (err, eventupdate) {
+            if (err) {
+              response.setError(AppCode.Fail);
+              response.send(res);
+            } else if (eventupdate == undefined || (eventupdate.matchedCount === 0 && eventupdate.modifiedCount === 0)) {
+              response.setError(AppCode.NotFound);
+            } else {
+
+              response.setData(AppCode.Success);
+              response.send(res);
+            }
+          });
+         
+       // response.setData(AppCode.Success);
+       // response.send(res);
+        }
+      });
+ 
+    }
+});
+
+
+
+};
+
+ChatCtrl.chatDeleteAll1 = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.query;
+ 
+
+  let query = [
+    {
+      $match: {
+        $or: [
+          {
+            sender_id: ObjectID(req.auth._id),
+            reciver_id: ObjectID(req.query.user_id),
+          },
+          {
+            reciver_id: ObjectID(req.auth._id),
+            sender_id: ObjectID(req.query.user_id),
+          },
+        ],
+      },
+    },
+   
+  ];
+
+  console.log("..............................",query)
+
+  chatModel.advancedAggregate(query, {}, (err, menu) => {
+    if (err) {
+        throw err;
+    } else if (_.isEmpty(menu)) {
+        response.setError(AppCode.NoUserFound);
+        response.send(res);
+    } else {
+      console.log("........................",menu);
+      let updateDataquery =
+          {
+           isDeleted:true,
+           deletedBy: ObjectID(req.auth._id)
+         
+          }
+          let updateDataquery1 =
+          {
+           isDeleted:true,
+           deletedBy: ObjectID(req.auth._id)
+         
+          }
+
+      chatModel.updateIsRead({
+        reciver_id: ObjectID(req.auth._id),
+        sender_id: ObjectID(data.user_id),
+      }, { $set: updateDataquery }, function (err, eventupdate) {
+        if (err) {
+          response.setError(AppCode.Fail);
+          response.send(res);
+        } else if (eventupdate == undefined || (eventupdate.matchedCount === 0 && eventupdate.modifiedCount === 0)) {
+          response.setError(AppCode.NotFound);
+        } else {
+          chatModel.updateIsRead({
+            sender_id: ObjectID(req.auth._id),
+            reciver_id: ObjectID(data.user_id),
+          }, { $set: updateDataquery1}, function (err, eventupdate) {
+            if (err) {
+              response.setError(AppCode.Fail);
+              response.send(res);
+            } else if (eventupdate == undefined || (eventupdate.matchedCount === 0 && eventupdate.modifiedCount === 0)) {
+              response.setError(AppCode.NotFound);
+            } else {
+
+              response.setData(AppCode.Success);
+              response.send(res);
+            }
+          });
+         
+       // response.setData(AppCode.Success);
+       // response.send(res);
+        }
+      });
+ 
+    }
+});
+
+
+
+};
+
 //EMP Info Save API
 ChatCtrl.imageUpload = (req, res) => {
   var response = new HttpRespose();

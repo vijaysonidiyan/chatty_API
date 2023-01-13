@@ -13,6 +13,8 @@ class chatModel extends ModelBase {
             createdAt: { type: Object, allowNullEmpty: true },
             updatedAt: { type: Object, allowNullEmpty: true },
             isRead: { type: Boolean, allowNullEmpty: true },
+            isDeleted:{ type: Boolean, allowNullEmpty: true},
+            deletedBy:{type: Object, allowNullEmpty: true},
             type: { type: String, allowNullEmpty: true }
         });
     }
@@ -48,6 +50,16 @@ class chatModel extends ModelBase {
             }
 
             cb(null, result.ops[0]);
+        });
+    }
+
+    
+    updateMany(query, data, cb) {
+        this.getModel(function (err, model) {
+            if (err) {
+                return cb(err);
+            }
+            model.updateMany(query, data, cb);
         });
     }
 
