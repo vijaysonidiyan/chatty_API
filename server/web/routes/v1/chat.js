@@ -68,10 +68,31 @@ router
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDelete);
 
 
+  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteAll
+  router
+  .route("/chatDeleteAll")
+  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDeleteAll);
+
+
+  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteAll1
+  router
+  .route("/chatDeleteAll1")
+  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDeleteAll1);
+  
+  
    //Check OnChatOrNot : http://localhost:3000/v1/chat/imageUpload
    router
    .route("/imageUpload")
    .get(ChatCtrl.imageUpload);
   
+
+
+   
+   //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteById
+   router
+   .route("/chatDeleteById")
+   .post(ChatCtrl.chatDeleteById);
+   
+
 
 module.exports = router;

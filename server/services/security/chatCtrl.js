@@ -15,6 +15,7 @@ const _ = require("lodash");
 const ObjectID = require("mongodb").ObjectID;
 const CONFIG = require("../../config");
 const userModel = require("../../common/model/userModel");
+const { eq } = require("lodash");
 
 ChatCtrl.getMessages = (req, res) => {
   const response = new HttpRespose();
@@ -281,6 +282,11 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
   let skip = limit * parseInt(pageNumber);
 
   options.sort = { Date: 1 };
+
+  const List=[]
+  List.push( ObjectID(req.auth._id))
+
+
   if (!!req.auth && !!req.auth._id) {
     let query = [
       {
@@ -289,15 +295,23 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
             {
               sender_id: ObjectID(req.auth._id),
               reciver_id: ObjectID(data.user_id),
+                 
             },
             {
               reciver_id: ObjectID(req.auth._id),
               sender_id: ObjectID(data.user_id),
+             
             },
+            
           ],
-          isDeleted: { $ne: true },
+          // $expr:
+          //   {
+          //       $nin: ["$isDeletedBy", List],   
+          //   }
 
-
+      isDeletedBy:{ $nin :List }
+        
+      
 
         },
       },
@@ -352,6 +366,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           },
           userName: "$senderData.userName",
           isDeleted: 1,
+          isDeletedBy:1,
 
           // senderData: {
           //   _id: "$senderData._id",
@@ -409,13 +424,15 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
                 {
                   sender_id: ObjectID(req.auth._id),
                   reciver_id: ObjectID(data.user_id),
+                  
                 },
                 {
                   reciver_id: ObjectID(req.auth._id),
                   sender_id: ObjectID(data.user_id),
+                 
                 },
               ],
-              isDeleted: { $ne: true },
+              isDeletedBy:{ $nin :List }
 
             };
             chatModel.count(countQuery, function (err, totalMessages) {
@@ -837,6 +854,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 senderId: { $last: "$sender_id" },
                 receiverId: { $last: "$reciver_id" },
                 count: { $sum: 1 },
+                
               },
             },
           ],
@@ -893,7 +911,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           countryCode: 1,
           isverified: 1,
           status: 1,
-
+         
           userName: 1,
           firstName: 1,
           lastName: 1,
@@ -907,6 +925,14 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           //     else: "$chat.message",
           //   },
           // },
+          // "userData": {
+          //   $cond: {
+          //     if: { $eq: ["$chat.senderId",  ObjectID(req.auth._id)] },
+          //     then: "reciver",
+          //     else: "sender",
+          //   },
+          // },
+         
           isDeleted: {
             $cond: {
               if: { $isArray: "$isDeleted" },
@@ -914,10 +940,20 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
               else: 0,
             },
           },
-          //  chat:1,
+          // chat:1,
           messageAt: "$chat.messageAt",
           senderId: "$chat.senderId",
           receiverId: "$chat.receiverId",
+          //user:true,
+          userData: {
+            $cond: {
+              if: { $ne: ["$chat.sender_id", ObjectID(req.auth._id)] }, then: "sender",
+              else: {
+                $cond: { if: { $ne: ["$chat.reciver_id", ObjectID(req.auth._id)] }, then: "receiver", else: "" }
+              }
+            }
+          },
+
           unreadCount: { $ifNull: ["$unreadCount.count", 0] },
         },
       },
@@ -969,6 +1005,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                     userName: x.userName,
                     profile_image: x.profile_image,
                     chat: x.chat,
+                    userData: x.userData,
                     isDeleted: x.isDeleted,
                     messageAt: x.messageAt,
                     senderId: x.senderId,
@@ -1570,9 +1607,9 @@ ChatCtrl.chatDeleteAll = (req, res) => {
       let updateDataquery =
           {
            isDeleted:true,
+           isDeletedBy:parseInt(req.query.isDeletedBy)
          
           }
-
       chatModel.updateIsRead({
         reciver_id: ObjectID(req.auth._id),
         sender_id: ObjectID(data.user_id),
@@ -1693,6 +1730,75 @@ ChatCtrl.chatDeleteAll1 = (req, res) => {
 
 
 
+};
+
+/* Designation Delete*/
+ChatCtrl.chatDeleteById = (req, res) => {
+  const response = new HttpRespose();
+  const data = req.body;
+  const query = {
+      _id: ObjectID(data._id)
+  };
+  chatModel.findOne(query, function (err, chat) {
+      if (err) {
+          AppCode.Fail.error = err.message;
+          response.setError(AppCode.Fail);
+          response.send(res);
+      } else {
+          if (chat == null) {
+              AppCode.Fail.error = "No record found";
+              response.setError(AppCode.Fail);
+              response.send(res);
+          } else {
+            let updateDataQuery={};
+
+            if(!!chat.isDeletedBy)
+            {
+              console.log("................",chat.isDeletedBy)
+              let aaa=[]
+              let bbb=[]
+              aaa=chat.isDeletedBy
+              console.log(",,,,,,,,,,,,,,,,,,,,,,,",req.body.isDeletedBy)
+              bbb=req.body.isDeletedBy
+      
+              let abc=aaa.concat(bbb)
+              console.log("......................................abcccccccc",abc)
+              abc.map((obj, index) => {
+                abc[index] = ObjectID(obj);
+              });
+      
+              console.log(".........abc after",abc)
+            
+      
+              updateDataQuery.isDeletedBy=abc
+              console.log(".......updateDataQuery.......",updateDataQuery)
+      
+            }
+            else{
+
+              updateDataQuery=req.body
+
+              updateDataQuery.isDeletedBy.map((obj, index) => {
+                updateDataQuery.isDeletedBy[index] = ObjectID(obj);
+            });
+
+
+            }
+
+      
+             delete req.body._id
+            chatModel.update(query, updateDataQuery, function (err, roleUpdate) {
+                if (err) {
+                  console.log("...........",err);
+                    response.setError(AppCode.Fail);
+                } else {
+                    response.setData(AppCode.Success);
+                    response.send(res);
+                }
+            });
+        }
+      }
+  });
 };
 
 //EMP Info Save API
