@@ -6,7 +6,14 @@ const { ObjectID } = require("bson");
 class imageModel extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "images", {
-            profile_image: { type: String, allowNullEmpty: true },
+            Image: { type: String, allowNullEmpty: true },
+            createdAt: { type: Object, allowNullEmpty: false },
+            updatedAt: { type: Object, allowNullEmpty: true },
+            status: {
+                type: Number,
+                allowNullEmpty: false,
+                enum: { 1: "active", 2: "inactive" }
+            },
         });
     }
 
@@ -32,7 +39,7 @@ class imageModel extends ModelBase {
         if (err) {
             return cb(err);
         }
-
+        data.status=1
         data.createdAt = new Date();;
 
         this.insert(data, (err, result) => {

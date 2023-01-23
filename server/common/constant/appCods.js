@@ -25,6 +25,10 @@ module.exports = {
         code: 1005,
         message: "already exist."
     },
+    AlreadyBlock: {
+        code: 1005,
+        message: "already blocked."
+    },
     allReadyadded
     : {
         code: 1005,
@@ -35,6 +39,7 @@ module.exports = {
         message: "please pass require details"
     },
     NotFound: { code: 1010, message: "Not found" },
+    unblockFirst: { code: 1010, message: "unblock first" },
     NoBlogDataFound: { code: 1010, message: "No blog data found" },
     NoUserFound: { code: 1006, message: "No user found." },
     InvalidCredential: { code: 1007, message: "Invalid username or password." },

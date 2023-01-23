@@ -161,6 +161,7 @@ module.exports = (app) => {
   app.use("/v1/adminAuth", cpUpload, require("./routes/v1/adminAuth"));
   app.use("/v1/favoriteUser", cpUpload, require("./routes/v1/favoriteUser"));
   app.use("/v1/story", cpUpload, require("./routes/v1/story"));
+  app.use("/v1/image", cpUpload, require("./routes/v1/image"));
  
 
   app.get(
