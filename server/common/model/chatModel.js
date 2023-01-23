@@ -7,14 +7,15 @@ class chatModel extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "chat", {
             message: { type: String, allowNullEmpty: true },
+            file_name: { type: String, allowNullEmpty: true },
             sender_id: { type: Object, allowNullEmpty: true },
             reciver_id: { type: Object, allowNullEmpty: true },
             postId: { type: Object, allowNullEmpty: true },
             createdAt: { type: Object, allowNullEmpty: true },
             updatedAt: { type: Object, allowNullEmpty: true },
             isRead: { type: Boolean, allowNullEmpty: true },
-            isDeleted:{ type: Boolean, allowNullEmpty: true},
-            deletedBy:{type: Object, allowNullEmpty: true},
+            isDeletedBy:{ type: Array, allowNullEmpty: true},
+         
             type: { type: String, allowNullEmpty: true }
         });
     }
@@ -60,6 +61,35 @@ class chatModel extends ModelBase {
                 return cb(err);
             }
             model.updateMany(query, data, cb);
+        });
+    }
+
+    updateOne(query, data, cb) {
+        this.getModel(function (err, model) {
+            if (err) {
+                return cb(err);
+            }
+            model.updateOne(query, data, cb);
+        });
+    }
+
+    update(query, data, cb) {
+        // data.birthDate = new Date(data.birthDate);
+
+        console.log(data);
+
+        var err = this.validate(data);
+        if (err) {
+            return cb(err);
+        }
+
+        data.updatedAt = new Date();
+        var self = this;
+        self.updateOne(query, { $set: data }, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, result);
         });
     }
 
@@ -114,5 +144,7 @@ class chatModel extends ModelBase {
         });
     }
 }
+
+
 
 module.exports = chatModel;

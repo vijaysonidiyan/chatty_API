@@ -94,5 +94,10 @@ router
    .post(ChatCtrl.chatDeleteById);
    
 
+   //Check OnChatOrNot : http://localhost:3000/v1/chat/allchatDelete
+   router
+   .route("/allchatDelete")
+   .post(CONFIG.JWTTOKENALLOWACCESS,ChatCtrl.allchatDelete);
+   
 
 module.exports = router;

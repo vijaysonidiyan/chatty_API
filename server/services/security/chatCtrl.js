@@ -309,7 +309,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           //       $nin: ["$isDeletedBy", List],   
           //   }
 
-      isDeletedBy:{ $nin :List }
+          isDeletedBy:{ $nin :List }
         
       
 
@@ -1800,6 +1800,85 @@ ChatCtrl.chatDeleteById = (req, res) => {
       }
   });
 };
+
+ChatCtrl.allchatDelete = (req, res) => {
+  const response = new HttpRespose();
+  let data = req.query;
+ 
+
+  let query = [
+    {
+      $match: {
+        $or: [
+          {
+            sender_id: ObjectID(req.auth._id),
+            reciver_id: ObjectID(req.body.user_id),
+          },
+          {
+            reciver_id: ObjectID(req.auth._id),
+            sender_id: ObjectID(req.body.user_id),
+          },
+        ],
+      },
+    },
+   
+  ];
+
+  console.log("..............................",query)
+
+  chatModel.advancedAggregate(query, {}, (err, menu) => {
+    if (err) {
+        throw err;
+    } else if (_.isEmpty(menu)) {
+        response.setError(AppCode.NoUserFound);
+        response.send(res);
+    } else {
+      console.log("........................",menu);
+     // console.log("........................",menu._id);
+    
+      menu.forEach(Element => {
+        let id = Element._id
+        let Query =
+        {
+          _id: ObjectID(id)
+        }
+        let bodydata = {
+          isDeletedBy: [ObjectID(req.auth._id)]
+        }
+        console.log("isdeletedby", bodydata);
+
+
+        chatModel.update(Query, bodydata, function (err, chat) {
+          if (err) {
+            console.log(err)
+            response.setError(AppCode.Fail);
+            response.send(res);
+          } else if (chat == undefined || (chat.matchedCount === 0 && chat.modifiedCount === 0)) {
+            response.setError(AppCode.NotFound);
+          } else {
+
+          }
+        });
+
+
+
+
+      })
+      response.setData(AppCode.Success);
+      response.send(res);
+
+
+      
+
+    
+ 
+    }
+});
+
+
+
+};
+
 
 //EMP Info Save API
 ChatCtrl.imageUpload = (req, res) => {
