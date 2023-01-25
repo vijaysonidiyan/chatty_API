@@ -110,11 +110,11 @@ MongoConnect.init()
 
       console.log("Connected user's", value);
 
-      
+
       users.push(value)
 
       console.log("userssssssssssssssss connected........", users)
-     
+
 
 
 
@@ -126,39 +126,136 @@ MongoConnect.init()
       });
 
 
-    
-      
+
+
       socket.on("socket_disconnection", function (socket) {
 
 
-        for (let i = 0; i < users.length; i++) {
-         
-          if (socket.socketId == users[i].socketId ) {
-            console.log("disconneceted user...................",users[i])
-            users.splice(i, 1)
+        // for (let i = 0; i < users.length; i++) {
 
-            if(socket.userId == users[i].userId && users[i].userId != undefined )
-            {
+        //   if (socket.socketId == users[i].socketId) {
+        //     console.log("disconneceted user...................", users[i])
+        //     users.splice(i, 1)
 
-            }
-            else
-            {
-              socket.broadcast.emit("status", {
-                userId: socket.userId,
-                status: "Offline",
-              });
+        //     for (let j = 0; i < users.length; j++) {
+        //       if (socket.userId == users[j].userId && users[j].userId != undefined) {
 
-            }
+        //       }
+        //       else {
+        //         socket.broadcast.emit("status", {
+        //           userId: socket.userId,
+        //           status: "Offline",
+        //         });
 
-          
- 
-          }
+        //       }
 
-        }
-       
+        //     }
+
+        //   }
+
+        // }
+
+
+
+        let status = 0
+
+        async.waterfall([
+          function (callback) {
+
+            let AllreadyExist = false;
+
+            var bar = new Promise((resolve, reject) => {
+              for (let i = 0; i < users.length; i++) {
+
+                if (socket.socketId == users[i].socketId) {
+
+                  users.splice(i, 1)
+                  // status = 1
+
+                }
+                if ((users.length - 1) == i) {
+
+                  resolve()
+
+                }
+              }
+
+            });
+
+            bar.then(() => {
+
+
+              async.waterfall([
+                function (callback) {
+
+                  let AllreadyExist = false;
+
+                  var bar = new Promise((resolve, reject) => {
+                    for (let j = 0; j < users.length; j++) {
+                      if (socket.userId == users[j].userId && users[j].userId != undefined) {
+                        status = 1
+                      }
+                      if ((users.length - 1) == j) {
+
+                        resolve()
+
+                      }
+                    }
+
+                  });
+
+                  bar.then(() => {
+
+
+
+                    if (status == 1) {
+                      socket.broadcast.emit("status", {
+                        userId: socket.userId,
+                        status: "Online",
+                      });
+
+                      console.log("Online");
+
+                    } else {
+
+                      socket.broadcast.emit("status", {
+                        userId: socket.userId,
+                        status: "Offline",
+                      });
+
+
+                      console.log("offline");
+
+                    }
+
+
+
+
+
+
+
+                  });
+
+                },
+
+              ]);
+
+
+
+
+
+
+
+
+            });
+
+          },
+
+        ]);
+
 
         //console.log("user disconnected", users);
-        console.log("user connected after disconnecting......", users); 
+        console.log("user connected after disconnecting......", users);
 
 
 
@@ -166,7 +263,7 @@ MongoConnect.init()
 
 
       socket.on("disconnect", function () {
-        
+
         // socket.broadcast.emit("status", {
         //   userId: ans,
         //   status: "Offline",
@@ -188,31 +285,31 @@ MongoConnect.init()
         // }
 
         for (let i = 0; i < users.length; i++) {
-         
-          if (socket.id == users[i].socketId ) {
-            console.log("disconneceted user...................",users[i])
-          
+
+          if (socket.id == users[i].socketId) {
+            console.log("disconneceted user...................", users[i])
+
             io.emit("user_disconnected", users[i]);
 
             users.splice(i, 1)
 
-           
+
           }
 
         }
 
         //console.log("user disconnected", users);
-        console.log("user connected after disconnecting......", users); 
+        console.log("user connected after disconnecting......", users);
       });
 
-     
 
-            // socket.on("user_connected", function (userData) {
-            //   console.log("before Connect", userData);
-            //   usersss[userData.senderId] = userData.socketId;
-            //   io.emit("user_connected", userData.senderId);
-            //   console.log("Connected user's", usersss);
-            // });
+
+      // socket.on("user_connected", function (userData) {
+      //   console.log("before Connect", userData);
+      //   usersss[userData.senderId] = userData.socketId;
+      //   io.emit("user_connected", userData.senderId);
+      //   console.log("Connected user's", usersss);
+      // });
 
       // socket.on("user_connected", function (userId) {
       //   console.log("userid",userId);
@@ -221,22 +318,22 @@ MongoConnect.init()
       //   io.emit("user_connected", users);
       //   console.log("Connected user's", users[0]);
       // });
-          
+
       socket.on("user_disconnected", function (userId) {
-        console.log("userid",userId);
+        console.log("userid", userId);
         let socketId = userId;
-        console.log(".....",socketId)
+        console.log(".....", socketId)
         io.emit("user_disconnected", users);
         console.log("disconnected user's", users);
 
-      
+
 
       });
 
-     
-    
 
-    
+
+
+
 
       //Someone is Online/Offline
       socket.on("checkStatus", function (userId) {
@@ -321,30 +418,30 @@ MongoConnect.init()
       //Someone is enter in chat
 
       socket.on("onChat", function (userId) {
-        console.log("userid",userId);
+        console.log("userid", userId);
         let socketId = userId;
-        console.log(".....",socketId)
+        console.log(".....", socketId)
         if (!!socketId) {
           io.to(socket.id).emit("chatStatus", {
             userId: userId,
             status: "OnChat",
           });
           console.log("onchat");
-       }
-       
+        }
+
       });
       //Someone is leave the chat
       socket.on("offChat", function (userId) {
-        console.log("userid",userId);
+        console.log("userid", userId);
         let socketId = userId;
-        console.log(".....",socketId)
+        console.log(".....", socketId)
         if (!!socketId) {
           io.to(socket.id).emit("chatStatus", {
             userId: userId,
             status: "offChat",
           });
           console.log("offChat");
-       }
+        }
       });
 
       //Someone is typing
@@ -364,76 +461,76 @@ MongoConnect.init()
 
       //update unreadcount and return data to reciver open in all tab
       socket.on("updateUnReadCount", function (data) {
-      //  let socketId = users[userId];
-       
-          let query = {
-            _id: ObjectID(data._id)
+        //  let socketId = users[userId];
+
+        let query = {
+          _id: ObjectID(data._id)
         }
         ChatModel.findOne(query, function (err, msg) {
-            if (err) {
-                response.setError(AppCode.Fail);
-                response.send(res);
-            }
-            else if (_.isEmpty(msg)) {
-                response.setError(AppCode.NotFound);
-                response.send(res);
-            }
-            else {
-               
-              ChatModel.updateOne(query,{ $set: { isRead: true } }, function (err, chat) {
-                if (err) {
-                  console.log("......err.....")
-                  //TODO: Log the error here
-                  console.log(err.message);
-                  console.log(err);
-                } else{
-                
-                  for (let i = 0; i < users.length; i++) {
-    
-                    if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
-    
-                      io.to(users[i].socketId).emit("return_unreadcount", {
-                        _id: msg._id,
-    
-                        message: msg.message,
-    
-                        sender_id: msg.sender_id,
-    
-                        reciver_id: msg.reciver_id,
-    
-                      });
-                    }
+          if (err) {
+            response.setError(AppCode.Fail);
+            response.send(res);
+          }
+          else if (_.isEmpty(msg)) {
+            response.setError(AppCode.NotFound);
+            response.send(res);
+          }
+          else {
+
+            ChatModel.updateOne(query, { $set: { isRead: true } }, function (err, chat) {
+              if (err) {
+                console.log("......err.....")
+                //TODO: Log the error here
+                console.log(err.message);
+                console.log(err);
+              } else {
+
+                for (let i = 0; i < users.length; i++) {
+
+                  if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+
+                    io.to(users[i].socketId).emit("return_unreadcount", {
+                      _id: msg._id,
+
+                      message: msg.message,
+
+                      sender_id: msg.sender_id,
+
+                      reciver_id: msg.reciver_id,
+
+                    });
                   }
-                  console.log(".....isRead=true ")
-    
                 }
-              });  
-            }
+                console.log(".....isRead=true ")
+
+              }
+            });
+          }
         })
 
-        
-        
+
+
       });
 
 
-    socket.on("img", function(info) {
-      console.log("inside receiver");
-      console.log(".........",info)
-      io.to(socket.id).emit('base64 image', //exclude sender
-      // io.sockets.emit(
-      //   "base64 file", //include sender
+      socket.on("img", function (info) {
+        console.log("inside receiver");
+        console.log(".........", info)
+        io.to(socket.id).emit('base64 image', //exclude sender
+          // io.sockets.emit(
+          //   "base64 file", //include sender
 
-        {
-          file: info.file,
-          fileName: info.fileName,
-        }
-      );
-     // var base64Str = info;
-    //  var buff = new Buffer(base64Str ,"base64");
-     // fs.writeFileSync("test.png", buff)
-    });
+          {
+            file: info.file,
+            fileName: info.fileName,
+          }
+        );
+        // var base64Str = info;
+        //  var buff = new Buffer(base64Str ,"base64");
+        // fs.writeFileSync("test.png", buff)
+      });
 
-     
+
 
 
 
@@ -450,13 +547,13 @@ MongoConnect.init()
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: "message",
-        }; 
+        };
         var query1 = {
           message: msg.message,
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: msg.type,
-          file_name:msg.file_name
+          file_name: msg.file_name
         };
         console.log("message data", query1);
         // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
@@ -467,7 +564,7 @@ MongoConnect.init()
 
         console.log("new_message call", users)
 
-       
+
 
         const groupList = [];
         groupList.push(ObjectID(msg.reciver_id))
@@ -489,221 +586,221 @@ MongoConnect.init()
 
         console.log(Query);
         UserModel.aggregate(Query, (err, user) => {
-            if (err) {
-                throw err;
-            }  
-             else if (_.isEmpty(user)) {
-              console.log("else iffffffffffffffffffffffffffffffffffff")
-              ChatModel.create(query1, function (err, chat) {
-                if (err) {
-                  console.log("......err.....")
-                  //TODO: Log the error here
-                  console.log(err.message);
-                  console.log(err);
-                } else {
-                  console.log(".....else in else if")
-                  if (!!chat) {
-                    console.log("chatchatchatchatchatchatchatchatchat",chat);
-      
-                  
-                      for (let i = 0; i < users.length; i++) {
-      
-      
-      
-                        if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
-                        
-        
-                          io.to(users[i].socketId).emit("new_message", {
-                            _id: chat._id,
-        
-                            message: msg.message,
-        
-                            sender_id: msg.sender_id,
-        
-                            reciver_id: msg.reciver_id,
-        
-                            type: msg.type,
+          if (err) {
+            throw err;
+          }
+          else if (_.isEmpty(user)) {
+            console.log("else iffffffffffffffffffffffffffffffffffff")
+            ChatModel.create(query1, function (err, chat) {
+              if (err) {
+                console.log("......err.....")
+                //TODO: Log the error here
+                console.log(err.message);
+                console.log(err);
+              } else {
+                console.log(".....else in else if")
+                if (!!chat) {
+                  console.log("chatchatchatchatchatchatchatchatchat", chat);
 
-                            file_name : msg.file_name,
-        
-                            createdAt:new Date()
-        
-                          });
-                          
-        
-        
-        
-                        }
-                        if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
-        
-                          io.to(users[i].socketId).emit("return_message", {
-                            _id: chat._id,
-        
-                            message: msg.message,
-        
-                            sender_id: msg.sender_id,
-        
-                            reciver_id: msg.reciver_id,
-        
-                            type: msg.type,
 
-                            file_name : msg.file_name,
-        
-                            createdAt:new Date()
-        
-                          });
-        
-        
-        
-                        }
-        
-                      }
-                      
-                    // io.to(socket_id).emit("new_message", {
-                    //   _id:chat._id,
-                    //   message: msg.message,
-                    //   sender_id: msg.sender_id,
-                    //   reciver_id: msg.reciver_id,
-                    //   type: "message",
-                    //   createdAt:new Date()
-                    // });
-      
-                    let isSendNotification = true;
-                    ChatScreenManagementModel.findOne(
-                      { userId: ObjectID(msg.reciver_id) },
-                      function (err, chatManage) {
-                        if (err) {
-                          console.log(err);
-                        } else {
-                          console.log(".........chatscreenmanagementModel")
-                          if (!!chatManage) {
-                            let idD = "";
-                            if (!!chatManage.chatWith) {
-                              idD = chatManage.chatWith.toString();
-                            }
-      
-                            console.log("Chat With ID", idD);
-                            // if (chatManage.status == 1) {
-                            //   isSendNotification = false;
-                            // }
-                            // if (chatManage.status == 2 && idD == msg.sender_id) {
-                            //   isSendNotification = false;
-                            // }
+                  for (let i = 0; i < users.length; i++) {
+
+
+
+                    if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+
+
+                      io.to(users[i].socketId).emit("new_message", {
+                        _id: chat._id,
+
+                        message: msg.message,
+
+                        sender_id: msg.sender_id,
+
+                        reciver_id: msg.reciver_id,
+
+                        type: msg.type,
+
+                        file_name: msg.file_name,
+
+                        createdAt: new Date()
+
+                      });
+
+
+
+
+                    }
+                    if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+
+                      io.to(users[i].socketId).emit("return_message", {
+                        _id: chat._id,
+
+                        message: msg.message,
+
+                        sender_id: msg.sender_id,
+
+                        reciver_id: msg.reciver_id,
+
+                        type: msg.type,
+
+                        file_name: msg.file_name,
+
+                        createdAt: new Date()
+
+                      });
+
+
+
+                    }
+
+                  }
+
+                  // io.to(socket_id).emit("new_message", {
+                  //   _id:chat._id,
+                  //   message: msg.message,
+                  //   sender_id: msg.sender_id,
+                  //   reciver_id: msg.reciver_id,
+                  //   type: "message",
+                  //   createdAt:new Date()
+                  // });
+
+                  let isSendNotification = true;
+                  ChatScreenManagementModel.findOne(
+                    { userId: ObjectID(msg.reciver_id) },
+                    function (err, chatManage) {
+                      if (err) {
+                        console.log(err);
+                      } else {
+                        console.log(".........chatscreenmanagementModel")
+                        if (!!chatManage) {
+                          let idD = "";
+                          if (!!chatManage.chatWith) {
+                            idD = chatManage.chatWith.toString();
                           }
-                          if (isSendNotification == true) {
-                            UserModel.findOne(
-                              { _id: ObjectID(msg.sender_id) },
-                              (err, user) => {
-                                if (err) {
-                                  console.log(err);
-                                } else if (!!user) {
-                                  UserModel.findOne(
-                                    { _id: ObjectID(msg.reciver_id) },
-                                    (err, receiverUser) => {
-                                      if (err) {
-                                        console.log(err);
-                                      } else if (!!receiverUser) {
-                                        let mesg = user.userName + " message you!",
-                                          title = "New Message",
-                                          type = "message",
-                                          senderId = msg.sender_id,
-                                          receiverId = msg.reciver_id,
-                                          receiverName = user.userName,
-                                          senderImage = !!receiverUser.profileUrl
-                                            ? receiverUser.profileUrl
-                                            : "",
-                                          receiverImage = !!user.profileUrl
-                                            ? user.profileUrl
-                                            : "",
-                                          res = "";
-      
-                                        // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
-                                        //     if (err) {
-                                        //         throw err
-                                        //     } else {
-                                        //         if (!!deviceTokensData) {
-                                        //             console.log("DT", deviceTokensData)
-                                        //             let tokens = deviceTokensData.deviceToken;
-                                        //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
-                                        //         }
-      
-                                        //     }
-                                        // });
-                                        let query = [
-                                          {
-                                            $match: { userId: ObjectID(msg.reciver_id) },
-                                          },
-                                        ];
-                                        DeviceTokenModel.aggregate(
-                                          query,
-                                          function (err, deviceTokensData) {
-                                            if (err) {
-                                              console.log(err);
-                                            } else {
-                                              console.log(
-                                                "deviceTokensDataaaaaaaaaaaaaa",
-                                                deviceTokensData
-                                              );
-                                              if (!!deviceTokensData) {
-                                                deviceTokensData.forEach((element) => {
-                                                  let tokens = element.deviceToken;
-                                                  if (!!tokens) {
-                                                    sendToTopics(
-                                                      mesg,
-                                                      title,
-                                                      type,
-                                                      senderId,
-                                                      receiverId,
-                                                      receiverName,
-                                                      receiverImage,
-                                                      senderImage,
-                                                      tokens,
-                                                      res
-                                                    );
-                                                  }
-                                                });
-                                              }
+
+                          console.log("Chat With ID", idD);
+                          // if (chatManage.status == 1) {
+                          //   isSendNotification = false;
+                          // }
+                          // if (chatManage.status == 2 && idD == msg.sender_id) {
+                          //   isSendNotification = false;
+                          // }
+                        }
+                        if (isSendNotification == true) {
+                          UserModel.findOne(
+                            { _id: ObjectID(msg.sender_id) },
+                            (err, user) => {
+                              if (err) {
+                                console.log(err);
+                              } else if (!!user) {
+                                UserModel.findOne(
+                                  { _id: ObjectID(msg.reciver_id) },
+                                  (err, receiverUser) => {
+                                    if (err) {
+                                      console.log(err);
+                                    } else if (!!receiverUser) {
+                                      let mesg = user.userName + " message you!",
+                                        title = "New Message",
+                                        type = "message",
+                                        senderId = msg.sender_id,
+                                        receiverId = msg.reciver_id,
+                                        receiverName = user.userName,
+                                        senderImage = !!receiverUser.profileUrl
+                                          ? receiverUser.profileUrl
+                                          : "",
+                                        receiverImage = !!user.profileUrl
+                                          ? user.profileUrl
+                                          : "",
+                                        res = "";
+
+                                      // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
+                                      //     if (err) {
+                                      //         throw err
+                                      //     } else {
+                                      //         if (!!deviceTokensData) {
+                                      //             console.log("DT", deviceTokensData)
+                                      //             let tokens = deviceTokensData.deviceToken;
+                                      //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
+                                      //         }
+
+                                      //     }
+                                      // });
+                                      let query = [
+                                        {
+                                          $match: { userId: ObjectID(msg.reciver_id) },
+                                        },
+                                      ];
+                                      DeviceTokenModel.aggregate(
+                                        query,
+                                        function (err, deviceTokensData) {
+                                          if (err) {
+                                            console.log(err);
+                                          } else {
+                                            console.log(
+                                              "deviceTokensDataaaaaaaaaaaaaa",
+                                              deviceTokensData
+                                            );
+                                            if (!!deviceTokensData) {
+                                              deviceTokensData.forEach((element) => {
+                                                let tokens = element.deviceToken;
+                                                if (!!tokens) {
+                                                  sendToTopics(
+                                                    mesg,
+                                                    title,
+                                                    type,
+                                                    senderId,
+                                                    receiverId,
+                                                    receiverName,
+                                                    receiverImage,
+                                                    senderImage,
+                                                    tokens,
+                                                    res
+                                                  );
+                                                }
+                                              });
                                             }
                                           }
-                                        );
-      
-                                        let notificationQuery = {
-                                          senderId: msg.sender_id,
-                                          reciverId: msg.reciver_id,
-                                          message: mesg,
-                                          type: type
                                         }
-                                        NotificationModel.create(notificationQuery, (err, notification) => {
-                                          if (err) {
-                                            throw err;
-                                          } else {
-                                            console.log(".....notificationModel")
-      
-                                          }
-                                        });
+                                      );
+
+                                      let notificationQuery = {
+                                        senderId: msg.sender_id,
+                                        reciverId: msg.reciver_id,
+                                        message: mesg,
+                                        type: type
                                       }
+                                      NotificationModel.create(notificationQuery, (err, notification) => {
+                                        if (err) {
+                                          throw err;
+                                        } else {
+                                          console.log(".....notificationModel")
+
+                                        }
+                                      });
                                     }
-                                  );
-                                }
+                                  }
+                                );
                               }
-                            );
-                          }
+                            }
+                          );
                         }
                       }
-                    );
-                  }
+                    }
+                  );
                 }
-              });
-            
-            }
-            else{
-              console.log("reciver id is in block List so you cant message .......................................");
-              for (let i = 0; i < users.length; i++) {
+              }
+            });
+
+          }
+          else {
+            console.log("reciver id is in block List so you cant message .......................................");
+            for (let i = 0; i < users.length; i++) {
 
               if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
-        
+
                 io.to(users[i].socketId).emit("block_user", {
-               
+
 
                   message: msg.message,
 
@@ -713,9 +810,9 @@ MongoConnect.init()
 
                   type: "message",
 
-                  createdAt:new Date(),
+                  createdAt: new Date(),
 
-                  isblock:true
+                  isblock: true
 
                 });
 
@@ -724,31 +821,31 @@ MongoConnect.init()
               }
             }
             //  response.setError(AppCode.unblockFirst);
-             // response.send(res);
+            // response.send(res);
 
 
-             
-            }
-          });
+
+          }
+        });
 
 
-       
+
       });
 
 
 
-      
+
       socket.on("chatdeletebyId", function (msg) {
         console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
 
         const data = msg;
 
-        var array =msg.isDeletedBy
+        var array = msg.isDeletedBy
         console.log("datadtadatdatdatmsg.................datadtadtadta", msg);
         const query = {
           _id: ObjectID(msg._id)
         };
-        console.log("queryyyyyyyyyyyyy",query);
+        console.log("queryyyyyyyyyyyyy", query);
         ChatModel.findOne(query, function (err, chat) {
           if (err) {
             console.log("err", err);
@@ -778,7 +875,7 @@ MongoConnect.init()
 
 
               }
-              
+
 
               if (!!chat.isDeletedBy) {
                 console.log("................", chat.isDeletedBy)
@@ -800,12 +897,12 @@ MongoConnect.init()
                 updateDataQuery.isDeletedBy = finalArray
                 console.log(".......if part updateDataQuery.......", updateDataQuery)
 
-               
-                
+
+
               }
               else {
 
-               
+
                 updateDataQuery = msg
 
                 updateDataQuery.isDeletedBy.map((obj, index) => {
@@ -838,10 +935,10 @@ MongoConnect.init()
 
       });
 
-         
 
 
-       
+
+
       socket.on("allchatdelete", function (msg) {
         console.log(".......messagee...", msg)
 
