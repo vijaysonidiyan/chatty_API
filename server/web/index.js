@@ -775,7 +775,6 @@ MongoConnect.init()
                   }
 
 
-
               }
               
 
@@ -837,94 +836,235 @@ MongoConnect.init()
 
       });
 
+         
+
 
        
-      // socket.on("allchatdeleteby", function (msg) {
-      //   console.log(".......messagee...", msg)
+      socket.on("allchatdelete", function (msg) {
+        console.log(".......messagee...", msg)
 
 
-      //   let query = [
-      //     {
-      //       $match: {
-      //         $or: [
-      //           {
-      //             sender_id: ObjectID(msg._id),
-      //             reciver_id: ObjectID(msg.user_id),
-      //           },
-      //           {
-      //             reciver_id: ObjectID(msg._id),
-      //             sender_id: ObjectID(msg.user_id),
-      //           },
-      //         ],
-      //       },
-      //     },
+        let query = [
+          {
+            $match: {
+              $or: [
+                {
+                  sender_id: ObjectID(msg._id),
+                  reciver_id: ObjectID(msg.user_id),
+                },
+                {
+                  reciver_id: ObjectID(msg._id),
+                  sender_id: ObjectID(msg.user_id),
+                },
+              ],
+            },
+          },
 
-      //   ];
+        ];
 
-      //   console.log("..............................", query)
+        console.log("..............................", query)
 
-      //   ChatModel.advancedAggregate(query, {}, (err, chat) => {
-      //     if (err) {
-      //       throw err;
-      //     } else if (_.isEmpty(chat)) {
-      //       console.log("not found user");
-      //     } else {
-      //       console.log("........................", chat);
-      //       // console.log("........................",chat._id);
+        ChatModel.advancedAggregate(query, {}, (err, chat) => {
+          if (err) {
+            throw err;
+          } else if (_.isEmpty(chat)) {
+            console.log("not chat user");
+          } else {
 
-      //       let array=msg.isDeletedBy
+            for (let i = 0; i < users.length; i++) {
 
-      //       for (let i = 0; i < users.length; i++) {
-      //         for (let j = 0; j < array.length; j++)
+              if (msg._id == users[i].userId && users[i].userId != undefined) {
 
-      //           if (array[j] == users[i].userId && users[i].userId != undefined) {
+                io.to(users[i].socketId).emit("allchatdeleted", {
+                  _id: msg._id,
+                  user_id: msg.user_id,
 
-      //             io.to(users[i].socketId).emit("chatdeletedbyId", {
-      //               _id: msg._id,
-      //               isDeletedBy: msg.isDeletedBy
+                });
+              }
 
-      //             });
+            }
 
-      //           }
+            chat.forEach(Element => {
+              let id = Element._id
+              let Query =
+              {
+                _id: ObjectID(id)
+              }
+              let updateDataQuery = {}
+              console.log("chatchatchatchatchatchat", Element);
+              if (!!Element.isDeletedBy) {
 
-      //       }
+                console.log("iffffffffffffffffff");
+                console.log("................", Element.isDeletedBy)
+                let aaa = []
+                let bbb = []
+                aaa = Element.isDeletedBy
+                console.log(",,,,,,,,,,,,,,,,,,,,,,,", msg._id)
+                bbb = msg._id
+                console.log("aaaaaaaaa", aaa);
+                console.log("bbbbbbbb", bbb);
 
-      //       chat.forEach(Element => {
-      //         let id = Element._id
-      //         let Query =
-      //         {
-      //           _id: ObjectID(id)
-      //         }
-      //         let bodydata = {
-      //           isDeletedBy: [ObjectID(req.auth._id)]
-      //         }
-      //         console.log("isdeletedby", bodydata);
+                let abc = aaa.concat(bbb)
+                console.log("......................................abcccccccc", abc)
+                abc.map((obj, index) => {
+                  abc[index] = ObjectID(obj);
+                });
 
-
-      //         ChatModel.update(Query, bodydata, function (err, chat) {
-      //           if (err) {
-      //             console.log("***********err***********",err)
-                 
-      //           } else if (chat == undefined || (chat.matchedCount === 0 && chat.modifiedCount === 0)) {
-      //            console.log("************chat not found");
-      //           } else {
-
-      //           }
-      //         });
-      //       })
-          
+                console.log(".........abc after", abc)
 
 
+                updateDataQuery.isDeletedBy = abc
+                console.log(".......updateDataQuery.......", updateDataQuery)
+
+              }
+              else {
+                console.log("else part exicuted");
+                updateDataQuery.isDeletedBy = [ObjectID(msg._id)]
+
+              }
 
 
 
-      //     }
-      //   });
+
+              ChatModel.update(Query, updateDataQuery, function (err, chat) {
+                if (err) {
+                  console.log("***********err***********", err)
+
+                } else if (chat == undefined || (chat.matchedCount === 0 && chat.modifiedCount === 0)) {
+                  console.log("************chat not found");
+                } else {
+
+                  console.log("all chat deleted");
+
+                }
+              });
+            })
 
 
 
 
-      // });
+
+
+          }
+        });
+
+
+
+
+      });
+
+      socket.on("allchatdelete", function (msg) {
+        console.log(".......messagee...", msg)
+
+
+        let query = [
+          {
+            $match: {
+              $or: [
+                {
+                  sender_id: ObjectID(msg.userId),
+                  reciver_id: ObjectID(msg.chatwithuserId),
+                },
+                {
+                  reciver_id: ObjectID(msg.userId),
+                  sender_id: ObjectID(msg.chatwithuserId),
+                },
+              ],
+            },
+          },
+
+        ];
+
+        console.log("..............................", query)
+
+        ChatModel.advancedAggregate(query, {}, (err, chat) => {
+          if (err) {
+            throw err;
+          } else if (_.isEmpty(chat)) {
+            console.log("not chat user");
+          } else {
+
+            for (let i = 0; i < users.length; i++) {
+
+              if (msg.userId == users[i].userId && users[i].userId != undefined) {
+
+                io.to(users[i].socketId).emit("allchatdeleted", {
+                  userId: msg.userId,
+                  chatwithuserId: msg.chatwithuserId,
+
+                });
+              }
+
+            }
+
+            chat.forEach(Element => {
+              let id = Element._id
+              let Query =
+              {
+                _id: ObjectID(id)
+              }
+              let updateDataQuery = {}
+              console.log("chatchatchatchatchatchat", Element);
+              if (!!Element.isDeletedBy) {
+
+                console.log("iffffffffffffffffff");
+                console.log("................", Element.isDeletedBy)
+                let aaa = []
+                let bbb = []
+                aaa = Element.isDeletedBy
+                console.log(",,,,,,,,,,,,,,,,,,,,,,,", msg.userId)
+                bbb = msg.userId
+                console.log("aaaaaaaaa", aaa);
+                console.log("bbbbbbbb", bbb);
+
+                let abc = aaa.concat(bbb)
+                console.log("......................................abcccccccc", abc)
+                abc.map((obj, index) => {
+                  abc[index] = ObjectID(obj);
+                });
+
+                console.log(".........abc after", abc)
+
+
+                updateDataQuery.isDeletedBy = abc
+                console.log(".......updateDataQuery.......", updateDataQuery)
+
+              }
+              else {
+                console.log("else part exicuted");
+                updateDataQuery.isDeletedBy = [ObjectID(msg.userId)]
+
+              }
+
+
+
+
+              ChatModel.update(Query, updateDataQuery, function (err, chat) {
+                if (err) {
+                  console.log("***********err***********", err)
+
+                } else if (chat == undefined || (chat.matchedCount === 0 && chat.modifiedCount === 0)) {
+                  console.log("************chat not found");
+                } else {
+
+                  console.log("all chat deleted");
+
+                }
+              });
+            })
+
+
+
+
+
+
+          }
+        });
+
+
+
+
+      });
 
 
 
