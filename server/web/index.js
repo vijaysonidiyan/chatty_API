@@ -137,6 +137,8 @@ MongoConnect.init()
         //     console.log("disconneceted user...................", users[i])
         //     users.splice(i, 1)
 
+
+
         //     for (let j = 0; i < users.length; j++) {
         //       if (socket.userId == users[j].userId && users[j].userId != undefined) {
 
@@ -157,72 +159,97 @@ MongoConnect.init()
 
 
 
-        let status = 0
+
 
         async.waterfall([
           function (callback) {
 
             let AllreadyExist = false;
 
+
+
             var bar = new Promise((resolve, reject) => {
+              let UserSData = users
               for (let i = 0; i < users.length; i++) {
 
-                if (socket.socketId == users[i].socketId) {
+                if (socket.socketId == users[i].socketId && socket.userId == users[i].userId) {
 
                   users.splice(i, 1)
+                  resolve()
                   // status = 1
 
-                }
-                if ((users.length - 1) == i) {
-
-                  resolve()
 
                 }
+                // if ((UserSData.length - 1) == i) {
+
+                //   resolve()
+
+                // }
+                // if (users.length == 0) {
+                //   resolve()
+                // }
+
               }
 
             });
 
             bar.then(() => {
 
-
+              let Status = 0
               async.waterfall([
                 function (callback) {
 
                   let AllreadyExist = false;
-
+                  // let UsersData = users
                   var bar = new Promise((resolve, reject) => {
-                    for (let j = 0; j < users.length; j++) {
-                      if (socket.userId == users[j].userId && users[j].userId != undefined) {
-                        status = 1
-                      }
-                      if ((users.length - 1) == j) {
+                    if (users.length > 0) {
+                      console.log("11111111111111111111")
+                      for (let j = 0; j < users.length; j++) {
+                        if (socket.userId == users[j].userId) {
+                          Status = 1
+                        }
+                        if ((users.length - 1) == j) {
 
-                        resolve()
+                          resolve()
 
+                        }
                       }
+                    }
+                    else {
+                      console.log("222222222222222222")
+                      Status = 0
+                      resolve()
                     }
 
                   });
 
                   bar.then(() => {
 
+                    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
+                    if (Status == 1) {
 
-                    if (status == 1) {
-                      socket.broadcast.emit("status", {
+                      io.to(socket.id).emit("status", {
+
                         userId: socket.userId,
+
                         status: "Online",
+
                       });
 
                       console.log("Online");
 
-                    } else {
+                    }
 
-                      socket.broadcast.emit("status", {
+                    if (Status == 0) {
+
+                      io.to(socket.id).emit("status", {
+
                         userId: socket.userId,
-                        status: "Offline",
-                      });
 
+                        status: "Offline",
+
+                      });
 
                       console.log("offline");
 
