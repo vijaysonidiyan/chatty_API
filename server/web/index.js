@@ -103,12 +103,20 @@ MongoConnect.init()
 
       }
       io.emit("socket_connection", value);
+      socket.broadcast.emit("status", {
+        userId: socket.handshake.query.userId,
+        status: "Online",
+      });
+
       console.log("Connected user's", value);
 
       
       users.push(value)
 
-      console.log("userssssssssssssssss connected.....[users]........", users)
+      console.log("userssssssssssssssss connected........", users)
+     
+
+
 
       socket.on("user_connected", function () {
 
@@ -118,11 +126,7 @@ MongoConnect.init()
       });
 
 
-      // socket.broadcast.emit("status", {
-      //   userId: socket.handshake.query.userId,
-      //   status: "Online",
-      // });
-     
+    
       
       socket.on("socket_disconnection", function (socket) {
 
@@ -131,18 +135,33 @@ MongoConnect.init()
          
           if (socket.socketId == users[i].socketId ) {
             console.log("disconneceted user...................",users[i])
-          
-           // io.emit("socket_disconnected", users[i]);
-
             users.splice(i, 1)
 
-           
+            if(socket.userId == users[i].userId && users[i].userId != undefined )
+            {
+
+            }
+            else
+            {
+              socket.broadcast.emit("status", {
+                userId: socket.userId,
+                status: "Offline",
+              });
+
+            }
+
+          
+ 
           }
 
         }
+       
 
         //console.log("user disconnected", users);
         console.log("user connected after disconnecting......", users); 
+
+
+
       });
 
 
@@ -209,32 +228,15 @@ MongoConnect.init()
         console.log(".....",socketId)
         io.emit("user_disconnected", users);
         console.log("disconnected user's", users);
+
+      
+
       });
 
      
     
 
     
-      socket.on('image', async image => {
-        // image is an array of bytes
-        const buffer = Buffer.from(image);
-        await fs.writeFile('/tmp/image', buffer).catch(console.error); // fs.promises
-    });
-    
-
-    socket.on("base64 file", function (msg) {
-      console.log("received base64 file from server: " + msg.fileName);
-      socket.username = msg.username;
-      io.to(roomId).emit('base64 image', //exclude sender
-      // io.sockets.emit(
-      //   "base64 file", //include sender
-
-        {
-          file: msg.file,
-          fileName: msg.fileName,
-        }
-      );
-    });
 
       //Someone is Online/Offline
       socket.on("checkStatus", function (userId) {
