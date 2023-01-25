@@ -207,6 +207,7 @@ MongoConnect.init()
                       for (let j = 0; j < users.length; j++) {
                         if (socket.userId == users[j].userId) {
                           Status = 1
+                          resolve()
                         }
                         if ((users.length - 1) == j) {
 
