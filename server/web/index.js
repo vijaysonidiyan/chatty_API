@@ -4,6 +4,7 @@ const app = express();
 const app2 = express();
 const fs = require("fs");
 var cors = require("cors");
+const AppCode = require("../common/constant/appCods");
 const ChatModel = new (require("./../../server/common/model/chatModel"))();
 const UserModel = new (require("./../../server/common/model/UserModel"))();
 const ChatScreenManagementModel =
@@ -17,9 +18,10 @@ const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
+
 //var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
-const chatModel = require("./../../server/common/model/chatModel");
+//const chatModel = require("./../../server/common/model/chatModel");
 const PostModel = new (require("./../../server/common/model/postModel").Post)();
 
 let server;
@@ -130,7 +132,7 @@ MongoConnect.init()
           if (socket.socketId == users[i].socketId ) {
             console.log("disconneceted user...................",users[i])
           
-           // io.emit("user_disconnected", users[i]);
+           // io.emit("socket_disconnected", users[i]);
 
             users.splice(i, 1)
 
@@ -446,12 +448,13 @@ MongoConnect.init()
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: "message",
-        };
+        }; 
         var query1 = {
           message: msg.message,
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
-          type: msg.type
+          type: msg.type,
+          file_name:msg.file_name
         };
         console.log("message data", query1);
         // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
@@ -462,249 +465,469 @@ MongoConnect.init()
 
         console.log("new_message call", users)
 
-        // fs.readFile('../uploads/photos/story.png', function(err, buf){
-        //   // it's possible to embed binary data
-        //   // within arbitrarily-complex objects
-        //   socket.emit('image', { image: true, buffer: buf });
-        //   console.log('image file is initialized');
+       
+
+        const groupList = [];
+        groupList.push(ObjectID(msg.reciver_id))
+        console.log("reciver_id......................................................", groupList)
+
+        let Query = [
+          {
+            $match: {
+
+              blockUser: {
+                $in: groupList,
+              },
+
+            },
+          }
+
+        ]
 
 
-        // });
+        console.log(Query);
+        UserModel.aggregate(Query, (err, user) => {
+            if (err) {
+                throw err;
+            }  
+             else if (_.isEmpty(user)) {
+              console.log("else iffffffffffffffffffffffffffffffffffff")
+              ChatModel.create(query1, function (err, chat) {
+                if (err) {
+                  console.log("......err.....")
+                  //TODO: Log the error here
+                  console.log(err.message);
+                  console.log(err);
+                } else {
+                  console.log(".....else in else if")
+                  if (!!chat) {
+                    console.log("chatchatchatchatchatchatchatchatchat",chat);
+      
+                  
+                      for (let i = 0; i < users.length; i++) {
+      
+      
+      
+                        if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+                        
         
+                          io.to(users[i].socketId).emit("new_message", {
+                            _id: chat._id,
+        
+                            message: msg.message,
+        
+                            sender_id: msg.sender_id,
+        
+                            reciver_id: msg.reciver_id,
+        
+                            type: msg.type,
 
+                            file_name : msg.file_name,
+        
+                            createdAt:new Date()
+        
+                          });
+                          
+        
+        
+        
+                        }
+                        if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+        
+                          io.to(users[i].socketId).emit("return_message", {
+                            _id: chat._id,
+        
+                            message: msg.message,
+        
+                            sender_id: msg.sender_id,
+        
+                            reciver_id: msg.reciver_id,
+        
+                            type: msg.type,
 
-        // for (let i = 0; i < users.length; i++) {
-
-
-
-        //   if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
-
-        //     io.to(users[i].socketId).emit("image", {
-
-        //       message: msg.message,
-
-        //       sender_id: msg.sender_id,
-
-        //       reciver_id: msg.reciver_id,
-
-        //       type: "message",
-
-        //     });
-
-        //   }
-
-        // }
-
-
-        // broadcast message to everyone in port:5000 except yourself.
-
-
-        // io.to(socket_id).emit("new_message", {
-        //   message: msg.message,
-        //   sender_id: msg.sender_id,
-        //   reciver_id: msg.reciver_id,
-        //   type: "message",
-        // });
-
-        // socket.broadcast.emit("new_message", { message: msg });
-        // save chat to the database
-
-
-        ChatModel.create(query1, function (err, chat) {
-          if (err) {
-            console.log("......err.....")
-            //TODO: Log the error here
-            console.log(err.message);
-            console.log(err);
-          } else {
-            console.log(".....else.....")
-            if (!!chat) {
-              console.log("chatchatchatchatchatchatchatchatchat",chat);
-
-            
-                for (let i = 0; i < users.length; i++) {
-
-
-
-                  if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
-  
-                    io.to(users[i].socketId).emit("new_message", {
-                      _id: chat._id,
-  
-                      message: msg.message,
-  
-                      sender_id: msg.sender_id,
-  
-                      reciver_id: msg.reciver_id,
-  
-                      type: "message",
-  
-                      createdAt:new Date()
-  
-                    });
-  
-  
-  
-                  }
-                  if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
-  
-                    io.to(users[i].socketId).emit("return_message", {
-                      _id: chat._id,
-  
-                      message: msg.message,
-  
-                      sender_id: msg.sender_id,
-  
-                      reciver_id: msg.reciver_id,
-  
-                      type: "message",
-  
-                      createdAt:new Date()
-  
-                    });
-  
-  
-  
-                  }
-  
-                }
-                
-              // io.to(socket_id).emit("new_message", {
-              //   _id:chat._id,
-              //   message: msg.message,
-              //   sender_id: msg.sender_id,
-              //   reciver_id: msg.reciver_id,
-              //   type: "message",
-              //   createdAt:new Date()
-              // });
-
-              let isSendNotification = true;
-              ChatScreenManagementModel.findOne(
-                { userId: ObjectID(msg.reciver_id) },
-                function (err, chatManage) {
-                  if (err) {
-                    console.log(err);
-                  } else {
-                    console.log(".........chatscreenmanagementModel")
-                    if (!!chatManage) {
-                      let idD = "";
-                      if (!!chatManage.chatWith) {
-                        idD = chatManage.chatWith.toString();
+                            file_name : msg.file_name,
+        
+                            createdAt:new Date()
+        
+                          });
+        
+        
+        
+                        }
+        
                       }
-
-                      console.log("Chat With ID", idD);
-                      // if (chatManage.status == 1) {
-                      //   isSendNotification = false;
-                      // }
-                      // if (chatManage.status == 2 && idD == msg.sender_id) {
-                      //   isSendNotification = false;
-                      // }
-                    }
-                    if (isSendNotification == true) {
-                      UserModel.findOne(
-                        { _id: ObjectID(msg.sender_id) },
-                        (err, user) => {
-                          if (err) {
-                            console.log(err);
-                          } else if (!!user) {
+                      
+                    // io.to(socket_id).emit("new_message", {
+                    //   _id:chat._id,
+                    //   message: msg.message,
+                    //   sender_id: msg.sender_id,
+                    //   reciver_id: msg.reciver_id,
+                    //   type: "message",
+                    //   createdAt:new Date()
+                    // });
+      
+                    let isSendNotification = true;
+                    ChatScreenManagementModel.findOne(
+                      { userId: ObjectID(msg.reciver_id) },
+                      function (err, chatManage) {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          console.log(".........chatscreenmanagementModel")
+                          if (!!chatManage) {
+                            let idD = "";
+                            if (!!chatManage.chatWith) {
+                              idD = chatManage.chatWith.toString();
+                            }
+      
+                            console.log("Chat With ID", idD);
+                            // if (chatManage.status == 1) {
+                            //   isSendNotification = false;
+                            // }
+                            // if (chatManage.status == 2 && idD == msg.sender_id) {
+                            //   isSendNotification = false;
+                            // }
+                          }
+                          if (isSendNotification == true) {
                             UserModel.findOne(
-                              { _id: ObjectID(msg.reciver_id) },
-                              (err, receiverUser) => {
+                              { _id: ObjectID(msg.sender_id) },
+                              (err, user) => {
                                 if (err) {
                                   console.log(err);
-                                } else if (!!receiverUser) {
-                                  let mesg = user.userName + " message you!",
-                                    title = "New Message",
-                                    type = "message",
-                                    senderId = msg.sender_id,
-                                    receiverId = msg.reciver_id,
-                                    receiverName = user.userName,
-                                    senderImage = !!receiverUser.profileUrl
-                                      ? receiverUser.profileUrl
-                                      : "",
-                                    receiverImage = !!user.profileUrl
-                                      ? user.profileUrl
-                                      : "",
-                                    res = "";
-
-                                  // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
-                                  //     if (err) {
-                                  //         throw err
-                                  //     } else {
-                                  //         if (!!deviceTokensData) {
-                                  //             console.log("DT", deviceTokensData)
-                                  //             let tokens = deviceTokensData.deviceToken;
-                                  //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
-                                  //         }
-
-                                  //     }
-                                  // });
-                                  let query = [
-                                    {
-                                      $match: { userId: ObjectID(msg.reciver_id) },
-                                    },
-                                  ];
-                                  DeviceTokenModel.aggregate(
-                                    query,
-                                    function (err, deviceTokensData) {
+                                } else if (!!user) {
+                                  UserModel.findOne(
+                                    { _id: ObjectID(msg.reciver_id) },
+                                    (err, receiverUser) => {
                                       if (err) {
                                         console.log(err);
-                                      } else {
-                                        console.log(
-                                          "deviceTokensDataaaaaaaaaaaaaa",
-                                          deviceTokensData
-                                        );
-                                        if (!!deviceTokensData) {
-                                          deviceTokensData.forEach((element) => {
-                                            let tokens = element.deviceToken;
-                                            if (!!tokens) {
-                                              sendToTopics(
-                                                mesg,
-                                                title,
-                                                type,
-                                                senderId,
-                                                receiverId,
-                                                receiverName,
-                                                receiverImage,
-                                                senderImage,
-                                                tokens,
-                                                res
+                                      } else if (!!receiverUser) {
+                                        let mesg = user.userName + " message you!",
+                                          title = "New Message",
+                                          type = "message",
+                                          senderId = msg.sender_id,
+                                          receiverId = msg.reciver_id,
+                                          receiverName = user.userName,
+                                          senderImage = !!receiverUser.profileUrl
+                                            ? receiverUser.profileUrl
+                                            : "",
+                                          receiverImage = !!user.profileUrl
+                                            ? user.profileUrl
+                                            : "",
+                                          res = "";
+      
+                                        // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
+                                        //     if (err) {
+                                        //         throw err
+                                        //     } else {
+                                        //         if (!!deviceTokensData) {
+                                        //             console.log("DT", deviceTokensData)
+                                        //             let tokens = deviceTokensData.deviceToken;
+                                        //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
+                                        //         }
+      
+                                        //     }
+                                        // });
+                                        let query = [
+                                          {
+                                            $match: { userId: ObjectID(msg.reciver_id) },
+                                          },
+                                        ];
+                                        DeviceTokenModel.aggregate(
+                                          query,
+                                          function (err, deviceTokensData) {
+                                            if (err) {
+                                              console.log(err);
+                                            } else {
+                                              console.log(
+                                                "deviceTokensDataaaaaaaaaaaaaa",
+                                                deviceTokensData
                                               );
+                                              if (!!deviceTokensData) {
+                                                deviceTokensData.forEach((element) => {
+                                                  let tokens = element.deviceToken;
+                                                  if (!!tokens) {
+                                                    sendToTopics(
+                                                      mesg,
+                                                      title,
+                                                      type,
+                                                      senderId,
+                                                      receiverId,
+                                                      receiverName,
+                                                      receiverImage,
+                                                      senderImage,
+                                                      tokens,
+                                                      res
+                                                    );
+                                                  }
+                                                });
+                                              }
                                             }
-                                          });
+                                          }
+                                        );
+      
+                                        let notificationQuery = {
+                                          senderId: msg.sender_id,
+                                          reciverId: msg.reciver_id,
+                                          message: mesg,
+                                          type: type
                                         }
+                                        NotificationModel.create(notificationQuery, (err, notification) => {
+                                          if (err) {
+                                            throw err;
+                                          } else {
+                                            console.log(".....notificationModel")
+      
+                                          }
+                                        });
                                       }
                                     }
                                   );
-
-                                  let notificationQuery = {
-                                    senderId: msg.sender_id,
-                                    reciverId: msg.reciver_id,
-                                    message: mesg,
-                                    type: type
-                                  }
-                                  NotificationModel.create(notificationQuery, (err, notification) => {
-                                    if (err) {
-                                      throw err;
-                                    } else {
-                                      console.log(".....notificationModel")
-
-                                    }
-                                  });
                                 }
                               }
                             );
                           }
                         }
-                      );
-                    }
+                      }
+                    );
                   }
                 }
-              );
+              });
+            
+            }
+            else{
+              console.log("reciver id is in block List so you cant message .......................................");
+              for (let i = 0; i < users.length; i++) {
+
+              if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+        
+                io.to(users[i].socketId).emit("block_user", {
+               
+
+                  message: msg.message,
+
+                  sender_id: msg.sender_id,
+
+                  reciver_id: msg.reciver_id,
+
+                  type: "message",
+
+                  createdAt:new Date(),
+
+                  isblock:true
+
+                });
+
+
+
+              }
+            }
+            //  response.setError(AppCode.unblockFirst);
+             // response.send(res);
+
+
+             
+            }
+          });
+
+
+       
+      });
+
+
+
+      
+      socket.on("chatdeletebyId", function (msg) {
+        console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
+
+        const data = msg;
+
+        var array =msg.isDeletedBy
+        console.log("datadtadatdatdatmsg.................datadtadtadta", msg);
+        const query = {
+          _id: ObjectID(msg._id)
+        };
+        console.log("queryyyyyyyyyyyyy",query);
+        ChatModel.findOne(query, function (err, chat) {
+          if (err) {
+            console.log("err", err);
+          } else {
+            if (chat == null) {
+              console.log("******no chat found***********")
+            } else {
+              let updateDataQuery = {};
+
+              for (let i = 0; i < users.length; i++) {
+                for (let j = 0; j < array.length; j++)
+
+
+
+                  if (array[j] == users[i].userId && users[i].userId != undefined) {
+
+
+                    io.to(users[i].socketId).emit("chatdeletedbyId", {
+                      _id: msg._id,
+                      isDeletedBy: msg.isDeletedBy
+
+
+                    });
+
+
+                  }
+
+
+
+              }
+              
+
+              if (!!chat.isDeletedBy) {
+                console.log("................", chat.isDeletedBy)
+                let firstArray = []
+                let secondArray = []
+                firstArray = chat.isDeletedBy
+                //        console.log(",,,,,,,,,,,,,,,,,,,,,,,",req.body.isDeletedBy)
+                secondArray = data.isDeletedBy
+
+                let finalArray = firstArray.concat(secondArray)
+                console.log("......................................finalArrayccccccc", finalArray)
+                finalArray.map((obj, index) => {
+                  finalArray[index] = ObjectID(obj);
+                });
+
+                console.log(".........finalArray after", finalArray)
+
+
+                updateDataQuery.isDeletedBy = finalArray
+                console.log(".......if part updateDataQuery.......", updateDataQuery)
+
+               
+                
+              }
+              else {
+
+               
+                updateDataQuery = msg
+
+                updateDataQuery.isDeletedBy.map((obj, index) => {
+                  updateDataQuery.isDeletedBy[index] = ObjectID(obj);
+                });
+
+                console.log("else part updatequery,,,,,,,,,,,,,,,,,,,,")
+
+
+              }
+
+
+              delete updateDataQuery._id
+              ChatModel.update(query, updateDataQuery, function (err, roleUpdate) {
+                if (err) {
+                  console.log("...........", err);
+                  // response.setError(AppCode.Fail);
+                } else {
+                  console.log("upadteeeeeeeeeeeeeeeeeeeeeeeeee");
+
+                  // response.setData(AppCode.Success);
+                  // response.send(res);
+                }
+              });
             }
           }
         });
+
+
+
       });
+
+
+       
+      // socket.on("allchatdeleteby", function (msg) {
+      //   console.log(".......messagee...", msg)
+
+
+      //   let query = [
+      //     {
+      //       $match: {
+      //         $or: [
+      //           {
+      //             sender_id: ObjectID(msg._id),
+      //             reciver_id: ObjectID(msg.user_id),
+      //           },
+      //           {
+      //             reciver_id: ObjectID(msg._id),
+      //             sender_id: ObjectID(msg.user_id),
+      //           },
+      //         ],
+      //       },
+      //     },
+
+      //   ];
+
+      //   console.log("..............................", query)
+
+      //   ChatModel.advancedAggregate(query, {}, (err, chat) => {
+      //     if (err) {
+      //       throw err;
+      //     } else if (_.isEmpty(chat)) {
+      //       console.log("not found user");
+      //     } else {
+      //       console.log("........................", chat);
+      //       // console.log("........................",chat._id);
+
+      //       let array=msg.isDeletedBy
+
+      //       for (let i = 0; i < users.length; i++) {
+      //         for (let j = 0; j < array.length; j++)
+
+      //           if (array[j] == users[i].userId && users[i].userId != undefined) {
+
+      //             io.to(users[i].socketId).emit("chatdeletedbyId", {
+      //               _id: msg._id,
+      //               isDeletedBy: msg.isDeletedBy
+
+      //             });
+
+      //           }
+
+      //       }
+
+      //       chat.forEach(Element => {
+      //         let id = Element._id
+      //         let Query =
+      //         {
+      //           _id: ObjectID(id)
+      //         }
+      //         let bodydata = {
+      //           isDeletedBy: [ObjectID(req.auth._id)]
+      //         }
+      //         console.log("isdeletedby", bodydata);
+
+
+      //         ChatModel.update(Query, bodydata, function (err, chat) {
+      //           if (err) {
+      //             console.log("***********err***********",err)
+                 
+      //           } else if (chat == undefined || (chat.matchedCount === 0 && chat.modifiedCount === 0)) {
+      //            console.log("************chat not found");
+      //           } else {
+
+      //           }
+      //         });
+      //       })
+          
+
+
+
+
+
+      //     }
+      //   });
+
+
+
+
+      // });
+
+
+
 
       socket.on("sharePost", function (msg) {
         console.log("message Data Before", msg);
@@ -906,7 +1129,7 @@ MongoConnect.init()
                                         console.log(err);
                                       } else {
                                         console.log(
-                                          "deviceTokensDataaaaaaaaaaaaaa",
+                                          "deviceTokensDatfirstArrayaaaaaaaaaaa",
                                           deviceTokensData
                                         );
                                         if (!!deviceTokensData) {
