@@ -158,6 +158,7 @@ ChatCtrl.getMessages = (req, res) => {
         isRead: 1,
         postId: 1,
         createdAt: 1,
+        file_name:1,
         postId: 1,
         content: "$postData.content",
         userId: "$postData.userId",
@@ -365,6 +366,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
             ],
           },
           userName: "$senderData.userName",
+          file_name:1,
           isDeleted: 1,
           isDeletedBy:1,
 
@@ -850,6 +852,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 _id: null,
                 message: { $last: "$message" },
                 type: { $last: "$type" },
+                file_name:{$last:"$file_name"},
                 messageAt: { $last: "$createdAt" },
                 senderId: { $last: "$sender_id" },
                 receiverId: { $last: "$reciver_id" },
