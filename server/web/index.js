@@ -126,39 +126,10 @@ MongoConnect.init()
       });
 
 
+      
 
 
-      socket.on("socket_disconnection", function (socket) {
-
-
-        // for (let i = 0; i < users.length; i++) {
-
-        //   if (socket.socketId == users[i].socketId) {
-        //     console.log("disconneceted user...................", users[i])
-        //     users.splice(i, 1)
-
-
-
-        //     for (let j = 0; i < users.length; j++) {
-        //       if (socket.userId == users[j].userId && users[j].userId != undefined) {
-
-        //       }
-        //       else {
-        //         socket.broadcast.emit("status", {
-        //           userId: socket.userId,
-        //           status: "Offline",
-        //         });
-
-        //       }
-
-        //     }
-
-        //   }
-
-        // }
-
-
-
+      socket.on("socket_disconnection", function (Socket) {
 
 
         async.waterfall([
@@ -166,29 +137,17 @@ MongoConnect.init()
 
             let AllreadyExist = false;
 
-
-
             var bar = new Promise((resolve, reject) => {
-              let UserSData = users
+
               for (let i = 0; i < users.length; i++) {
 
-                if (socket.socketId == users[i].socketId && socket.userId == users[i].userId) {
+                if (Socket.socketId == users[i].socketId && Socket.userId == users[i].userId) {
 
                   users.splice(i, 1)
+                  socket.disconnect(true);
                   resolve()
-                  // status = 1
-
 
                 }
-                // if ((UserSData.length - 1) == i) {
-
-                //   resolve()
-
-                // }
-                // if (users.length == 0) {
-                //   resolve()
-                // }
-
               }
 
             });
@@ -205,7 +164,7 @@ MongoConnect.init()
                     if (users.length > 0) {
                       console.log("11111111111111111111")
                       for (let j = 0; j < users.length; j++) {
-                        if (socket.userId == users[j].userId) {
+                        if (Socket.userId == users[j].userId) {
                           Status = 1
                           resolve()
                         }
@@ -230,9 +189,9 @@ MongoConnect.init()
 
                     if (Status == 1) {
 
-                      io.to(socket.id).emit("status", {
+                      socket.broadcast.emit("status", {
 
-                        userId: socket.userId,
+                        userId: Socket.userId,
 
                         status: "Online",
 
@@ -244,9 +203,9 @@ MongoConnect.init()
 
                     if (Status == 0) {
 
-                      io.to(socket.id).emit("status", {
+                      socket.broadcast.emit("status", {
 
-                        userId: socket.userId,
+                        userId: Socket.userId,
 
                         status: "Offline",
 
@@ -256,33 +215,18 @@ MongoConnect.init()
 
                     }
 
-
-
-
-
-
-
                   });
 
                 },
 
               ]);
-
-
-
-
-
-
-
-
             });
 
           },
 
         ]);
 
-
-        //console.log("user disconnected", users);
+        console.log("user disconnected", users);
         console.log("user connected after disconnecting......", users);
 
 
@@ -291,26 +235,6 @@ MongoConnect.init()
 
 
       socket.on("disconnect", function () {
-
-        // socket.broadcast.emit("status", {
-        //   userId: ans,
-        //   status: "Offline",
-        // });
-        // console.log("user disconnected", usersss);
-
-        // USERS = users;
-        // users = []
-        // for (let i = 0; i < USERS.length; i++) {
-        //   if (socket.id == USERS[i].socketId) {
-        //   }
-        //   else {
-        //     let value1 = {
-        //       socketId: USERS[i].socketId,
-        //       userId: USERS[i].userId
-        //     }
-        //     users.push(value1)
-        //   }
-        // }
 
         for (let i = 0; i < users.length; i++) {
 
