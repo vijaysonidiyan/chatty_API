@@ -10,6 +10,8 @@
     "repository": {},
     "dependencies": {
         "@aws-sdk/client-s3": "^3.241.0",
+        "@ffmpeg-installer/ffmpeg": "^1.1.0",
+        "@ffprobe-installer/ffprobe": "^1.4.1",
         "async": "^3.2.4",
         "aws-sdk": "^2.1283.0",
         "bcryptjs": "^2.4.3",
@@ -21,6 +23,9 @@
         "express-jwt": "^7.7.5",
         "express-jwt-blacklist": "^1.1.0",
         "express-session": "^1.17.3",
+        "ffmpeg": "0.0.4",
+        "ffprobe": "^1.1.2",
+        "ffprobe-static": "^3.0.0",
         "firebase-admin": "^11.4.1",
         "fluent-ffmpeg": "^2.1.2",
         "handlebars": "^4.7.7",
@@ -34,6 +39,7 @@
         "nodemailer": "^6.7.7",
         "rand-token": "^1.0.1",
         "sharp": "^0.31.3",
-        "socket.io": "^4.5.4"
+        "socket.io": "^4.5.4",
+        "socketio-file-upload": "^0.7.3"
     }
 }

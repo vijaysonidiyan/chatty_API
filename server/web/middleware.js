@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
         file.fieldname === "image" ||
         file.fieldname === "profile_image" ||
         file.fieldname === "logo" ||
-        file.fieldname === "Image" ||
+     
         file.fieldname === "storyImages"
       ) {
         dirPath = CONFIG.UPLOADS.DIR_PATH_PHOTOS;
@@ -149,7 +149,7 @@ module.exports = (app) => {
     },
     {
       name: "Image",
-      maxCount: 1,
+      maxCount: 25,
     },
   ]);
 
@@ -162,6 +162,7 @@ module.exports = (app) => {
   app.use("/v1/favoriteUser", cpUpload, require("./routes/v1/favoriteUser"));
   app.use("/v1/story", cpUpload, require("./routes/v1/story"));
   app.use("/v1/image", cpUpload, require("./routes/v1/image"));
+  app.use("/v1/media", cpUpload, require("./routes/v1/media"));
  
 
   app.get(
