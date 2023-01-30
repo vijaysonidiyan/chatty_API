@@ -7,9 +7,21 @@ class mediaModel extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "media", {
             photos: { type: Array, allowNullEmpty: true },
+            photo_name:{type: String, allowNullEmpty: true},
+            video_name:{type: String, allowNullEmpty: true},
+            originalname:{type: String, allowNullEmpty: true},
+            document_name:{type: String, allowNullEmpty: true},
             videos: { type: Array, allowNullEmpty: true },
+            type: {
+                type: Number,
+                allowNullEmpty: false,
+                enum: { 1: "photo", 2: "video",3:"document" }
+            },
             documents: { type: Array, allowNullEmpty: true },  
-            thumbnail:{type:Array, allowNullEmpty: true },      
+            thumbnail:{type:Array, allowNullEmpty: true },   
+            ext:{type:Array, allowNullEmpty: true},  
+            mimetype:{type:Array, allowNullEmpty: true} ,
+            createdBy:{type: Object, allowNullEmpty: false },
             createdAt: { type: Object, allowNullEmpty: false },
             updatedAt: { type: Object, allowNullEmpty: true },
             status: {
