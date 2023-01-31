@@ -30,11 +30,13 @@
     CONF.LOGGER.ERROR_PATH = path.join(__dirname, '/../log/' + CONF.LOGGER.ERROR_PATH);
     CONF.LOGGER.CRITICAL_PATH = path.join(__dirname, '/../log/' + CONF.LOGGER.CRITICAL_PATH);
 
+
     //For getting directory and db path to store in 
     CONF.UPLOADS = {
         ROOT_PATH: path.join(__dirname, '/../..'),
         DEFAULT: path.join(__dirname, '/../../uploads/'),
         DIR_PATH_PHOTOS: path.join(__dirname, '/../../uploads/photos/'),
+      
         DIR_PATH_VIDEOS: path.join(__dirname, '/../../uploads/videos/'),
         DIR_PATH_DOCUMENTS: path.join(__dirname, '/../../uploads/documents/'),
         DB_PATH_ICONS: '/uploads/',

@@ -41,10 +41,22 @@ const storage = multer.diskStorage({
         file.fieldname === "function_video"
       ) {
         dirPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS;
+        if (!!dirPath) {
+          var path = CONFIG.UPLOADS.DIR_PATH_VIDEOS;
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+          }
+        }
       } else if (
         file.fieldname === "documents"
       ) {
         dirPath = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS;
+        if (!!dirPath) {
+          var path = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS;
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+          }
+        }
       }
     }
     cb(null, dirPath);
