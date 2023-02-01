@@ -642,7 +642,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
 
                                     let videoscreenshitthumbnailKey =
                                         CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                        dateTimeData +
+                                        "thumb-" +
                                         VideoNameForScreenShot.split(".")[0] +
                                         ".jpg";
                                     console.log("---------thumbnailKey----------", videoscreenshitthumbnailKey)
@@ -765,9 +765,9 @@ mediaCtrl.mediaMasterSave = (req, res) => {
 
                                   let thumbnailKey =
                                   CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                  dateTimeData +
+                                  "thumb-" +
                                   thumbnailName.split(".")[0] +
-                                  ".jpg";
+                                  ".png";
                                   console.log("---------thumbnailKey----------",thumbnailKey)
 
                                 
@@ -827,7 +827,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     let photosData = [];
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.photos.files.map((obj, index) => {
-                       let thumbnailphoto = dateTimeData + obj.filename
+                       let thumbnailphoto = "thumb-" + obj.filename
 
                         photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailphoto ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
@@ -868,11 +868,11 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                 if (!!data.media && !!data.media.videos && !!data.media.videos.files && data.media.videos.files.length > 0) {
                     let videosData = [];
                     data.media.videos.files.map((obj, index) => {
-                        let video_screenshot = obj.filename.split(".")[0] + ".jpg";
+                        let video_screenshot = obj.filename.split(".")[0] + ".png";
                         video_screenshot = video_screenshot.split("/");
                         video_screenshot = video_screenshot[video_screenshot.length - 1];
 
-                        let thumbnails=dateTimeData+obj.filename.split(".")[0] + ".jpg";
+                        let thumbnails="thumb-"+obj.filename.split(".")[0] + ".jpg";
                         videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot,thumbnail: thumbnails ,status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
                     });
 
@@ -982,24 +982,72 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
                         throw err;
                     } else {
                         console.log("removeeeeeeeeeee");
+                        console.log("data............",data.type);
 
-                        let filename = data.video_name
-                        let filename1 = data.thumbnail
-                        console.log("fileeeeeeename", filename);
-                        console.log("filename1", filename1);
+                        let typee = data.type
 
-                        var filePath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + filename;
-                        console.log("filePathfilePathfilePath.......", filePath);
+                        if(typee == 2)
+                        {
+
+                            console.log((" 22222222222222222222"));
+                            let filename = data.video_name
+                            let filename1 = data.thumbnail
+                            let videoscreenshot = data.video_screenshot
+                           
+    
+    
+                            var filePath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + filename;
+                         
+    
+    
+                            var filePath1 = CONFIG.UPLOADS.DIR_PATH_PHOTOS + filename1;
+                            let aaa = filePath1.split(".")[0]
+    
+                            var vedioscreenshortpath = CONFIG.UPLOADS.DIR_PATH_PHOTOS + videoscreenshot
+                            let bbb = vedioscreenshortpath.split(".")[0]
+                      
+                            console.log("filePath..........", filePath);
+                            console.log("filePath1..........", filePath1);
+                            console.log("vedioscreenshortpath..........", vedioscreenshortpath);
+    
+                            fs.unlinkSync(filePath);
+                            fs.unlinkSync(filePath1);
+                            fs.unlinkSync(vedioscreenshortpath);
+    
+                        }
+                        else if (typee == 1){
+
+                            console.log("1111111111111111111111");
+                            let photoname = data.photo_name;
+                            let photothumbnail = data.thumbnail
+
+                            var photopath=CONFIG.UPLOADS.DIR_PATH_PHOTOS + photoname;
+                            var thumbnailpath=CONFIG.UPLOADS.DIR_PATH_PHOTOS + photothumbnail;
+
+                            
+                            fs.unlinkSync(photopath);
+                            fs.unlinkSync(thumbnailpath);
+                          
 
 
-                        var filePath1 = CONFIG.UPLOADS.DIR_PATH_PHOTOS + filename1;
-                        let aaa = filePath1.split(".")[0]
-                        console.log("thumbnailssssssssssss..........", filePath1);
-                        console.log("thumbnailssssssssssss..........", aaa);
+                           
+                        }
+                        else{
 
-                        fs.unlinkSync(filePath);
-                        fs.unlinkSync(filePath1);
+                            console.log("222222222222222");
 
+                            let documentname = data.document_name 
+
+                            var documentpath = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS + documentname;
+
+                            fs.unlinkSync(documentpath);
+
+
+                        }
+
+
+
+                       
                         response.setData(AppCode.Success);
                         response.send(res);
                     }
