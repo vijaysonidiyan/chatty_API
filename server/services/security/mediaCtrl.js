@@ -18,12 +18,14 @@ const NotificationModel =
     new (require("../../common/model/NotificationModel"))();
 const UserModel =
     new (require("../../common/model/userModel"))();
-// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+ const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
  const ffmpeg = require('fluent-ffmpeg');
  const ffprobePath = require("ffprobe-static").path;
  const path = require("path");
 const imageThumbnail = require("image-thumbnail");
 let options = { width: 100, height: 100, responseType: 'base64', jpegOptions: { force:true, quality:90 } }
+ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
 
 /* Create media Data */
 
@@ -833,15 +835,15 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                        obj.filename;
                         console.log("-------thumbnailName------------",thumbnailName)
 
-                        let thumbnailKey1 =
+                        let thumbnailKeyy=
                         "thumb-" +
                         thumbnailName.split(".")[0] +
                         ".png";
-                        console.log("---------thumbnailKey----------",thumbnailKey1)
+                        console.log("---------thumbnailKey----------",thumbnailKeyy)
 
                     
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailKey1 ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailKeyy ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
@@ -855,7 +857,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                             cb(err);
                         } else {
                             console.log("here photos result after insert : ", photos);
-                            photos.forEach(element => {
+                                photos.forEach(element => {
                                 result.push(element)
                                 
                             });
@@ -1005,13 +1007,9 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
                             let filename = data.video_name
                             let filename1 = data.thumbnail
                             let videoscreenshot = data.video_screenshot
-                           
-    
-    
+                        
                             var filePath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + filename;
                          
-    
-    
                             var filePath1 = CONFIG.UPLOADS.DIR_PATH_PHOTOS + filename1;
                             let aaa = filePath1.split(".")[0]
     
@@ -1076,4 +1074,6 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
     }
 
 }
+
+
 module.exports = mediaCtrl;
