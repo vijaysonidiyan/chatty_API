@@ -827,9 +827,21 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     let photosData = [];
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.photos.files.map((obj, index) => {
-                       let thumbnailphoto = "thumb-" + obj.filename
+                        console.log("&&&&&&&&&&&&&&&&&&&",obj);
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailphoto ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+                        let thumbnailName =
+                       obj.filename;
+                        console.log("-------thumbnailName------------",thumbnailName)
+
+                        let thumbnailKey1 =
+                        "thumb-" +
+                        thumbnailName.split(".")[0] +
+                        ".png";
+                        console.log("---------thumbnailKey----------",thumbnailKey1)
+
+                    
+
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailKey1 ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
