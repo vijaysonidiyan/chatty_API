@@ -670,6 +670,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                             //   s3.putObject(thumbParams, function (err, data) {
                                             //     console.log(err, data);
                                             //   });
+                                            cb(null);
                                         })
                                         .catch((err) => console.error(err));
 
@@ -689,39 +690,39 @@ mediaCtrl.mediaMasterSave = (req, res) => {
 
 
                             // Create a command to convert any video file to MP4
-                            if (!!file.mimetype && file.mimetype !== 'video/mp4') {
-                                var oldVideoName = filesArr[filesArrKey][filesKey].filename;
-                                filesArr[filesArrKey][filesKey].filename = filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4';
-                                var originalVideoNameWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + oldVideoName;
-                                var command = ffmpeg(originalVideoNameWithPath);
-                                command
-                                    .videoCodec('libx264')
-                                    .on('error', function (err) {
-                                        logger.log("error", 'An error occurred:' + err);
-                                    })
-                                    .on('progress', function (progress) {
-                                        logger.log("info", 'Processing: mp4');
-                                    })
-                                    .on('end', function () {
-                                        logger.log("info", 'Processing finished ................!' + originalVideoNameWithPath);
-                                        //cb(null);
-                                        //For remove uploaded video which is not mp3 or main video
-                                        if (!!originalVideoNameWithPath) {
-                                            fs.exists(originalVideoNameWithPath, function (exists) {
-                                                if (exists) {
-                                                    fs.unlinkSync(originalVideoNameWithPath);
-                                                }
-                                            });
-                                        }
-                                    })
-                                    .save(CONFIG.UPLOADS.DIR_PATH_VIDEOS + filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4');
-                            } else {
-                                //cb(null);
-                            }
+                            // if (!!file.mimetype && file.mimetype !== 'video/mp4') {
+                            //     var oldVideoName = filesArr[filesArrKey][filesKey].filename;
+                            //     filesArr[filesArrKey][filesKey].filename = filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4';
+                            //     var originalVideoNameWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + oldVideoName;
+                            //     var command = ffmpeg(originalVideoNameWithPath);
+                            //     command
+                            //         .videoCodec('libx264')
+                            //         .on('error', function (err) {
+                            //             logger.log("error", 'An error occurred:' + err);
+                            //         })
+                            //         .on('progress', function (progress) {
+                            //             logger.log("info", 'Processing: mp4');
+                            //         })
+                            //         .on('end', function () {
+                            //             logger.log("info", 'Processing finished ................!' + originalVideoNameWithPath);
+                            //             //cb(null);
+                            //             //For remove uploaded video which is not mp3 or main video
+                            //             if (!!originalVideoNameWithPath) {
+                            //                 fs.exists(originalVideoNameWithPath, function (exists) {
+                            //                     if (exists) {
+                            //                         fs.unlinkSync(originalVideoNameWithPath);
+                            //                     }
+                            //                 });
+                            //             }
+                            //         })
+                            //         .save(CONFIG.UPLOADS.DIR_PATH_VIDEOS + filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4');
+                            // } else {
+                            //     //cb(null);
+                            // }
                         }
                     }
                 }
-                cb(null);
+               // cb(null);
             },
             function (cb) {
                 //Set photos and videos name array and other to params
