@@ -987,9 +987,14 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
                 console.log(err)
                 response.setError(AppCode.Fail);
                 response.send(res);
-            } else {
-                console.log("mediamediamedia", data);
+            }
+            else if (data === null) {
+                response.setError(AppCode.NotFound);
+                response.send(res);
 
+            }
+            else {
+                console.log("mediamediamedia", data);
                 mediaModel.remove(query, (err, media) => {
 
                     if (err) {
@@ -997,57 +1002,56 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
                         throw err;
                     } else {
                         console.log("removeeeeeeeeeee");
-                        console.log("data............",data.type);
+                        console.log("data............", data.type);
 
                         let typee = data.type
 
-                        if(typee == 2)
-                        {
+                        if (typee == 2) {
 
                             console.log((" 22222222222222222222"));
                             let filename = data.video_name
                             let filename1 = data.thumbnail
                             let videoscreenshot = data.video_screenshot
-                        
+
                             var filePath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + filename;
-                         
+
                             var filePath1 = CONFIG.UPLOADS.DIR_PATH_PHOTOS + filename1;
                             let aaa = filePath1.split(".")[0]
-    
+
                             var vedioscreenshortpath = CONFIG.UPLOADS.DIR_PATH_PHOTOS + videoscreenshot
                             let bbb = vedioscreenshortpath.split(".")[0]
-                      
+
                             console.log("filePath..........", filePath);
                             console.log("filePath1..........", filePath1);
                             console.log("vedioscreenshortpath..........", vedioscreenshortpath);
-    
+
                             fs.unlinkSync(filePath);
                             fs.unlinkSync(filePath1);
                             fs.unlinkSync(vedioscreenshortpath);
-    
+
                         }
-                        else if (typee == 1){
+                        else if (typee == 1) {
 
                             console.log("1111111111111111111111");
                             let photoname = data.photo_name;
                             let photothumbnail = data.thumbnail
 
-                            var photopath=CONFIG.UPLOADS.DIR_PATH_PHOTOS + photoname;
-                            var thumbnailpath=CONFIG.UPLOADS.DIR_PATH_PHOTOS + photothumbnail;
+                            var photopath = CONFIG.UPLOADS.DIR_PATH_PHOTOS + photoname;
+                            var thumbnailpath = CONFIG.UPLOADS.DIR_PATH_PHOTOS + photothumbnail;
 
-                            
+
                             fs.unlinkSync(photopath);
                             fs.unlinkSync(thumbnailpath);
-                          
 
 
-                           
+
+
                         }
-                        else{
+                        else {
 
                             console.log("222222222222222");
 
-                            let documentname = data.document_name 
+                            let documentname = data.document_name
 
                             var documentpath = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS + documentname;
 
@@ -1058,15 +1062,15 @@ mediaCtrl.mediaMasterDelete = (req, res) => {
 
 
 
-                       
+
                         response.setData(AppCode.Success);
                         response.send(res);
                     }
                 });
                 console.log("11111111111111");
 
-                
-               
+
+
             }
         });
     } catch (exception) {
