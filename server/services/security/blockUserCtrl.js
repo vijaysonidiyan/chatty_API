@@ -8,7 +8,11 @@ const CONFIG = require("../../config");
 const _ = require("lodash");
 const async = require("async");
 const AppCode = require("../../common/constant/appCods");
-const MasterUserModel = new (require("../../common/model/userModel"))();
+const { remove } = require("lodash");
+//const userModel = require("../../common/model/userModel");
+//const userModel = require("../../common/model/userModel");
+
+//const MasterUserModel = new (require("../../common/model/userModel"))();
 const BlockUserModel = new (require("../../common/model/blockUserModel"))();
 const NotificationModel =
   new (require("../../common/model/NotificationModel"))();
@@ -17,14 +21,11 @@ const UserModel =
 
 blockUserCtrl.blockUser = (req, res) => {
   var response = new HttpRespose();
-  // let data = {
-  //     userId: ObjectID(req.payload.userId),
-  //     blockedUserId: ObjectID(req.body.blockedUserId)
-  // }
+ 
   try {
     BlockUserModel.findOne(
       {
-        userId: ObjectID(req.auth._id),
+        userId: ObjectID(req.body._id),
         blockedUserId: ObjectID(req.body.blockedUserId),
         status: 1,
       },
@@ -33,9 +34,10 @@ blockUserCtrl.blockUser = (req, res) => {
           console.log(err);
           throw err;
         } else if (_.isEmpty(blockedUserFind)) {
+
           BlockUserModel.create(
             {
-              userId: ObjectID(req.auth._id),
+              userId: ObjectID(req.body._id),
               blockedUserId: ObjectID(req.body.blockedUserId),
             },
             (err, blockedUser) => {
@@ -43,13 +45,100 @@ blockUserCtrl.blockUser = (req, res) => {
                 console.log(err);
                 throw err;
               } else {
-                response.setError(AppCode.Success,blockedUser);
-                response.send(res);
-               
+
+                //block array save in user table 
+                UserModel.findOne(
+                  {
+                    _id: ObjectID(req.body._id),
+                  },
+                  (err, userfind) => {
+                    if (err) {
+                      console.log(err);
+                      throw err;
+                    } else {
+                      if (userfind == null) {
+                        AppCode.Fail.error = "No record found";
+                        response.setError(AppCode.Fail);
+                        response.send(res);
+                      } else {
+
+                        if (!!userfind.blockUser) {
+                          let updateDataQuery = {};
+                          console.log("................", userfind.blockUser)
+                          let aaa = []
+                          let bbb = []
+                          aaa = userfind.blockUser
+                          console.log(",,,,,,,,,,,,,,,,,,,,,,,", req.body.blockedUserId)
+                          bbb.push(ObjectID(req.body.blockedUserId))
+
+                          let abc = aaa.concat(bbb)
+                          console.log("......................................abcccccccc", abc)
+
+
+                          console.log(".........abc after", abc)
+
+
+                          updateDataQuery.blockUser = abc
+                          console.log(".......updateDataQuery.......", updateDataQuery)
+
+                          // delete req.body._id
+                          UserModel.update({ _id: ObjectID(req.body._id) }, updateDataQuery, function (err, roleUpdate) {
+                            if (err) {
+                              console.log("...........", err);
+                              response.setError(AppCode.Fail);
+                            } else {
+
+                              console.log(")))))))))", updateDataQuery);
+                              response.setData(AppCode.Success);
+                              response.send(res);
+                            }
+                          });
+
+
+
+                        }
+                        else {
+                          let updateDataQuery = {};
+
+
+                          let a1 = []
+                          a1.push(ObjectID(req.body.blockedUserId))
+
+                          console.log("a111111111111111111", a1);
+                          updateDataQuery.blockUser = a1
+
+                          console.log("<MMMMMMMM", updateDataQuery);
+
+
+
+                          // delete req.body._id
+                          UserModel.update({ _id: ObjectID(req.body._id) }, updateDataQuery, function (err, roleUpdate) {
+                            if (err) {
+                              console.log("...........", err);
+                              response.setError(AppCode.Fail);
+                            } else {
+
+                              console.log(")))))))))", updateDataQuery);
+                              response.setData(AppCode.Success);
+                              response.send(res);
+                            }
+                          });
+
+                        }
+
+                      }
+                    }
+                  }
+                );
+                // response.setError(AppCode.Success, blockedUser);
+                // response.send(res);
+
               }
             }
           );
         } else {
+
+          console.log("blockedUserFindblockedUserFindblockedUserFind",blockedUserFind)
           response.setError(AppCode.AlreadyBlock);
           response.send(res);
         }
@@ -73,8 +162,8 @@ blockUserCtrl.getBlockUserList = (req, res) => {
   const skip = limit * parseInt(pageNumber);
   options.skip = skip;
   options.limit = limit;
-  getBlockedUserList(req.auth._id).then((user) =>  {
-    console.log(",,,,,,,,,,",user)
+  getBlockedUserList(req.auth._id).then((user) => {
+    console.log(",,,,,,,,,,", user)
     const blockuser = [];
     _.forEach(user.blockedUserData, (follower) => {
       console.log("------follower-----------------", follower);
@@ -93,7 +182,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
                 "i"
               ),
             },
-           
+
           ],
 
           $expr: {
@@ -111,8 +200,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
           _id: 1,
           userId: 1,
           userName: 1,
-          firstName: 1,
-          lastName: 1,
+         
           profile_image: { $ifNull: ["$profile_image", ""] },
 
           // qualityRating: { $ifNull: ["$qualityRating", 0] },
@@ -136,9 +224,9 @@ blockUserCtrl.getBlockUserList = (req, res) => {
           //     0,
           //   ],
           // },
-        //  about: 1,
-         // isBuddy: "false",
-        //  isBuddyRequested: "false",
+          //  about: 1,
+          // isBuddy: "false",
+          //  isBuddyRequested: "false",
         },
       },
     ];
@@ -147,7 +235,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
         {
           userName: new RegExp(
             ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-          "i"
+            "i"
           ),
         },
       ],
@@ -170,7 +258,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
               } else if (options.skip > 0 && countData === 0) {
                 cb(null);
               } else {
-                console.log("....coundata",countData)
+                console.log("....coundata", countData)
                 if (countData <= skip + limit) {
                   result.totalblockuser = countData;
                 } else {
@@ -219,13 +307,86 @@ blockUserCtrl.getBlockUserList = (req, res) => {
 };
 
 
+//-- party-plot List 
+blockUserCtrl.blockUserList = (req, res) => {
+  const response = new HttpRespose();
+  try {
+    let query = [
+      {
+        $match: {
+          _id: ObjectID(req.query._id)
+        },
+      },
+      {
+        $lookup: {
+          from: "user",
+          let: { blockUser: "$blockUser" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: [
+                    "$_id",
+                    {
+                      $cond: {
+                        if: { $isArray: "$$blockUser" },
+                        then: "$$blockUser",
+                        else: [],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                userName: 1
+              },
+            },
+          ],
+          as: "blockuserList",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          //  address: 1,
+          userName: 1,
+          //  status: 1,
+          //  createdby: 1,
+          //  updatedBy: 1,
+          // createdAt: 1,
+          // updatedAt: 1,
+          blockuserList: 1
+        },
+      },
+    ];
+    UserModel.advancedAggregate(query, {}, (err, partyplot) => {
+      if (err) {
+        throw err;
+      } else if (_.isEmpty(partyplot)) {
+        response.setError(AppCode.NotFound);
+        response.send(res);
+      } else {
+        response.setData(AppCode.Success, partyplot);
+        response.send(res);
+      }
+    });
+  } catch (exception) {
+    response.setError(AppCode.InternalServerError);
+    response.send(res);
+  }
+}
+
+
 
 blockUserCtrl.unblockUser = (req, res) => {
   var response = new HttpRespose();
   try {
     BlockUserModel.findOne(
       {
-        userId: ObjectID(req.auth._id),
+        userId: ObjectID(req.body._id),
         blockedUserId: ObjectID(req.body.blockedUserId),
       },
       (err, blockedUserFind) => {
@@ -234,27 +395,112 @@ blockUserCtrl.unblockUser = (req, res) => {
         } else {
           BlockUserModel.remove(
             {
-              userId: ObjectID(req.auth._id),
+              userId: ObjectID(req.body._id),
               blockedUserId: ObjectID(req.body.blockedUserId),
             },
             (err, newId) => {
               if (err) {
                 throw err;
               } else {
-               
-                  response.setData(AppCode.Success);
-                response.send(res);
-              }
-            }
-          );
+
+                //block array save in user table 
+                UserModel.findOne(
+                  {
+                    _id: ObjectID(req.body._id),
+                  },
+                  (err, userfind) => {
+                    if (err) {
+                      console.log(err);
+                      throw err;
+                    } else {
+                      if (userfind == null) {
+                        AppCode.Fail.error = "No record found";
+                        response.setError(AppCode.Fail);
+                        response.send(res);
+                      } else {
+                        // console.log("................",userfind)
+
+
+                        let updateDataQuery = {};
+                        //  console.log("................",userfind.blockUser)
+                        let users = []
+                        let Users = []
+                        users = userfind.blockUser
+                        Users = userfind.blockUser
+
+                        console.log("usersssssssss", users);
+
+                        for (let i = 0; i < Users.length; i++) {
+
+                          if ((req.body.blockedUserId).toString() == (Users[i]).toString()) {
+                            console.log("disconneceted user...................", Users[i])
+
+
+                            console.log(".....if......")
+
+                            users.splice(i, 1)
+
+
+                            updateDataQuery.blockUser = users
+
+                            // if ((Users.length - 1) == i) {
+                              UserModel.update({ _id: ObjectID(req.body._id) }, updateDataQuery, function (err, roleUpdate) {
+                                if (err) {
+                                  console.log("...........", err);
+                                  response.setError(AppCode.Fail);
+                                } else {
+
+                                  console.log(")))))))))", updateDataQuery);
+                                  response.setData(AppCode.Success);
+                                  response.send(res);
+                                }
+                              });
+                            // }
+
+                          }
+                          else {
+                            console.log("...............else");
+                          }
+
+                        }
+
+
+                      
+
+                      //console.log("user disconnected", users);
+                      // console.log("user connected after disconnecting......", users);
+
+                      updateDataQuery.blockUser = users
+
+
+
+
+
+
+
+
+                    }
+                  }
+                  }
+                );
+
+
+
+
+
+          //response.setData(AppCode.Success);
+          // response.send(res);
         }
       }
     );
-  } catch (exception) {
-    console.log(exception);
-    response.setError(AppCode.InternalServerError);
-    response.send(res);
   }
+      }
+    );
+  } catch (exception) {
+  console.log(exception);
+  response.setError(AppCode.InternalServerError);
+  response.send(res);
+}
 };
 
 const getBlockedUserList = (userId) => {

@@ -53,7 +53,7 @@ favoriteUserCtrl.favoriteUser = (req, res) => {
             }
           );
         } else {
-          response.setError(AppCode.AlreadyBlock);
+          response.setError(AppCode.allReadyadded);
           response.send(res);
         }
       }
@@ -91,6 +91,7 @@ favoriteUserCtrl.getFavoriteUserList = (req, res) => {
           $or: [
             {
              // userName: new RegExp('^' + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'),
+              // userName: new RegExp('^' + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'),
               userName: new RegExp(
                 ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
                 "i"
@@ -112,10 +113,9 @@ favoriteUserCtrl.getFavoriteUserList = (req, res) => {
       {
         $project: {
           _id: 1,
-        
+          mobileNo:1,
           userName: 1,
-          firstName: 1,
-          lastName: 1,
+          countryName:1,
           profile_image: { $ifNull: ["$profile_image", ""] },
 
         },
@@ -242,6 +242,7 @@ const getFavoriteUserList = (userId) => {
   console.log(userId);
   const promise = new Promise((resolve, reject) => {
     let query = [
+
       {
         $match: {
           _id: ObjectID(userId),

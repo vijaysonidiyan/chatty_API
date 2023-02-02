@@ -17,8 +17,8 @@ router.route("/blockUser").post(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.blockUs
 // Get Interest  details: http://localhost:3001/v1/blockUser/get-blockeduserList-Byid
 router.route("/getBlockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockUserList);
 
-// Get Interest  details: http://localhost:3001/v1/blockUser/getBlockedList
-//router.route("/getBlockedList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockedList);
+// Get Interest  details: http://localhost:3001/v1/blockUser/blockUserList
+router.route("/blockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.blockUserList);
 
 // save seshType details: http://localhost:3001/v1/blockUser/unblockUser
 router.route("/unblockUser").post(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.unblockUser);
