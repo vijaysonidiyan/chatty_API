@@ -505,7 +505,8 @@ MongoConnect.init()
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: msg.type,
-          file_name: msg.file_name
+          file_name: msg.file_name,
+          video_screenshort:msg.video_screenshort
         };
         console.log("message data", query1);
         // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
@@ -575,6 +576,8 @@ MongoConnect.init()
 
                         file_name: msg.file_name,
 
+                        video_screenshort:msg.video_screenshort,
+
                         createdAt: new Date()
 
                       });
@@ -598,6 +601,8 @@ MongoConnect.init()
 
                         file_name: msg.file_name,
 
+                        video_screenshort:msg.video_screenshort,
+
                         createdAt: new Date()
 
                       });
@@ -607,7 +612,6 @@ MongoConnect.init()
                     }
 
                   }
-
                   // io.to(socket_id).emit("new_message", {
                   //   _id:chat._id,
                   //   message: msg.message,
@@ -658,11 +662,11 @@ MongoConnect.init()
                                         senderId = msg.sender_id,
                                         receiverId = msg.reciver_id,
                                         receiverName = user.userName,
-                                        senderImage = !!receiverUser.profileUrl
-                                          ? receiverUser.profileUrl
+                                        senderImage = !!receiverUser.profile_image
+                                          ? receiverUser.profile_image
                                           : "",
-                                        receiverImage = !!user.profileUrl
-                                          ? user.profileUrl
+                                        receiverImage = !!user.profile_image
+                                          ? user.profile_image
                                           : "",
                                         res = "";
 

@@ -8,6 +8,7 @@ class chatModel extends ModelBase {
         super(CONFIG.DB.MONGO.DB_NAME, "chat", {
             message: { type: String, allowNullEmpty: true },
             file_name: { type: String, allowNullEmpty: true },
+            video_screenshort:{type: String, allowNullEmpty: true},
             sender_id: { type: Object, allowNullEmpty: true },
             reciver_id: { type: Object, allowNullEmpty: true },
             postId: { type: Object, allowNullEmpty: true },
@@ -15,7 +16,6 @@ class chatModel extends ModelBase {
             updatedAt: { type: Object, allowNullEmpty: true },
             isRead: { type: Boolean, allowNullEmpty: true },
             isDeletedBy:{ type: Array, allowNullEmpty: true},
-         
             type: { type: String, allowNullEmpty: true }
         });
     }

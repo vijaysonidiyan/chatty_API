@@ -159,6 +159,7 @@ ChatCtrl.getMessages = (req, res) => {
         postId: 1,
         createdAt: 1,
         file_name:1,
+        video_screenshort:1,
         postId: 1,
         content: "$postData.content",
         userId: "$postData.userId",
@@ -367,6 +368,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           },
           userName: "$senderData.userName",
           file_name:1,
+          video_screenshort:1,
           isDeleted: 1,
           isDeletedBy:1,
 
@@ -774,6 +776,10 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
   options.skip = skip;
   options.limit = limit;
   options.sort = { messageAt: -1 };
+  const List=[]
+  List.push( ObjectID(req.auth._id))
+  console.log("List...........",List)
+
   getCHatUserDetails(loginUserId).then((chat) => {
     const userChat = [];
 
@@ -844,6 +850,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
 
                   ],
                 },
+                isDeletedBy:{ $nin :List }
               },
 
             },
@@ -853,6 +860,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 message: { $last: "$message" },
                 type: { $last: "$type" },
                 file_name:{$last:"$file_name"},
+                video_screenshort:{$last:"$video_screenshort"},
                 messageAt: { $last: "$createdAt" },
                 senderId: { $last: "$sender_id" },
                 receiverId: { $last: "$reciver_id" },
@@ -878,7 +886,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           as: "unreadCount",
           let: { userId: "$_id" },
           pipeline: [
-            {
+            { 
               $match: {
                 $expr: {
                   $and: [
@@ -887,6 +895,8 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                     { $ne: ["$isRead", true] },
                   ],
                 },
+                isDeletedBy:{ $nin :List }
+
               },
             },
             {
@@ -920,6 +930,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           lastName: 1,
           profile_image: { $ifNull: ["$profile_image", "-"] },
           statusType: 1,
+          "chatId":"$chat._id",
           "chat": "$chat.message",
           // chat: {
           //   $cond: {
@@ -944,6 +955,8 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
             },
           },
           // chat:1,
+          file_name:"$chat.file_name",
+          video_screenshort:"$chat.video_screenshort",
           messageAt: "$chat.messageAt",
           senderId: "$chat.senderId",
           receiverId: "$chat.receiverId",
@@ -1735,7 +1748,7 @@ ChatCtrl.chatDeleteAll1 = (req, res) => {
 
 };
 
-/* Designation Delete*/
+/* chat Delete*/
 ChatCtrl.chatDeleteById = (req, res) => {
   const response = new HttpRespose();
   const data = req.body;
@@ -1881,7 +1894,7 @@ ChatCtrl.allchatDelete = (req, res) => {
 
 
 };
-
+ 
 
 //EMP Info Save API
 ChatCtrl.imageUpload = (req, res) => {
