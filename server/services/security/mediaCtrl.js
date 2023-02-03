@@ -762,7 +762,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
                                 //data.documents.files.push(file.filename);
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname, mimetype: file.mimetype, ext: file.filename.split(".")[1] });
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname, mimetype: file.mimetype, ext: file.filename.split(".")[1] ,size :file.size});
                             } else if (file.fieldname === "photos") {
                                 let isSquareImage = false;
                                 let thumbnailName =
@@ -810,12 +810,12 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                 console.log("dateTimeData", dateTimeData)
 
 
-                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname });
+                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname , size :file.size });
                             } else if (file.fieldname === "videos") {
                                 // data.media[file.fieldname].files.push(
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname });
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname , size :file.size });
                                 //data.media[file.fieldname].files.push(file.filename);
                             }
                         }
@@ -847,7 +847,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
 
 
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname, thumbnail: thumbnailKeyy, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,size :obj.size, thumbnail: thumbnailKeyy, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
@@ -891,7 +891,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                         video_screenshot = video_screenshot[video_screenshot.length - 1];
 
                         let thumbnails = "thumb-" + obj.filename.split(".")[0] + ".jpg";
-                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
+                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails,size :obj.size, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
                     });
 
                     //console.log("videosDatavideosDatavideosDatavideosDatavideosData:",videosData);
@@ -926,7 +926,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.documents.files.map((obj, index) => {
 
-                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
+                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, size :obj.size ,createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
 
                     });
 

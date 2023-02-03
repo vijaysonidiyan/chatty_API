@@ -21,6 +21,7 @@ class mediaModel extends ModelBase {
             thumbnail:{type:Array, allowNullEmpty: true },   
             ext:{type:Array, allowNullEmpty: true},  
             mimetype:{type:Array, allowNullEmpty: true} ,
+            size:{type:Number, allowNullEmpty: true},
             createdBy:{type: Object, allowNullEmpty: false },
             createdAt: { type: Object, allowNullEmpty: false },
             updatedAt: { type: Object, allowNullEmpty: true },
