@@ -489,15 +489,34 @@ MongoConnect.init()
       socket.on("message", function (msg) {
         console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
 
-        var query1 = {
+        var query = {
           message: msg.message,
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: msg.type,
-          file_name: msg.file_name,
-          video_screenshort:msg.video_screenshort
+        
         };
-        console.log("message data", query1);
+
+        if(!!msg.size)
+        {
+          query.size =msg.size
+        }
+        if(!!msg.file_name)
+        {
+          query.file_name =msg.file_name
+        }
+        if(!!msg.video_screenshort)
+        {
+          query.video_screenshort =msg.video_screenshort
+        }
+        if(!!msg.thumbnail)
+        {
+          query.thumbnail =msg.thumbnail
+        }
+
+
+
+        console.log("message data", query);
         // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
         var socket_id = usersss[msg.reciver_id];
         console.log("m old socketId: reciverID ", socket_id);
@@ -537,7 +556,7 @@ MongoConnect.init()
           }
           else if (_.isEmpty(user)) {
             console.log("else iffffffffffffffffffffffffffffffffffff")
-            ChatModel.create(query1, function (err, chat) {
+            ChatModel.create(query, function (err, chat) {
               if (err) {
                 console.log("......err.....")
                 //TODO: Log the error here
