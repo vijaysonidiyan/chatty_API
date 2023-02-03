@@ -9,6 +9,8 @@ class chatModel extends ModelBase {
             message: { type: String, allowNullEmpty: true },
             file_name: { type: String, allowNullEmpty: true },
             video_screenshort:{type: String, allowNullEmpty: true},
+            thumbnail:{type: String, allowNullEmpty: true},
+            size:{type:String,allowNullEmpty: true },
             sender_id: { type: Object, allowNullEmpty: true },
             reciver_id: { type: Object, allowNullEmpty: true },
             postId: { type: Object, allowNullEmpty: true },
