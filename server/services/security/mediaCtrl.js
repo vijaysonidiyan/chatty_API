@@ -18,12 +18,12 @@ const NotificationModel =
     new (require("../../common/model/NotificationModel"))();
 const UserModel =
     new (require("../../common/model/userModel"))();
- const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
- const ffmpeg = require('fluent-ffmpeg');
- const ffprobePath = require("ffprobe-static").path;
- const path = require("path");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const ffmpeg = require('fluent-ffmpeg');
+const ffprobePath = require("ffprobe-static").path;
+const path = require("path");
 const imageThumbnail = require("image-thumbnail");
-let options = { width: 100, height: 100, responseType: 'base64', jpegOptions: { force:true, quality:90 } }
+let options = { width: 100, height: 100, responseType: 'base64', jpegOptions: { force: true, quality: 90 } }
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 
@@ -139,7 +139,7 @@ mediaCtrl.mediaMasterSave1 = (req, res) => {
                                 data.documents.files.push({ filename: file.filename, originalname: file.originalname, mimetype: file.mimetype, ext: file.filename.split(".")[1] });
                             } else if (file.fieldname === "photos") {
 
-                                
+
                                 // data.media[file.fieldname].files.push(
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
@@ -250,7 +250,7 @@ mediaCtrl.mediaMasterSave1 = (req, res) => {
 mediaCtrl.mediaMasterSavefinal = (req, res) => {
     const response = new HttpRespose();
 
-    let result =[]
+    let result = []
     if (!!req.auth._id) {
         const data = req.body;
         console.log(data)
@@ -403,26 +403,26 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                             } else if (file.fieldname === "photos") {
                                 let isSquareImage = false;
                                 let thumbnailName =
-                                  filesArr[filesArrKey][filesKey].originalname;
-                                  console.log("-------thumbnailName------------",thumbnailName)
+                                    filesArr[filesArrKey][filesKey].originalname;
+                                console.log("-------thumbnailName------------", thumbnailName)
 
-                                  let thumbnailKey =
-                                  CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                  dateTimeData +
-                                  thumbnailName.split(".")[0] +
-                                  ".jpg";
-                                  console.log("---------thumbnailKey----------",thumbnailKey)
+                                let thumbnailKey =
+                                    CONFIG.UPLOADS.DIR_PATH_PHOTOS +
+                                    dateTimeData +
+                                    thumbnailName.split(".")[0] +
+                                    ".jpg";
+                                console.log("---------thumbnailKey----------", thumbnailKey)
 
-                                
-                                  
-                               // const fileContent = fs.readFileSync(thumbnailKey);
+
+
+                                // const fileContent = fs.readFileSync(thumbnailKey);
 
                                 imageThumbnail(file.path)
                                     .then((thumbnail) => {
-                                         console.log("thumbnailthumbnail",thumbnail)
+                                        console.log("thumbnailthumbnail", thumbnail)
 
-                                         const buffer = Buffer.from(thumbnail, "base64");
-                                         fs.writeFileSync(thumbnailKey, buffer);
+                                        const buffer = Buffer.from(thumbnail, "base64");
+                                        fs.writeFileSync(thumbnailKey, buffer);
 
 
 
@@ -444,15 +444,15 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                                     .catch((err) => console.error(err));
 
 
-                                  console.log("dateTimeData",dateTimeData)
+                                console.log("dateTimeData", dateTimeData)
 
-                               
-                                data.media[file.fieldname].files.push({ filename: file.filename,  thumbnail: thumbnailKey, originalname: file.originalname });
+
+                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname });
                             } else if (file.fieldname === "videos") {
                                 // data.media[file.fieldname].files.push(
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname});
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname });
                                 //data.media[file.fieldname].files.push(file.filename);
                             }
                         }
@@ -470,9 +470,9 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                     let photosData = [];
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.photos.files.map((obj, index) => {
-                       let thumbnailphoto = dateTimeData + obj.originalname
+                        let thumbnailphoto = dateTimeData + obj.originalname
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailphoto ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname, thumbnail: thumbnailphoto, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
@@ -488,9 +488,9 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                             console.log("here photos result after insert : ", photos);
                             photos.forEach(element => {
                                 result.push(element)
-                                
+
                             });
-                          
+
                             cb(null);
 
                         }
@@ -503,7 +503,7 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                     cb(null);
                 }
             },
-         
+
             function (cb) {
                 //Store videos in video model
                 //console.log("new videos data :",data.media.videos.files);
@@ -515,8 +515,8 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                         video_screenshot = video_screenshot.split("/");
                         video_screenshot = video_screenshot[video_screenshot.length - 1];
 
-                        let thumbnails=dateTimeData+obj.filename.split(".")[0] + ".jpg";
-                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot,thumbnail: thumbnails ,status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
+                        let thumbnails = dateTimeData + obj.filename.split(".")[0] + ".jpg";
+                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
                     });
 
                     //console.log("videosDatavideosDatavideosDatavideosDatavideosData:",videosData);
@@ -531,7 +531,7 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                             console.log("here videos result after insert : ", videos);
                             videos.forEach(element => {
                                 result.push(element)
-                                
+
                             });
 
                             cb(null);
@@ -551,26 +551,26 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.documents.files.map((obj, index) => {
 
-                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname,createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
+                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
 
                     });
 
-                    console.log("documentsDatadocumentsDatadocumentsDatadocumentsData:",documentsData);
+                    console.log("documentsDatadocumentsDatadocumentsDatadocumentsData:", documentsData);
 
                     data.media.documents.files = [];
 
                     mediaModel.createMany(documentsData, function (err, document) {
                         if (err) {
-                            console.log("errrrrrrrrr",err);
+                            console.log("errrrrrrrrr", err);
                             //TODO: Log the error here
                             cb(err);
                         } else {
                             console.log("here document result after insert : ", document);
                             document.forEach(element => {
                                 result.push(element)
-                                
+
                             });
-                          
+
                             cb(null);
 
                         }
@@ -578,20 +578,20 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
                 } else {
                     data.media.documents.files = [];
 
-                    
-                  
+
+
                     cb(null);
                 }
             },
-          
+
         ], function (err) {
             if (err) {
                 AppCode.Fail.error = err.message;
                 response.setError(AppCode.Fail);
                 response.send(res);
             } else {
-                console.log("resultresultresultresult",result);
-                response.setData(AppCode.Success,result);
+                console.log("resultresultresultresult", result);
+                response.setData(AppCode.Success, result);
                 response.send(res);
                 //result=[]
 
@@ -609,7 +609,7 @@ mediaCtrl.mediaMasterSavefinal = (req, res) => {
 mediaCtrl.mediaMasterSave = (req, res) => {
     const response = new HttpRespose();
 
-    let result =[]
+    let result = []
     if (!!req.auth._id) {
         const data = req.body;
         console.log(data)
@@ -720,9 +720,12 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                             //     //cb(null);
                             // }
                         }
+                        else {
+                            cb(null);
+                        }
                     }
                 }
-               // cb(null);
+                // cb(null);
             },
             function (cb) {
                 //Set photos and videos name array and other to params
@@ -763,26 +766,26 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                             } else if (file.fieldname === "photos") {
                                 let isSquareImage = false;
                                 let thumbnailName =
-                                  filesArr[filesArrKey][filesKey].filename;
-                                  console.log("-------thumbnailName------------",thumbnailName)
+                                    filesArr[filesArrKey][filesKey].filename;
+                                console.log("-------thumbnailName------------", thumbnailName)
 
-                                  let thumbnailKey =
-                                  CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                  "thumb-" +
-                                  thumbnailName.split(".")[0] +
-                                  ".png";
-                                  console.log("---------thumbnailKey----------",thumbnailKey)
+                                let thumbnailKey =
+                                    CONFIG.UPLOADS.DIR_PATH_PHOTOS +
+                                    "thumb-" +
+                                    thumbnailName.split(".")[0] +
+                                    ".png";
+                                console.log("---------thumbnailKey----------", thumbnailKey)
 
-                                
-                                  
-                               // const fileContent = fs.readFileSync(thumbnailKey);
+
+
+                                // const fileContent = fs.readFileSync(thumbnailKey);
 
                                 imageThumbnail(file.path)
                                     .then((thumbnail) => {
-                                         console.log("thumbnailthumbnail",thumbnail)
+                                        console.log("thumbnailthumbnail", thumbnail)
 
-                                         const buffer = Buffer.from(thumbnail, "base64");
-                                         fs.writeFileSync(thumbnailKey, buffer);
+                                        const buffer = Buffer.from(thumbnail, "base64");
+                                        fs.writeFileSync(thumbnailKey, buffer);
 
 
 
@@ -804,15 +807,15 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                     .catch((err) => console.error(err));
 
 
-                                  console.log("dateTimeData",dateTimeData)
+                                console.log("dateTimeData", dateTimeData)
 
-                               
-                                data.media[file.fieldname].files.push({ filename: file.filename,  thumbnail: thumbnailKey, originalname: file.originalname });
+
+                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname });
                             } else if (file.fieldname === "videos") {
                                 // data.media[file.fieldname].files.push(
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname});
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname });
                                 //data.media[file.fieldname].files.push(file.filename);
                             }
                         }
@@ -830,21 +833,21 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     let photosData = [];
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.photos.files.map((obj, index) => {
-                        console.log("&&&&&&&&&&&&&&&&&&&",obj);
+                        console.log("&&&&&&&&&&&&&&&&&&&", obj);
 
                         let thumbnailName =
-                       obj.filename;
-                        console.log("-------thumbnailName------------",thumbnailName)
+                            obj.filename;
+                        console.log("-------thumbnailName------------", thumbnailName)
 
-                        let thumbnailKeyy=
-                        "thumb-" +
-                        thumbnailName.split(".")[0] +
-                        ".png";
-                        console.log("---------thumbnailKey----------",thumbnailKeyy)
+                        let thumbnailKeyy =
+                            "thumb-" +
+                            thumbnailName.split(".")[0] +
+                            ".png";
+                        console.log("---------thumbnailKey----------", thumbnailKeyy)
 
-                    
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,thumbnail :thumbnailKeyy ,createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname, thumbnail: thumbnailKeyy, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
@@ -858,11 +861,11 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                             cb(err);
                         } else {
                             console.log("here photos result after insert : ", photos);
-                                photos.forEach(element => {
+                            photos.forEach(element => {
                                 result.push(element)
-                                
+
                             });
-                          
+
                             cb(null);
 
                         }
@@ -875,7 +878,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     cb(null);
                 }
             },
-         
+
             function (cb) {
                 //Store videos in video model
                 //console.log("new videos data :",data.media.videos.files);
@@ -887,8 +890,8 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                         video_screenshot = video_screenshot.split("/");
                         video_screenshot = video_screenshot[video_screenshot.length - 1];
 
-                        let thumbnails="thumb-"+obj.filename.split(".")[0] + ".jpg";
-                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot,thumbnail: thumbnails ,status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
+                        let thumbnails = "thumb-" + obj.filename.split(".")[0] + ".jpg";
+                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
                     });
 
                     //console.log("videosDatavideosDatavideosDatavideosDatavideosData:",videosData);
@@ -903,7 +906,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                             console.log("here videos result after insert : ", videos);
                             videos.forEach(element => {
                                 result.push(element)
-                                
+
                             });
 
                             cb(null);
@@ -923,26 +926,26 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.documents.files.map((obj, index) => {
 
-                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname,createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
+                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
 
                     });
 
-                    console.log("documentsDatadocumentsDatadocumentsDatadocumentsData:",documentsData);
+                    console.log("documentsDatadocumentsDatadocumentsDatadocumentsData:", documentsData);
 
                     data.media.documents.files = [];
 
                     mediaModel.createMany(documentsData, function (err, document) {
                         if (err) {
-                            console.log("errrrrrrrrr",err);
+                            console.log("errrrrrrrrr", err);
                             //TODO: Log the error here
                             cb(err);
                         } else {
                             console.log("here document result after insert : ", document);
                             document.forEach(element => {
                                 result.push(element)
-                                
+
                             });
-                          
+
                             cb(null);
 
                         }
@@ -950,20 +953,20 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                 } else {
                     data.media.documents.files = [];
 
-                    
-                  
+
+
                     cb(null);
                 }
             },
-          
+
         ], function (err) {
             if (err) {
                 AppCode.Fail.error = err.message;
                 response.setError(AppCode.Fail);
                 response.send(res);
             } else {
-                console.log("resultresultresultresult",result);
-                response.setData(AppCode.Success,result);
+                console.log("resultresultresultresult", result);
+                response.setData(AppCode.Success, result);
                 response.send(res);
                 //result=[]
 
