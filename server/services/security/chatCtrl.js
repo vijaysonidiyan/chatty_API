@@ -160,6 +160,8 @@ ChatCtrl.getMessages = (req, res) => {
         createdAt: 1,
         file_name:1,
         video_screenshort:1,
+        size:1,
+        thumbnail:1,
         postId: 1,
         content: "$postData.content",
         userId: "$postData.userId",
@@ -369,6 +371,8 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           userName: "$senderData.userName",
           file_name:1,
           video_screenshort:1,
+          size:1,
+          thumbnail:1,
           isDeleted: 1,
           isDeletedBy:1,
 
@@ -861,6 +865,8 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 type: { $last: "$type" },
                 file_name:{$last:"$file_name"},
                 video_screenshort:{$last:"$video_screenshort"},
+                size:{$last:"$size"},
+                thumbnail:{$last:"$thumbnail"},
                 messageAt: { $last: "$createdAt" },
                 senderId: { $last: "$sender_id" },
                 receiverId: { $last: "$reciver_id" },
@@ -924,7 +930,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           countryCode: 1,
           isverified: 1,
           status: 1,
-         
+         chat:1,
           userName: 1,
           firstName: 1,
           lastName: 1,
@@ -955,8 +961,10 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
             },
           },
           // chat:1,
-          file_name:"$chat.file_name",
-          video_screenshort:"$chat.video_screenshort",
+          "file_name":"$chat.file_name",
+          "video_screenshort":"$chat.video_screenshort",
+          "size":"$chat.size",
+          "thumbnail":"$chat.thumbnail",
           messageAt: "$chat.messageAt",
           senderId: "$chat.senderId",
           receiverId: "$chat.receiverId",
@@ -1007,6 +1015,8 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
               } else if (options.skip > 0 && _.isEmpty(followers)) {
                 cb(null);
               } else {
+                console.log("followersfollowersfollowersfollowers",followers);
+
                 let abc=[]
 
                 followers.filter((x) => {
@@ -1021,6 +1031,10 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                     userName: x.userName,
                     profile_image: x.profile_image,
                     chat: x.chat,
+                    file_name:x.file_name,
+                    size:x.size,
+                    video_screenshort:x.video_screenshort,
+                    thumbnail:x.thumbnail,
                     userData: x.userData,
                     isDeleted: x.isDeleted,
                     messageAt: x.messageAt,

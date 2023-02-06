@@ -15,8 +15,6 @@ class blockUserModel extends ModelBase {
                 allowNullEmpty: false,
                 enum: { 1: "bolck", 2: "blocked" } //block = user block other User // blocked = which is blocked by someone
             },
-            // startDate: { type: Object, allowNullEmpty: true },
-            // endedDate: { type: Object, allowNullEmpty: true },
             createdAt: { type: Object, allowNullEmpty: true }
         });
     }
