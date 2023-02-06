@@ -126,7 +126,7 @@ MongoConnect.init()
       });
 
 
-      
+
 
 
       socket.on("socket_disconnection", function (Socket) {
@@ -494,24 +494,23 @@ MongoConnect.init()
           sender_id: msg.sender_id,
           reciver_id: msg.reciver_id,
           type: msg.type,
-        
+
         };
 
-        if(!!msg.size)
-        {
-          query.size =msg.size
+        if (!!msg.size) {
+          query.size = msg.size
         }
-        if(!!msg.file_name)
-        {
-          query.file_name =msg.file_name
+        if (!!msg.file_name) {
+          query.file_name = msg.file_name
         }
-        if(!!msg.video_screenshort)
-        {
-          query.video_screenshort =msg.video_screenshort
+        if (!!msg.video_screenshort) {
+          query.video_screenshort = msg.video_screenshort
         }
-        if(!!msg.thumbnail)
-        {
-          query.thumbnail =msg.thumbnail
+        if (!!msg.thumbnail) {
+          query.thumbnail = msg.thumbnail
+        }
+        if (!!msg.file_original_name) {
+          query.file_original_name = msg.file_original_name
         }
 
 
@@ -588,7 +587,11 @@ MongoConnect.init()
 
                         file_name: msg.file_name,
 
-                        video_screenshort:msg.video_screenshort,
+                        video_screenshort: msg.video_screenshort,
+
+                        file_original_name: msg.file_original_name,
+
+                        size: msg.size,
 
                         createdAt: new Date()
 
@@ -613,7 +616,11 @@ MongoConnect.init()
 
                         file_name: msg.file_name,
 
-                        video_screenshort:msg.video_screenshort,
+                        video_screenshort: msg.video_screenshort,
+
+                        file_original_name: msg.file_original_name,
+
+                        size: msg.size,
 
                         createdAt: new Date()
 
@@ -1051,7 +1058,7 @@ MongoConnect.init()
             console.log("not chat user");
           } else {
 
-            console.log("length..........................",chat.length);
+            console.log("length..........................", chat.length);
             for (let i = 0; i < users.length; i++) {
 
               if (msg.userId == users[i].userId && users[i].userId != undefined) {
