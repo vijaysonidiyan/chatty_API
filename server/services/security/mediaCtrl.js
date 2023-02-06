@@ -619,112 +619,122 @@ mediaCtrl.mediaMasterSave = (req, res) => {
         const dateTimeData = Date.now();
         async.waterfall([
             function (cb) {
+
+
                 // convert video to mp4 if required
-                for (let filesArrKey in filesArr) {
-                    let files = filesArr[filesArrKey];
-                    for (let filesKey in files) {
-                        let file = files[filesKey];
-                        console.log("fileeeeeeeeeeeeeeeeeeeeeee", file);
+                if (!!filesArr.videos) {
+                    for (let i = 0; i < filesArr.videos.length; i++) {
+                        let file = filesArr.videos[i];
 
-                        if (file.fieldname === "videos") {
+                        console.log("@@@@@@@@@@@@@@@@@@@@@@", file)
 
-                            //For takes screen shot
-                            let VideoNameForScreenShot = filesArr[filesArrKey][filesKey].filename;
-                            let VideoNameForScreenShotWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + VideoNameForScreenShot;
-                            console.log("VideoNameForScreenShotWithPath", VideoNameForScreenShotWithPath);
-                            ffmpeg(VideoNameForScreenShotWithPath)
-                                .on('end', function () {
-                                    console.log("Processing finished successfully");
-                                    const localUrl =
-                                        CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                        VideoNameForScreenShot.split(".")[0] +
-                                        ".png";
+                        //For takes screen shot
+                        let VideoNameForScreenShot = file.filename;
+                        let VideoNameForScreenShotWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + VideoNameForScreenShot;
+                        console.log("VideoNameForScreenShotWithPath", VideoNameForScreenShotWithPath);
+                        ffmpeg(VideoNameForScreenShotWithPath)
+                            .on('end', function () {
+                                console.log("Processing finished successfully");
+                                const localUrl =
+                                    CONFIG.UPLOADS.DIR_PATH_PHOTOS +
+                                    VideoNameForScreenShot.split(".")[0] +
+                                    ".png";
 
-                                    const fileContent = fs.readFileSync(localUrl);
+                                const fileContent = fs.readFileSync(localUrl);
 
-                                    let videoscreenshitthumbnailKey =
-                                        CONFIG.UPLOADS.DIR_PATH_PHOTOS +
-                                        "thumb-" +
-                                        VideoNameForScreenShot.split(".")[0] +
-                                        ".jpg";
-                                    console.log("---------thumbnailKey----------", videoscreenshitthumbnailKey)
+                                let videoscreenshitthumbnailKey =
+                                    CONFIG.UPLOADS.DIR_PATH_PHOTOS +
+                                    "thumb-" +
+                                    VideoNameForScreenShot.split(".")[0] +
+                                    ".jpg";
+                                console.log("---------thumbnailKey----------", videoscreenshitthumbnailKey)
 
-                                    imageThumbnail(fileContent)
-                                        .then((thumbnail) => {
-                                            console.log(thumbnail)
-                                            const buffer = Buffer.from(thumbnail, "base64");
-                                            fs.writeFileSync(videoscreenshitthumbnailKey, buffer);
+                                imageThumbnail(fileContent)
+                                    .then((thumbnail) => {
+                                        console.log(thumbnail)
+                                        const buffer = Buffer.from(thumbnail, "base64");
+                                        fs.writeFileSync(videoscreenshitthumbnailKey, buffer);
 
 
-                                            //   var thumbParams = {
-                                            //     Bucket: CONFIG.UPLOADS_BUCKET.bucketName,
-                                            //     Key:
-                                            //       CONFIG.S3UPLOADS.DIR_PATH_POST_PHOTOS +
-                                            //       dateTimeData +
-                                            //       "Thumb" +
-                                            //       VideoNameForScreenShot.split(".")[0] +
-                                            //       ".jpg",
-                                            //     ACL: "public-read",
-                                            //     Body: thumbnail, //got buffer by reading file path
-                                            //   };
-                                            //   s3.putObject(thumbParams, function (err, data) {
-                                            //     console.log(err, data);
-                                            //   });
+                                        //   var thumbParams = {
+                                        //     Bucket: CONFIG.UPLOADS_BUCKET.bucketName,
+                                        //     Key:
+                                        //       CONFIG.S3UPLOADS.DIR_PATH_POST_PHOTOS +
+                                        //       dateTimeData +
+                                        //       "Thumb" +
+                                        //       VideoNameForScreenShot.split(".")[0] +
+                                        //       ".jpg",
+                                        //     ACL: "public-read",
+                                        //     Body: thumbnail, //got buffer by reading file path
+                                        //   };
+                                        //   s3.putObject(thumbParams, function (err, data) {
+                                        //     console.log(err, data);
+                                        //   });
+                                        if ((filesArr.videos.length - 1) == i) {
                                             cb(null);
-                                        })
-                                        .catch((err) => console.error(err));
+                                        }
+
+                                    })
+                                    .catch((err) => console.error(err));
 
 
-                                    console.log('Screenshots taken');
-                                })
+                                console.log('Screenshots taken');
+                            })
 
-                                .on('error', function (err) {
-                                    console.error("**********", err);
-                                })
-                                .screenshots({
-                                    // Will take screenshots at 20%, 40%, 60% and 80% of the video if increase count 1 to 4
-                                    count: 1,
-                                    folder: CONFIG.UPLOADS.DIR_PATH_PHOTOS,
-                                    filename: VideoNameForScreenShot.split(".")[0] + '.png'
-                                });
+                            .on('error', function (err) {
+                                console.error("**********", err);
+                            })
+                            .screenshots({
+                                // Will take screenshots at 20%, 40%, 60% and 80% of the video if increase count 1 to 4
+                                count: 1,
+                                folder: CONFIG.UPLOADS.DIR_PATH_PHOTOS,
+                                filename: VideoNameForScreenShot.split(".")[0] + '.png'
+                            });
 
 
-                            // Create a command to convert any video file to MP4
-                            // if (!!file.mimetype && file.mimetype !== 'video/mp4') {
-                            //     var oldVideoName = filesArr[filesArrKey][filesKey].filename;
-                            //     filesArr[filesArrKey][filesKey].filename = filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4';
-                            //     var originalVideoNameWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + oldVideoName;
-                            //     var command = ffmpeg(originalVideoNameWithPath);
-                            //     command
-                            //         .videoCodec('libx264')
-                            //         .on('error', function (err) {
-                            //             logger.log("error", 'An error occurred:' + err);
-                            //         })
-                            //         .on('progress', function (progress) {
-                            //             logger.log("info", 'Processing: mp4');
-                            //         })
-                            //         .on('end', function () {
-                            //             logger.log("info", 'Processing finished ................!' + originalVideoNameWithPath);
-                            //             //cb(null);
-                            //             //For remove uploaded video which is not mp3 or main video
-                            //             if (!!originalVideoNameWithPath) {
-                            //                 fs.exists(originalVideoNameWithPath, function (exists) {
-                            //                     if (exists) {
-                            //                         fs.unlinkSync(originalVideoNameWithPath);
-                            //                     }
-                            //                 });
-                            //             }
-                            //         })
-                            //         .save(CONFIG.UPLOADS.DIR_PATH_VIDEOS + filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4');
-                            // } else {
-                            //     //cb(null);
-                            // }
-                        }
-                        else {
-                            cb(null);
-                        }
                     }
                 }
+                else {
+                    cb(null);
+                }
+
+
+                // Create a command to convert any video file to MP4
+                // if (!!file.mimetype && file.mimetype !== 'video/mp4') {
+                //     var oldVideoName = filesArr[filesArrKey][filesKey].filename;
+                //     filesArr[filesArrKey][filesKey].filename = filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4';
+                //     var originalVideoNameWithPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS + oldVideoName;
+                //     var command = ffmpeg(originalVideoNameWithPath);
+                //     command
+                //         .videoCodec('libx264')
+                //         .on('error', function (err) {
+                //             logger.log("error", 'An error occurred:' + err);
+                //         })
+                //         .on('progress', function (progress) {
+                //             logger.log("info", 'Processing: mp4');
+                //         })
+                //         .on('end', function () {
+                //             logger.log("info", 'Processing finished ................!' + originalVideoNameWithPath);
+                //             //cb(null);
+                //             //For remove uploaded video which is not mp3 or main video
+                //             if (!!originalVideoNameWithPath) {
+                //                 fs.exists(originalVideoNameWithPath, function (exists) {
+                //                     if (exists) {
+                //                         fs.unlinkSync(originalVideoNameWithPath);
+                //                     }
+                //                 });
+                //             }
+                //         })
+                //         .save(CONFIG.UPLOADS.DIR_PATH_VIDEOS + filesArr[filesArrKey][filesKey].filename.split('.')[0] + '.mp4');
+                // } else {
+                //     //cb(null);
+                // }
+                //         }
+                //         // else {
+                //         //     cb(null);
+                //         // }
+                //     }
+                // }
                 // cb(null);
             },
             function (cb) {
@@ -762,7 +772,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
                                 //data.documents.files.push(file.filename);
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname, mimetype: file.mimetype, ext: file.filename.split(".")[1] ,size :file.size});
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname, mimetype: file.mimetype, ext: file.filename.split(".")[1], size: file.size });
                             } else if (file.fieldname === "photos") {
                                 let isSquareImage = false;
                                 let thumbnailName =
@@ -810,12 +820,12 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                                 console.log("dateTimeData", dateTimeData)
 
 
-                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname , size :file.size });
+                                data.media[file.fieldname].files.push({ filename: file.filename, thumbnail: thumbnailKey, originalname: file.originalname, size: file.size });
                             } else if (file.fieldname === "videos") {
                                 // data.media[file.fieldname].files.push(
                                 //   "http://" + req.hostname + "/uploads/" + file.filename
                                 // );
-                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname , size :file.size });
+                                data.media[file.fieldname].files.push({ filename: file.filename, originalname: file.originalname, size: file.size });
                                 //data.media[file.fieldname].files.push(file.filename);
                             }
                         }
@@ -847,7 +857,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
 
 
 
-                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname,size :obj.size, thumbnail: thumbnailKeyy, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
+                        photosData[index] = { photo_name: obj.filename, originalname: obj.originalname, size: obj.size, thumbnail: thumbnailKeyy, createdBy: ObjectID(req.auth._id), type: 1, status: 1, createdAt: new Date() };
 
                     });
 
@@ -891,7 +901,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                         video_screenshot = video_screenshot[video_screenshot.length - 1];
 
                         let thumbnails = "thumb-" + obj.filename.split(".")[0] + ".jpg";
-                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails,size :obj.size, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
+                        videosData[index] = { video_name: obj.filename, video_screenshot: video_screenshot, thumbnail: thumbnails, size: obj.size, status: 1, originalname: obj.originalname, type: 2, createdBy: ObjectID(req.auth._id), createdAt: new Date() };
                     });
 
                     //console.log("videosDatavideosDatavideosDatavideosDatavideosData:",videosData);
@@ -926,7 +936,7 @@ mediaCtrl.mediaMasterSave = (req, res) => {
                     //console.log("All data.tags >>>>>>>>>> :",data.tags);
                     data.media.documents.files.map((obj, index) => {
 
-                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, size :obj.size ,createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
+                        documentsData[index] = { document_name: obj.filename, originalname: obj.originalname, size: obj.size, createdBy: ObjectID(req.auth._id), type: 3, status: 1, createdAt: new Date() };
 
                     });
 
