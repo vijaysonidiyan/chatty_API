@@ -58,7 +58,7 @@ router.route("/favouriteUserList1").post(userCtrl.favouriteUserList1)
 router.route("/resendOtpUser").post(userCtrl.resendOtpUser)
 
 //Create user Data : http://localhost:5001/v1/user/verifyContactList
-router.route("/verifyContactList").post(userCtrl.verifyContactList)
+router.route("/verifyContactList").post(CONFIG.JWTTOKENALLOWACCESS,userCtrl.verifyContactList)
 
 
 module.exports = router;

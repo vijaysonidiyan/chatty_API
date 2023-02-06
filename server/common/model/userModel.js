@@ -21,9 +21,11 @@ class userModel extends ModelBase {
             countryName: { type: String, allowNullEmpty: false },
             isverified: { type: Boolean, allowNullEmpty: false },
             profile_image: { type: String, allowNullEmpty: true },
+          
             createdby: { type: Object, allowNullEmpty: true },
             updatedBy: { type: Object, allowNullEmpty: true },
             updatedBy: { type: Object, allowNullEmpty: true },
+            blockUser:{type: Array, allowNullEmpty: true},
             status: {
                 type: Number,
                 allowNullEmpty: false,

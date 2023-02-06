@@ -13,6 +13,10 @@ class favouriteModel extends ModelBase {
                 allowNullEmpty: false,
                 enum: { 1: "active", 2: "inactive" }
             },
+            updatedAt: { type: Object, allowNullEmpty: true },
+            createdAt: { type: Object, allowNullEmpty: true },
+            createdBy: { type: Object, allowNullEmpty: true },
+            updatedBy: { type: Object, allowNullEmpty: true },
         });
     }
 

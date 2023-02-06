@@ -9,6 +9,7 @@ const UserModel = new (require("./../../common/model/userModel"))
 const VarificationCodeModel = new (require("./../../common/model/varificationCodeModel"))
 const FavouriteModel = new (require("./../../common/model/favouriteModel"))
 const UserWiseVerifiedUserModel = new (require("./../../common/model/userWiseVerifiedUserModel"))
+const ContactModel = new (require("./../../common/model/contactModel"))
 const ChatModel = new (require("./../../common/model/chatModel"))
 const ObjectID = require("mongodb").ObjectID;
 const CONFIG = require("../../config");
@@ -224,8 +225,8 @@ userCtrl.userLoginForWeb1 = (req, res) => {
             response.send(res);
         } else if (UserData !== null) {
             console.log(".....................................", UserData)
-           // let activity = parseInt(req.body.activity);
-          //  console.log("------------------------------------", activity);
+            // let activity = parseInt(req.body.activity);
+            //  console.log("------------------------------------", activity);
             VarificationCodeModel.removeMany({
                 userId: ObjectID(UserData._id), activity: 1
             }, function (err, removecode) {
@@ -379,7 +380,7 @@ userCtrl.userLoginForWeb = (req, res) => {
         } else if (UserData !== null) {
             console.log(".....................................", UserData)
             //let activity = parseInt(req.body.activity);
-           // console.log("------------------------------------", activity);
+            // console.log("------------------------------------", activity);
             VarificationCodeModel.removeMany({
                 userId: ObjectID(UserData._id), activity: 1
             }, function (err, removecode) {
@@ -529,7 +530,7 @@ userCtrl.userCreate = (req, res) => {
         } else if (UserData !== null) {
             console.log(".....................................", UserData)
             //let activity = parseInt(req.body.activity);
-          //  console.log("------------------------------------", activity);
+            //  console.log("------------------------------------", activity);
             VarificationCodeModel.removeMany({
                 userId: ObjectID(UserData._id), activity: 1
             }, function (err, removecode) {
@@ -1271,8 +1272,8 @@ userCtrl.getActiveUserList = (req, res) => {
     let sortDirection = "";
     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
 
-    var userId=ObjectID(req.auth._id)
-    console.log("userIduserIduserIduserId",userId)
+    var userId = ObjectID(req.auth._id)
+    console.log("userIduserIduserIduserId", userId)
 
     let condition = {};
 
@@ -1306,9 +1307,9 @@ userCtrl.getActiveUserList = (req, res) => {
 
                     },
                     {
-                        
-                     _id: { $ne: ObjectID(req.auth._id) },
-                          
+
+                        _id: { $ne: ObjectID(req.auth._id) },
+
 
                     }
                 ]
@@ -1329,8 +1330,8 @@ userCtrl.getActiveUserList = (req, res) => {
                 updatedAt: 1,
                 profile_image: 1,
                 userName: 1,
-                countryCode:1,
-                countryName:1
+                countryCode: 1,
+                countryName: 1
 
 
 
@@ -1366,9 +1367,9 @@ userCtrl.getActiveUserList = (req, res) => {
 
             },
             {
-                        
-             _id: { $ne: ObjectID(req.auth._id) },
-                     
+
+                _id: { $ne: ObjectID(req.auth._id) },
+
 
             }
         ]
@@ -2138,19 +2139,15 @@ userCtrl.stateListForAdmin = (req, res) => {
 };
 
 
-
-
-
-
 //--roleMaster  save Api
 userCtrl.verifyContactList1 = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
     var resultList = []
     for (let i = 0; i < req.body.data.length; i++) {
-        console.log("datadatadatadtadtadtadat",req.body.data[i])
+        console.log("datadatadatadtadtadtadat", req.body.data[i])
 
-       
+
         let query = {
             mobileNo: req.body.data[i]
         }
@@ -2159,11 +2156,11 @@ userCtrl.verifyContactList1 = (req, res) => {
                 response.setError(AppCode.Fail);
                 response.send(res);
             } else if (roleFind !== null) {
-                console.log("..........",roleFind)
+                console.log("..........", roleFind)
                 resultList.push({
 
                     mobileNo: roleFind.mobileNo,
-                    userName:roleFind.userName,
+                    userName: roleFind.userName,
                     isverified: roleFind.isverified,
 
 
@@ -2200,27 +2197,23 @@ userCtrl.verifyContactList1 = (req, res) => {
 
 };
 
-
-
 //--verifieduser  save Api
 userCtrl.verifyContactList = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
-   // let data = req.body;
+    // let data = req.body;
     let searchKey = "";
     let options = {};
     let condition = {};
     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
     let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
     let limit = !!req.query.limit ? parseInt(req.query.limit) : 100000000;
-    //let loginUserId = ObjectID(req.payload.userId);
-    // const limit = 100000;
     const skip = limit * parseInt(pageNumber);
     options.skip = skip;
     options.limit = limit;
+
     var resultList = []
     for (let i = 0; i < req.body.data.length; i++) {
-       // console.log("datadatadatadtadtadtadat",req.body.data[i])
        
         let query = [
             {
@@ -2229,7 +2222,6 @@ userCtrl.verifyContactList = (req, res) => {
                         {
                             mobileNo: req.body.data[i]
                         },
-
 
                     ]
                 },
@@ -2249,10 +2241,10 @@ userCtrl.verifyContactList = (req, res) => {
             },
             {
                 $sort: {
-                  createdAt: -1,
+                    createdAt: -1,
                 },
-              },
-           
+            },
+
 
         ];
         try {
@@ -2263,65 +2255,90 @@ userCtrl.verifyContactList = (req, res) => {
                 else if (_.isEmpty(assignTeam)) {
                     var m1 = req.body.data[i]
                     resultList.push({
-    
+
                         mobileNo: m1,
                         isverified: false,
-    
-    
+
+
                     })
-                   // console.log(",,,,,,,,,,,else ", resultList)
-                    if ((req.body.data.length - 1) == i) {
+                  
+                    // if ((req.body.data.length - 1) == i) {
 
-
-
-                        response.setData(AppCode.Success, resultList);
-                        response.send(res);
-                    }
+                    //     response.setData(AppCode.Success, resultList);
+                    //     response.send(res);
+                    // }
                 }
                 else {
-                    //console.log("..........",assignTeam)
-                    let query={
+                  
+                    let query = {
                         mobileNo: assignTeam[0].mobileNo,
-                       // userName:assignTeam[0].userName,
+                        userId: ObjectID(req.auth._id),
                         isverified: assignTeam[0].isverified,
 
                     }
-                    if(!!assignTeam[0].userName)
-                    {
-                        query.userName=assignTeam[0].userName
-                        
+
+                    if (!!assignTeam[0].userName) {
+                        query.userName = assignTeam[0].userName
+
                     }
-                    else{
-                        query.userName=""
+                    else {
+                        query.userName = ""
 
                     }
                     resultList.push({
-    
-                        mobileNo: assignTeam[0].mobileNo,
-                        userName:assignTeam[0].userName,
-                        isverified: assignTeam[0].isverified,
-    
-    
-                    })
-                    UserWiseVerifiedUserModel.create(query, function (err, userwiseList) {
-                        if (err) {
-                          console.log("event error", err)
-                          response.setError(AppCode.InternalServerError);
-                          response.send(res);
-                        } else {
-                          console.log(".....length.**************..", userwiseList)
-                         
 
-                        }
-                      });
+                        mobileNo: assignTeam[0].mobileNo,
+                        userName: assignTeam[0].userName,
+                        isverified: assignTeam[0].isverified,
+
+
+                    })
+
                     if ((req.body.data.length - 1) == i) {
+                        console.log("resultListresultListresultList", resultList);
+
+                        let abc = []
+
+                        resultList.forEach(Element => {
+                            if (Element.isverified == true) {
+                                Element.userId = ObjectID(req.auth._id)
+                                abc.push(Element)
+
+
+                                let queryy = {
+                                    mobileNo: Element.mobileNo,
+                                    userId: Element.userId
+
+                                }
+                                UserWiseVerifiedUserModel.findOne(queryy, {}, (err, verifieddata) => {
+                                    if (err) {
+                                        console.log(err)
+                                        response.setError(AppCode.Fail);
+                                        response.send(res);
+                                    } else if (verifieddata !== null) {
+                                        console.log("already exist...........");
+
+                                    } else {
+                                        UserWiseVerifiedUserModel.create(Element, function (err, userwiseList) {
+                                            if (err) {
+                                                console.log("event error", err)
+                                                response.setError(AppCode.InternalServerError);
+                                                response.send(res);
+                                            } else {
+                                                console.log(".............craeted data.....................", userwiseList)
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                        })
+                        console.log("abcccccccccccc", abc);
                         response.setData(AppCode.Success, resultList);
                         response.send(res);
                     }
 
-
-    
-                   // console.log(",,,,,,,,,,,else iff", resultList)
                 }
 
             });
@@ -2330,9 +2347,7 @@ userCtrl.verifyContactList = (req, res) => {
             response.send(res);
         }
 
-    
     }
-
 
 };
 
