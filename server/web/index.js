@@ -591,6 +591,8 @@ MongoConnect.init()
 
                         file_original_name: msg.file_original_name,
 
+                        thumbnail: msg.thumbnail,
+
                         size: msg.size,
 
                         createdAt: new Date()
@@ -619,6 +621,8 @@ MongoConnect.init()
                         video_screenshort: msg.video_screenshort,
 
                         file_original_name: msg.file_original_name,
+
+                        thumbnail: msg.thumbnail,
 
                         size: msg.size,
 
