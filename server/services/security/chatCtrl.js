@@ -375,7 +375,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
           thumbnail:1,
           isDeleted: 1,
           isDeletedBy:1,
-
+          file_original_name:1,
           // senderData: {
           //   _id: "$senderData._id",
           //   profileHeader: 1,
