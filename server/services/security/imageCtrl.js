@@ -13,32 +13,139 @@ const ImageModel = new (require("../../common/model/imageModel"))();
 const BlockUserModel = new (require("../../common/model/blockUserModel"))();
 const FavouriteModel = new (require("../../common/model/favouriteModel"))();
 const NotificationModel =
-  new (require("../../common/model/NotificationModel"))();
+    new (require("../../common/model/NotificationModel"))();
 const UserModel =
-  new (require("../../common/model/userModel"))();
+    new (require("../../common/model/userModel"))();
 
+/* Create Decoration Data */
+
+imageCtrl.imageCreate1 = (req, res) => {
+    var response = new HttpRespose()
+    var data = req.body;
+    console.log("fileeeeeeeee", req.files.Image)
+
+    for (let i = 0; i < req.files.Image.length; i++) {
+
+
+        data.Image = req.files.Image[i].filename;
+
+        console.log("............", data);
+       
+        ImageModel.create(data, (err, image) => {
+            if (err) {
+                console.log("////////////", err)
+                response.setError(AppCode.Fail);
+                response.send(res);
+            } else {
+
+                console.log("else");
+
+            }
+        });
+    }
+
+
+    response.setData(AppCode.Success);
+    response.send(res);
+};
 /* Create Decoration Data */
 
 imageCtrl.imageCreate = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
- console.log("fileeeeeeeee",req.files.Image)
-    if (!!req.files.Image) {
-        data.Image = req.files.Image[0].filename;
-    }
+    let filesArr = req.files;
 
-    console.log("............",data);
-   
-    ImageModel.create(data, (err, image) => {
-        if (err) {
-            response.setError(AppCode.Fail);
-            response.send(res);
-        } else {
-            response.setData(AppCode.Success, image);
-            response.send(res);
+    let abc = [];
+    if (
+        filesArr !== "" &&
+        filesArr !== null &&
+        filesArr !== undefined &&
+        filesArr !== [] &&
+        filesArr !== {}
+    ) {
+        for (let filesArrKey in filesArr) {
+            let files = filesArr[filesArrKey];
+            for (let filesKey in files) {
+                let file = files[filesKey];
+                console.log("filefilefile",file);
+              
+
+            
+                abc.push(file.filename)
+            }
         }
-    });
+    }
+    console.log("abcabcabcbabc", abc);
+    abc.forEach(Element => {
+        let query = {}
+        if (!!file.mimetype && file.mimetype !== "video/mp4") {
+            query.file_name = Element.filename,
+            query.type = "video"
+        }
+        else {
+            query.file_name = Element.filename,
+            query.type = "photo" 
+
+        }
+      //  query.file_name = Element
+        ImageModel.create(query, (err, decoration) => {
+            if (err) {
+                response.setError(AppCode.Fail);
+                response.send(res);
+            } else {
+                // response.setData(AppCode.Success, decoration);
+                // response.send(res);
+            }
+        });
+
+
+
+    })
+    response.setData(AppCode.Success);
+    response.send(res);
+    
+   
 };
+
+
+
+// imageCtrl.imageCreate = (req, res) => {
+//     var response = new HttpRespose()
+//     var data = req.body;
+//     let filesArr = req.files;
+//     console.log(".................",req.files.Image)
+
+//     let abc = [];
+//     if (
+//         filesArr !== "" &&
+//         filesArr !== null &&
+//         filesArr !== undefined &&
+//         filesArr !== [] &&
+//         filesArr !== {}
+//     ) {
+//         for (let filesArrKey in filesArr) {
+//             let files = filesArr[filesArrKey];
+//             for (let filesKey in files) {
+//                 let file = files[filesKey];
+//                 data.Image = file.filename
+//                 console.log("datadtadtadat",data);
+
+//                 ImageModel.create(data, (err, decoration) => {
+//                     if (err) {
+//                         console.log("err",err);
+//                         response.setError(AppCode.Fail);
+//                         response.send(res);
+//                     } else {
+//                        // response.setData(AppCode.Success, decoration);
+//                       //  response.send(res);
+//                     }
+//                 });
+               
+//             }
+//         }
+//     }
+   
+// };
 
 
 // update image
@@ -46,9 +153,9 @@ imageCtrl.imageCreate = (req, res) => {
 //update menuMaster Api
 imageCtrl.imageUpdate = (req, res) => {
     var response = new HttpRespose();
-   var data = req.body
-   
-   
+    var data = req.body
+
+
     let query = {
         _id: ObjectID(req.body._id)
     }
@@ -63,11 +170,11 @@ imageCtrl.imageUpdate = (req, res) => {
         }
         else {
             let updateDataquery = {}
-            if (!!req.files.Image) { 
-                updateDataquery.Image = req.files.Image[0].filename; 
-            } 
-           
-           // delete req.body._id
+            if (!!req.files.Image) {
+                updateDataquery.Image = req.files.Image[0].filename;
+            }
+
+            // delete req.body._id
             ImageModel.updateOne(query, { $set: updateDataquery }, function (err, menuUpdate) {
                 if (err) {
                     response.setError(AppCode.Fail);

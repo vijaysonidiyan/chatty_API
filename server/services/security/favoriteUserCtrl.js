@@ -18,12 +18,52 @@ const NotificationModel =
 const UserModel =
   new (require("../../common/model/userModel"))();
 
+// favoriteUserCtrl.favoriteUser = (req, res) => {
+//   var response = new HttpRespose();
+ 
+//   try {
+//     FavouriteModel.findOne(
+//       {
+//         userId: ObjectID(req.auth._id),
+//         favId: ObjectID(req.body.favId),
+//         status: 1,
+//       },
+//       (err, favoriteUserFind) => {
+//         if (err) {
+//           console.log(err);
+//           throw err;
+//         } else if (_.isEmpty(favoriteUserFind)) {
+//           FavouriteModel.create(
+//             {
+//               userId: ObjectID(req.auth._id),
+//               favId: ObjectID(req.body.favId),
+//             },
+//             (err, favoriteUser) => {
+//               if (err) {
+//                 console.log(err);
+//                 throw err;
+//               } else {
+//                 response.setError(AppCode.Success, favoriteUser);
+//                 response.send(res);
+
+//               }
+//             }
+//           );
+//         } else {
+//           response.setError(AppCode.allReadyadded);
+//           response.send(res);
+//         }
+//       }
+//     );
+//   } catch (exception) {
+//     response.setError(AppCode.InternalServerError);
+//     response.send(res);
+//   }
+// };
+
 favoriteUserCtrl.favoriteUser = (req, res) => {
   var response = new HttpRespose();
-  // let data = {
-  //     userId: ObjectID(req.payload.userId),
-  //     blockedUserId: ObjectID(req.body.blockedUserId)
-  // }
+
   try {
     FavouriteModel.findOne(
       {
@@ -46,15 +86,39 @@ favoriteUserCtrl.favoriteUser = (req, res) => {
                 console.log(err);
                 throw err;
               } else {
-                response.setError(AppCode.Success, favoriteUser);
+                let isfavorite = {
+                  isfavorite: true
+
+                }
+                response.setData(AppCode.Success, isfavorite);
                 response.send(res);
 
               }
             }
           );
         } else {
-          response.setError(AppCode.allReadyadded);
-          response.send(res);
+          FavouriteModel.remove(
+            {
+              userId: ObjectID(req.auth._id),
+              favId: ObjectID(req.body.favId),
+            },
+            (err, favorite) => {
+              if (err) {
+                throw err;
+              } else {
+                let isfavorite = {
+                  isfavorite: false
+
+                }
+
+                response.setData(AppCode.Success, isfavorite);
+                response.send(res);
+              }
+            }
+          );
+
+          // response.setError(AppCode.allReadyadded);
+          // response.send(res);
         }
       }
     );
