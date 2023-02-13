@@ -87,7 +87,7 @@ favoriteUserCtrl.favoriteUser = (req, res) => {
                 throw err;
               } else {
                 let isfavorite ={
-                  isfavorite :true
+                  isFavourite :true
 
                 }
                 response.setData(AppCode.Success,isfavorite);
@@ -107,7 +107,7 @@ favoriteUserCtrl.favoriteUser = (req, res) => {
                 throw err;
               } else {
                 let isfavorite ={
-                  isfavorite :false
+                  isFavourite :false
 
                 }
 

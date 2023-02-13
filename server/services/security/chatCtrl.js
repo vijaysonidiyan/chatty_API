@@ -1107,7 +1107,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                     receiverId: x.receiverId,
                     unreadCount: x.unreadCount,
                     chat_status:false,
-                    favouritedata:x.favouritedata,
+                    isFavourite:x.favouritedata,
                    
 
 
