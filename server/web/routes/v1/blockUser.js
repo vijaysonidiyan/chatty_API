@@ -15,7 +15,7 @@ const CONFIG = require("../../../config");
 router.route("/blockUser").post(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.blockUser);
 
 // Get Interest  details: http://localhost:3001/v1/blockUser/get-blockeduserList-Byid
-router.route("/getBlockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockUserList);
+//router.route("/getBlockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.getBlockUserList);
 
 // Get Interest  details: http://localhost:3001/v1/blockUser/blockUserList
 router.route("/blockUserList").get(CONFIG.JWTTOKENALLOWACCESS,BlockUserCtrl.blockUserList);
