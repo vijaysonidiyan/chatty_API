@@ -2201,7 +2201,7 @@ userCtrl.verifyContactList1 = (req, res) => {
 userCtrl.verifyContactList = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
-   
+    // let data = req.body;
     let searchKey = "";
     let options = {};
     let condition = {};
@@ -2262,7 +2262,11 @@ userCtrl.verifyContactList = (req, res) => {
 
                     })
                   
-                   
+                    if ((req.body.data.length - 1) == i) {
+
+                        response.setData(AppCode.Success, resultList);
+                        response.send(res);
+                    }
                 }
                 else {
                   
@@ -2312,12 +2316,12 @@ userCtrl.verifyContactList = (req, res) => {
                                         response.setError(AppCode.Fail);
                                         response.send(res);
                                     } else if (verifieddata !== null) {
-                                       // console.log("already exist...........");
+                                        //console.log("already exist...........");
 
                                     } else {
                                         UserWiseVerifiedUserModel.create(Element, function (err, userwiseList) {
                                             if (err) {
-                                              //  console.log("event error", err)
+                                                console.log("event error", err)
                                                 response.setError(AppCode.InternalServerError);
                                                 response.send(res);
                                             } else {
@@ -2330,7 +2334,7 @@ userCtrl.verifyContactList = (req, res) => {
                             }
 
                         })
-                     //   console.log("abcccccccccccc", abc);
+                       // console.log("abcccccccccccc", abc);
                         response.setData(AppCode.Success, resultList);
                         response.send(res);
                     }
