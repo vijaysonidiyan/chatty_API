@@ -856,6 +856,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 },
                 isDeletedBy:{ $nin :List }
               },
+              
 
             },
             {
@@ -874,6 +875,41 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                 
               },
             },
+          //   {
+          //     $lookup: {
+          //         from: "favourite",
+          //         as: "favouritedata",
+          //         let: { "favId": "$favId" },
+          //         pipeline: [
+          //           {
+          //             $match: {
+          //                 $expr: {
+          //                     $and: [
+          //                         {
+          //                             $eq: ["$userId", ObjectID(req.auth.userId)]
+          //                         },
+          //                         {
+          //                             $eq: ["$favId", $$favId],
+          //                         },
+          //                     ]
+          //                 }
+          //             }
+          //         },
+          //             {
+          //                 $project: {
+          //                     _id: 1,
+          //                 }
+          //             }
+          //         ]
+          //     },
+          // },
+          // {
+          //     $unwind: {
+          //         "path": "$favouritedata",
+          //         "preserveNullAndEmptyArrays": true
+          //     },
+          // },
+          
           ],
         },
       },
@@ -905,6 +941,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
 
               },
             },
+           
             {
               $group: {
                 _id: null,
@@ -914,23 +951,53 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           ],
         },
       },
+
       {
         $unwind: {
           path: "$unreadCount",
           preserveNullAndEmptyArrays: true,
         },
       },
-
+      {
+        $lookup: {
+          from: "favourite",
+          as: "favouritedata",
+          let: { userId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$userId", ObjectID(req.auth._id)],
+                    },
+                    {
+                      $eq: ["$favId", "$$userId"],
+                    },
+                    
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+   
       {
         $project: {
           _id: 1,
+          favouritedata: {$cond: {
+            if: { $eq:["$favouritedata",[]] },
+            then: false ,
+            else: true,
+          }},
           userId: 1,
           mobileNo: 1,
           countryName: 1,
           countryCode: 1,
           isverified: 1,
           status: 1,
-         chat:1,
+          chat:1,
           userName: 1,
           firstName: 1,
           lastName: 1,
@@ -971,10 +1038,8 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
           //user:true,
           userData: {
             $cond: {
-              if: { $ne: ["$chat.sender_id", ObjectID(req.auth._id)] }, then: "sender",
-              else: {
-                $cond: { if: { $ne: ["$chat.reciver_id", ObjectID(req.auth._id)] }, then: "receiver", else: "" }
-              }
+              if: { $eq: ["$chat.sender_id", (req.auth._id)] }, then: "sender",
+              else: "reciever"
             }
           },
 
@@ -1041,7 +1106,10 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
                     senderId: x.senderId,
                     receiverId: x.receiverId,
                     unreadCount: x.unreadCount,
-                    chat_status:false
+                    chat_status:false,
+                    isFavourite:x.favouritedata,
+                   
+
 
                   }
                   abc.push(temp)

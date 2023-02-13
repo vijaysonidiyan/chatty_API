@@ -2262,11 +2262,49 @@ userCtrl.verifyContactList = (req, res) => {
 
                     })
                   
-                    // if ((req.body.data.length - 1) == i) {
+                    if ((req.body.data.length - 1) == i) {
+                        
+                        let abc = []
 
-                    //     response.setData(AppCode.Success, resultList);
-                    //     response.send(res);
-                    // }
+                        resultList.forEach(Element => {
+                            if (Element.isverified == true) {
+                                Element.userId = ObjectID(req.auth._id)
+                                abc.push(Element)
+
+
+                                let queryy = {
+                                    mobileNo: Element.mobileNo,
+                                    userId: Element.userId
+
+                                }
+                                UserWiseVerifiedUserModel.findOne(queryy, {}, (err, verifieddata) => {
+                                    if (err) {
+                                        console.log(err)
+                                        response.setError(AppCode.Fail);
+                                        response.send(res);
+                                    } else if (verifieddata !== null) {
+                                        //console.log("already exist...........");
+
+                                    } else {
+                                        UserWiseVerifiedUserModel.create(Element, function (err, userwiseList) {
+                                            if (err) {
+                                                console.log("event error", err)
+                                                response.setError(AppCode.InternalServerError);
+                                                response.send(res);
+                                            } else {
+                                              //  console.log(".............craeted data.....................", userwiseList)
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                        })
+
+                        response.setData(AppCode.Success, resultList);
+                        response.send(res);
+                    }
                 }
                 else {
                   
@@ -2295,7 +2333,7 @@ userCtrl.verifyContactList = (req, res) => {
                     })
 
                     if ((req.body.data.length - 1) == i) {
-                        console.log("resultListresultListresultList", resultList);
+                      //  console.log("resultListresultListresultList", resultList);
 
                         let abc = []
 
@@ -2316,7 +2354,7 @@ userCtrl.verifyContactList = (req, res) => {
                                         response.setError(AppCode.Fail);
                                         response.send(res);
                                     } else if (verifieddata !== null) {
-                                        console.log("already exist...........");
+                                        //console.log("already exist...........");
 
                                     } else {
                                         UserWiseVerifiedUserModel.create(Element, function (err, userwiseList) {
@@ -2325,7 +2363,7 @@ userCtrl.verifyContactList = (req, res) => {
                                                 response.setError(AppCode.InternalServerError);
                                                 response.send(res);
                                             } else {
-                                                console.log(".............craeted data.....................", userwiseList)
+                                              //  console.log(".............craeted data.....................", userwiseList)
 
                                             }
                                         });
@@ -2334,7 +2372,7 @@ userCtrl.verifyContactList = (req, res) => {
                             }
 
                         })
-                        console.log("abcccccccccccc", abc);
+                       // console.log("abcccccccccccc", abc);
                         response.setData(AppCode.Success, resultList);
                         response.send(res);
                     }
