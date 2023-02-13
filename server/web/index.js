@@ -13,6 +13,7 @@ const NotificationModel =
   new (require("../../server/common/model/NotificationModel"))();
 const DeviceTokenModel =
   new (require("./../../server/common/model/deviceTokenModel"))();
+const BlockUserModel = new (require("../../server/common/model/blockUserModel"))();
 const ObjectID = require("mongodb").ObjectID;
 const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
@@ -485,6 +486,332 @@ MongoConnect.init()
 
 
 
+      
+// old message API without block functonality
+      // socket.on("message", function (msg) {
+      //   console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
+
+      //   var query = {
+      //     message: msg.message,
+      //     sender_id: msg.sender_id,
+      //     reciver_id: msg.reciver_id,
+      //     type: msg.type,
+
+      //   };
+
+      //   if (!!msg.size) {
+      //     query.size = msg.size
+      //   }
+      //   if (!!msg.file_name) {
+      //     query.file_name = msg.file_name
+      //   }
+      //   if (!!msg.video_screenshort) {
+      //     query.video_screenshort = msg.video_screenshort
+      //   }
+      //   if (!!msg.thumbnail) {
+      //     query.thumbnail = msg.thumbnail
+      //   }
+      //   if (!!msg.file_original_name) {
+      //     query.file_original_name = msg.file_original_name
+      //   }
+
+
+
+      //   console.log("message data", query);
+      //   // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
+      //   var socket_id = usersss[msg.reciver_id];
+      //   console.log("m old socketId: reciverID ", socket_id);
+      //   var socket_id1 = usersss[msg.sender_id];
+      //   console.log("m old socketId: sender_id ", socket_id1);
+
+      //   console.log("new_message call", users)
+
+      //   const groupList = [];
+      //   groupList.push(ObjectID(msg.reciver_id))
+      //   console.log("reciver_id......................................................", groupList)
+
+      //   let Query = [
+      //     {
+      //       $match: {
+      //         $and: [
+      //           {
+      //             _id: { $eq: ObjectID(msg.sender_id) }
+      //           },
+      //           {
+      //             blockUser: {
+      //               $in: groupList,
+      //             },
+      //           }
+
+      //         ]
+      //       },
+      //     }
+
+      //   ]
+
+
+      //   console.log(Query);
+      //   UserModel.aggregate(Query, (err, user) => {
+      //     if (err) {
+      //       throw err;
+      //     }
+      //     else if (_.isEmpty(user)) {
+      //       console.log("else iffffffffffffffffffffffffffffffffffff")
+      //       ChatModel.create(query, function (err, chat) {
+      //         if (err) {
+      //           console.log("......err.....")
+      //           //TODO: Log the error here
+      //           console.log(err.message);
+      //           console.log(err);
+      //         } else {
+      //           console.log(".....else in else if")
+      //           if (!!chat) {
+      //             console.log("chatchatchatchatchatchatchatchatchat", chat);
+
+
+      //             for (let i = 0; i < users.length; i++) {
+
+
+
+      //               if (msg.reciver_id == users[i].userId && users[i].userId != undefined) {
+
+
+      //                 io.to(users[i].socketId).emit("new_message", {
+      //                   _id: chat._id,
+
+      //                   message: msg.message,
+
+      //                   sender_id: msg.sender_id,
+
+      //                   reciver_id: msg.reciver_id,
+
+      //                   type: msg.type,
+
+      //                   file_name: msg.file_name,
+
+      //                   video_screenshort: msg.video_screenshort,
+
+      //                   file_original_name: msg.file_original_name,
+
+      //                   thumbnail: msg.thumbnail,
+
+      //                   size: msg.size,
+
+      //                   createdAt: new Date()
+
+      //                 });
+
+
+
+
+      //               }
+      //               if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+
+      //                 io.to(users[i].socketId).emit("return_message", {
+      //                   _id: chat._id,
+
+      //                   message: msg.message,
+
+      //                   sender_id: msg.sender_id,
+
+      //                   reciver_id: msg.reciver_id,
+
+      //                   type: msg.type,
+
+      //                   file_name: msg.file_name,
+
+      //                   video_screenshort: msg.video_screenshort,
+
+      //                   file_original_name: msg.file_original_name,
+
+      //                   thumbnail: msg.thumbnail,
+
+      //                   size: msg.size,
+
+      //                   createdAt: new Date()
+
+      //                 });
+
+
+
+      //               }
+
+      //             }
+      //             // io.to(socket_id).emit("new_message", {
+      //             //   _id:chat._id,
+      //             //   message: msg.message,
+      //             //   sender_id: msg.sender_id,
+      //             //   reciver_id: msg.reciver_id,
+      //             //   type: "message",
+      //             //   createdAt:new Date()
+      //             // });
+
+      //             let isSendNotification = true;
+      //             ChatScreenManagementModel.findOne(
+      //               { userId: ObjectID(msg.reciver_id) },
+      //               function (err, chatManage) {
+      //                 if (err) {
+      //                   console.log(err);
+      //                 } else {
+      //                   console.log(".........chatscreenmanagementModel")
+      //                   if (!!chatManage) {
+      //                     let idD = "";
+      //                     if (!!chatManage.chatWith) {
+      //                       idD = chatManage.chatWith.toString();
+      //                     }
+
+      //                     console.log("Chat With ID", idD);
+      //                     // if (chatManage.status == 1) {
+      //                     //   isSendNotification = false;
+      //                     // }
+      //                     // if (chatManage.status == 2 && idD == msg.sender_id) {
+      //                     //   isSendNotification = false;
+      //                     // }
+      //                   }
+      //                   if (isSendNotification == true) {
+      //                     UserModel.findOne(
+      //                       { _id: ObjectID(msg.sender_id) },
+      //                       (err, user) => {
+      //                         if (err) {
+      //                           console.log(err);
+      //                         } else if (!!user) {
+      //                           UserModel.findOne(
+      //                             { _id: ObjectID(msg.reciver_id) },
+      //                             (err, receiverUser) => {
+      //                               if (err) {
+      //                                 console.log(err);
+      //                               } else if (!!receiverUser) {
+      //                                 let mesg = user.userName + " message you!",
+      //                                   title = "New Message",
+      //                                   type = "message",
+      //                                   senderId = msg.sender_id,
+      //                                   receiverId = msg.reciver_id,
+      //                                   receiverName = user.userName,
+      //                                   senderImage = !!receiverUser.profile_image
+      //                                     ? receiverUser.profile_image
+      //                                     : "",
+      //                                   receiverImage = !!user.profile_image
+      //                                     ? user.profile_image
+      //                                     : "",
+      //                                   res = "";
+
+      //                                 // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
+      //                                 //     if (err) {
+      //                                 //         throw err
+      //                                 //     } else {
+      //                                 //         if (!!deviceTokensData) {
+      //                                 //             console.log("DT", deviceTokensData)
+      //                                 //             let tokens = deviceTokensData.deviceToken;
+      //                                 //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
+      //                                 //         }
+
+      //                                 //     }
+      //                                 // });
+      //                                 let query = [
+      //                                   {
+      //                                     $match: { userId: ObjectID(msg.reciver_id) },
+      //                                   },
+      //                                 ];
+      //                                 DeviceTokenModel.aggregate(
+      //                                   query,
+      //                                   function (err, deviceTokensData) {
+      //                                     if (err) {
+      //                                       console.log(err);
+      //                                     } else {
+      //                                       console.log(
+      //                                         "deviceTokensDataaaaaaaaaaaaaa",
+      //                                         deviceTokensData
+      //                                       );
+      //                                       if (!!deviceTokensData) {
+      //                                         deviceTokensData.forEach((element) => {
+      //                                           let tokens = element.deviceToken;
+      //                                           if (!!tokens) {
+      //                                             sendToTopics(
+      //                                               mesg,
+      //                                               title,
+      //                                               type,
+      //                                               senderId,
+      //                                               receiverId,
+      //                                               receiverName,
+      //                                               receiverImage,
+      //                                               senderImage,
+      //                                               tokens,
+      //                                               res
+      //                                             );
+      //                                           }
+      //                                         });
+      //                                       }
+      //                                     }
+      //                                   }
+      //                                 );
+
+      //                                 let notificationQuery = {
+      //                                   senderId: msg.sender_id,
+      //                                   reciverId: msg.reciver_id,
+      //                                   message: mesg,
+      //                                   type: type
+      //                                 }
+      //                                 NotificationModel.create(notificationQuery, (err, notification) => {
+      //                                   if (err) {
+      //                                     throw err;
+      //                                   } else {
+      //                                     console.log(".....notificationModel")
+
+      //                                   }
+      //                                 });
+      //                               }
+      //                             }
+      //                           );
+      //                         }
+      //                       }
+      //                     );
+      //                   }
+      //                 }
+      //               }
+      //             );
+      //           }
+      //         }
+      //       });
+
+      //     }
+      //     else {
+      //       console.log("reciver id is in block List so you cant message .......................................");
+      //       for (let i = 0; i < users.length; i++) {
+
+      //         if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+
+      //           io.to(users[i].socketId).emit("block_user", {
+
+
+      //             message: msg.message,
+
+      //             sender_id: msg.sender_id,
+
+      //             reciver_id: msg.reciver_id,
+
+      //             type: "message",
+
+      //             createdAt: new Date(),
+
+      //             isblock: true
+
+      //           });
+
+
+
+      //         }
+      //       }
+      //       //  response.setError(AppCode.unblockFirst);
+      //       // response.send(res);
+
+
+
+      //     }
+      //   });
+
+
+
+      // });
 
       socket.on("message", function (msg) {
         console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
@@ -513,10 +840,7 @@ MongoConnect.init()
           query.file_original_name = msg.file_original_name
         }
 
-
-
         console.log("message data", query);
-        // console.log("message Dataaaaaaaaaaaaaaaaaaaaaaaaaaa", query);
         var socket_id = usersss[msg.reciver_id];
         console.log("m old socketId: reciverID ", socket_id);
         var socket_id1 = usersss[msg.sender_id];
@@ -524,37 +848,47 @@ MongoConnect.init()
 
         console.log("new_message call", users)
 
-        const groupList = [];
-        groupList.push(ObjectID(msg.reciver_id))
-        console.log("reciver_id......................................................", groupList)
+        console.log("queryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", query)
+        console.log("reciver_id", ObjectID(msg.reciver_id))
+        console.log("sender_id", ObjectID(msg.sender_id))
+
 
         let Query = [
           {
             $match: {
-              $and: [
+              $or: [
                 {
-                  _id: { $eq: ObjectID(msg.sender_id) }
-                },
-                {
-                  blockUser: {
-                    $in: groupList,
+                  $expr: {
+                    $and: [
+                      {
+                        $eq: ["$userId", ObjectID(msg.sender_id)],
+                      },
+                      {
+                        $eq: ["$blockedUserId", ObjectID(msg.reciver_id)],
+                      },
+                    ],
                   },
-                }
-
-              ]
+                  $expr: {
+                    $and: [
+                      {
+                        $eq: ["$blockedUserId", ObjectID(msg.reciver_id)],
+                      },
+                      {
+                        $eq: ["$userId", ObjectID(msg.sender_id)],
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           }
 
         ]
-
-
-        console.log(Query);
-        UserModel.aggregate(Query, (err, user) => {
+        BlockUserModel.advancedAggregate(Query, {}, (err, leaveGetById) => {
           if (err) {
             throw err;
-          }
-          else if (_.isEmpty(user)) {
-            console.log("else iffffffffffffffffffffffffffffffffffff")
+          } else if (_.isEmpty(leaveGetById)) {
+            console.log(" no block user found.............................")
             ChatModel.create(query, function (err, chat) {
               if (err) {
                 console.log("......err.....")
@@ -693,18 +1027,6 @@ MongoConnect.init()
                                           : "",
                                         res = "";
 
-                                      // DeviceTokenModel.findOne({ userId: ObjectID(msg.reciver_id) }, function (err, deviceTokensData) {
-                                      //     if (err) {
-                                      //         throw err
-                                      //     } else {
-                                      //         if (!!deviceTokensData) {
-                                      //             console.log("DT", deviceTokensData)
-                                      //             let tokens = deviceTokensData.deviceToken;
-                                      //             sendToTopics(mesg, title, type, senderId, receiverId, receiverName, receiverImage, senderImage, tokens, res)
-                                      //         }
-
-                                      //     }
-                                      // });
                                       let query = [
                                         {
                                           $match: { userId: ObjectID(msg.reciver_id) },
@@ -771,9 +1093,8 @@ MongoConnect.init()
               }
             });
 
-          }
-          else {
-            console.log("reciver id is in block List so you cant message .......................................");
+          } else {
+            console.log("reciver id or sender ID is in block List so you cant message .......................................");
             for (let i = 0; i < users.length; i++) {
 
               if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
@@ -807,9 +1128,8 @@ MongoConnect.init()
           }
         });
 
-
-
       });
+
 
 
 
