@@ -10,6 +10,7 @@ class blockUserModel extends ModelBase {
         super(CONFIG.DB.MONGO.DB_NAME, "blockedUser", {
             userId: { type: Object, allowNullEmpty: false },
             blockedUserId: { type: Object, allowNullEmpty: true },//blockuserId
+            isBlock:{type: Boolean, allowNullEmpty: true},
             status: {
                 type: Number,
                 allowNullEmpty: false,
