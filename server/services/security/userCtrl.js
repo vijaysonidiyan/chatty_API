@@ -2198,7 +2198,7 @@ userCtrl.verifyContactList1 = (req, res) => {
 };
 
 //--verifieduser  save Api
-userCtrl.verifyContactList = (req, res) => {
+userCtrl.verifyContactList12 = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
     // let data = req.body;
@@ -2214,7 +2214,7 @@ userCtrl.verifyContactList = (req, res) => {
 
     var resultList = []
     for (let i = 0; i < req.body.data.length; i++) {
-       
+
         let query = [
             {
                 $match: {
@@ -2248,7 +2248,7 @@ userCtrl.verifyContactList = (req, res) => {
 
         ];
         try {
-            UserModel.advancedAggregate(query, {}, (err, assignTeam) => {
+            UserModel.aggregate(query, (err, assignTeam) => {
                 if (err) {
                     throw err;
                 }
@@ -2261,9 +2261,9 @@ userCtrl.verifyContactList = (req, res) => {
 
 
                     })
-                  
+
                     if ((req.body.data.length - 1) == i) {
-                        
+
                         let abc = []
 
                         resultList.forEach(Element => {
@@ -2292,7 +2292,7 @@ userCtrl.verifyContactList = (req, res) => {
                                                 response.setError(AppCode.InternalServerError);
                                                 response.send(res);
                                             } else {
-                                              //  console.log(".............craeted data.....................", userwiseList)
+                                                //  console.log(".............craeted data.....................", userwiseList)
 
                                             }
                                         });
@@ -2307,7 +2307,7 @@ userCtrl.verifyContactList = (req, res) => {
                     }
                 }
                 else {
-                  
+
                     let query = {
                         mobileNo: assignTeam[0].mobileNo,
                         userId: ObjectID(req.auth._id),
@@ -2333,7 +2333,7 @@ userCtrl.verifyContactList = (req, res) => {
                     })
 
                     if ((req.body.data.length - 1) == i) {
-                      //  console.log("resultListresultListresultList", resultList);
+                        //  console.log("resultListresultListresultList", resultList);
 
                         let abc = []
 
@@ -2363,7 +2363,7 @@ userCtrl.verifyContactList = (req, res) => {
                                                 response.setError(AppCode.InternalServerError);
                                                 response.send(res);
                                             } else {
-                                              //  console.log(".............craeted data.....................", userwiseList)
+                                                //  console.log(".............craeted data.....................", userwiseList)
 
                                             }
                                         });
@@ -2372,7 +2372,7 @@ userCtrl.verifyContactList = (req, res) => {
                             }
 
                         })
-                       // console.log("abcccccccccccc", abc);
+                        // console.log("abcccccccccccc", abc);
                         response.setData(AppCode.Success, resultList);
                         response.send(res);
                     }
@@ -2388,6 +2388,85 @@ userCtrl.verifyContactList = (req, res) => {
     }
 
 };
+
+//--verifieduser  save Api
+userCtrl.verifyContactList = (req, res) => {
+    var response = new HttpRespose()
+    var data = req.body;
+    // let data = req.body;
+    let searchKey = "";
+    let options = {};
+    let condition = {};
+    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+    let pageNumber = !!req.query.pageNumber ? req.query.pageNumber : 0;
+    let limit = !!req.query.limit ? parseInt(req.query.limit) : 100000000;
+    const skip = limit * parseInt(pageNumber);
+    options.skip = skip;
+    options.limit = limit;
+
+    const list = [req.body.data];
+    // list.push(ObjectID(req.body.data))
+
+    console.log(">>>>>>>>>>>>>>>>>>", list);
+
+    var resultList = []
+
+    let query = [
+        {
+            $match: { $and: [{ mobileNo: { $in: req.body.data } }, { isverified: true }] }
+        },
+        {
+            $project: {
+                _id: 1,
+                mobileNo: 1,
+                isverified: 1,
+                
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1,
+            },
+        },
+
+
+    ];
+    try {
+        UserModel.aggregate(query, (err, userdata) => {
+            if (err) {
+                throw err;
+            }
+            else if (_.isEmpty(userdata)) {
+                
+                resultList.push({
+
+                    mobileNo: userdata.mobileNo,
+                    isverified: false,
+
+                })
+
+            }
+          
+            else {
+                resultList.push({
+
+                    mobileNo: userdata.mobileNo,
+                    isverified: true,
+
+                })
+                console.log("resultListresultList", resultList);
+            }
+
+        });
+    } catch (exception) {
+        response.setError(AppCode.InternalServerError);
+        response.send(res);
+    }
+
+
+
+};
+
 
 
 
