@@ -26,6 +26,7 @@ const { Console } = require("console");
 const handlebars = require('handlebars');
 const userModel = require("./../../common/model/userModel");
 const { result } = require("lodash");
+const userWiseVerifiedUserModel = require("./../../common/model/userWiseVerifiedUserModel");
 
 // import { Country, State, City } from 'country-state-city';
 //import { ICountry, IState, ICity } from 'country-state-city';
@@ -2450,7 +2451,48 @@ userCtrl.verifyContactList = (req, res) => {
                                     isverified: userdata[a].isverified
                                 }
                                 resultList.push(obj)
-                                break
+
+                                if(userdata[a].isverified == true)
+                                {
+                                    let query = { mobileNo:req.body.data[i],
+                                                isverified: userdata[a].isverified,
+                                                userId:ObjectID(req.auth._id) }
+                                    UserWiseVerifiedUserModel.findOne(query, {}, function (err, data) {
+                                        if (err) {
+                                            response.setError(AppCode.Fail);
+                                            response.send(res);
+                                        } else {
+                                            if(data == null)
+                                            {
+                                                
+                                                UserWiseVerifiedUserModel.create(query, (err, dataa) => {
+                                                    if (err) {
+                                                      //  response.setError(AppCode.Fail);
+                                                       // response.send(res);
+                                                    } else {
+                                                        console.log("UserWiseVerifiedUserModel");
+                                                        
+                                                       // response.setData(AppCode.Success, dataa);
+                                                       // response.send(res);
+                                                    }
+                                                });
+                                                
+                                                
+                                            }else{
+                                                console.log("create in elseeeeeeeeeeeee")
+                                            }
+                                           
+                                        }
+                                    })
+                                    break
+
+                                }
+                                
+                                else{
+                                    break
+
+                                }
+                                
                             }
                             if ((userdata.length - 1) == a) {
                                 obj = {
@@ -2462,8 +2504,51 @@ userCtrl.verifyContactList = (req, res) => {
                         }
 
                         if ((req.body.data.length - 1) == i) {
+                          
+
+                            console.log("resultListresultList", resultList)
                             response.setData(AppCode.Success, resultList)
                             response.send(res)
+                            // for (let j = 0; j < resultList.length; j++) {
+                            //     if (resultList[j].isverified === true) {
+
+                            //         console.log("ifffffffffffffffffffffffffff");
+                            //       let abc = {
+                            //             mobileNo: resultList[j].mobileNo,
+                            //             isverified: resultList[j].isverified,
+                            //             userId: ObjectID(req.auth._id)
+                            //         }
+                            //         list.push(abc)
+
+                                  
+
+
+                            //     }
+                            //     if ((resultList.length - 1) == j) {
+                            //         console.log("listttttttttt",list)
+
+                                    
+                            //         UserWiseVerifiedUserModel.createMany(list, function (err, data) {
+                            //             if (err) {
+                            //                 console.log("event error", err)
+                            //                 response.setError(AppCode.InternalServerError);
+                            //                 response.send(res);
+                            //             } else {
+                            //                 //  console.log(".....length...", excelList.length)
+                            //                 console.log(".....length...", data.length)
+    
+                            //                 response.setData(AppCode.Success, resultList)
+                            //                 response.send(res)
+    
+                            //             }
+                            //         });
+    
+                            //     }
+    
+
+                            // }
+                           
+
                         }
 
                     }
