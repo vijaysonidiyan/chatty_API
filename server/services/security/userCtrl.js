@@ -2409,7 +2409,7 @@ userCtrl.verifyContactList = (req, res) => {
 
     console.log(">>>>>>>>>>>>>>>>>>", list);
 
-    var resultList = []
+
 
     let query = [
         {
@@ -2420,7 +2420,7 @@ userCtrl.verifyContactList = (req, res) => {
                 _id: 1,
                 mobileNo: 1,
                 isverified: 1,
-                
+
             }
         },
         {
@@ -2436,25 +2436,38 @@ userCtrl.verifyContactList = (req, res) => {
             if (err) {
                 throw err;
             }
-            else if (_.isEmpty(userdata)) {
-                
-                resultList.push({
-
-                    mobileNo: userdata.mobileNo,
-                    isverified: false,
-
-                })
-
-            }
-          
             else {
-                resultList.push({
 
-                    mobileNo: userdata.mobileNo,
-                    isverified: true,
+                if (req.body.data.length > 0) {
+                    let obj = {}
+                    let resultList = []
+                    for (let i = 0; i < req.body.data.length; i++) {
 
-                })
-                console.log("resultListresultList", resultList);
+                        for (let a = 0; a < userdata.length; a++) {
+                            if (req.body.data[i].toString() == userdata[a].mobileNo.toString()) {
+                                obj = {
+                                    mobileNo: req.body.data[i],
+                                    isverified: userdata[a].isverified
+                                }
+                                resultList.push(obj)
+                                break
+                            }
+                            if ((userdata.length - 1) == a) {
+                                obj = {
+                                    mobileNo: req.body.data[i],
+                                    isverified: false
+                                }
+                                resultList.push(obj)
+                            }
+                        }
+
+                        if ((req.body.data.length - 1) == i) {
+                            response.setData(AppCode.Success, resultList)
+                            response.send(res)
+                        }
+
+                    }
+                }
             }
 
         });
