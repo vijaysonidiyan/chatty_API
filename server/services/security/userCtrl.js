@@ -2408,13 +2408,29 @@ userCtrl.verifyContactList = (req, res) => {
     const list = [req.body.data];
     // list.push(ObjectID(req.body.data))
 
-    console.log(">>>>>>>>>>>>>>>>>>", list);
+    let abc=[]
+    let aaa=[]
+    req.body.data.map((obj, index) => {
+        req.body.data = abc
+        aaa.push(obj.mobileNo)
+
+        abc[index] = {
+            mobileNo :obj.mobileNo,
+            userName:obj.userName
+          
+            
+        }
+    });
+
+  console.log(">>>>>>>>>abc>>>>>>>>>", abc);
+  console.log(">>>>>>>>aaa>>>>>>>>>>", aaa);
+    console.log(">>>>>>>list>>>>>>>>>>>", list);
 
 
 
     let query = [
         {
-            $match: { $and: [{ mobileNo: { $in: req.body.data } }, { isverified: true }] }
+            $match: { $and: [{ mobileNo: { $in: aaa } }, { isverified: true }] }
         },
         {
             $project: {
@@ -2438,23 +2454,29 @@ userCtrl.verifyContactList = (req, res) => {
                 throw err;
             }
             else {
+                console.log("elseeeeeeeeeeeeee");
+
+                console.log("userdatauserdatauserdata",userdata);
 
                 if (req.body.data.length > 0) {
                     let obj = {}
                     let resultList = []
-                    for (let i = 0; i < req.body.data.length; i++) {
+
+                    console.log("Listtttttttttttttttttttttttt",abc);
+                    for (let i = 0; i < abc.length; i++) {
 
                         for (let a = 0; a < userdata.length; a++) {
-                            if (req.body.data[i].toString() == userdata[a].mobileNo.toString()) {
+                            if (abc[i].mobileNo.toString() == userdata[a].mobileNo.toString()) {
                                 obj = {
-                                    mobileNo: req.body.data[i],
+                                    mobileNo: abc[i].mobileNo,
+                                    userName:abc[i].userName,
                                     isverified: userdata[a].isverified
                                 }
                                 resultList.push(obj)
 
                                 if(userdata[a].isverified == true)
                                 {
-                                    let query = { mobileNo:req.body.data[i],
+                                    let query = { mobileNo:abc[i].mobileNo,
                                                 isverified: userdata[a].isverified,
                                                 userId:ObjectID(req.auth._id) }
                                     UserWiseVerifiedUserModel.findOne(query, {}, function (err, data) {
@@ -2471,15 +2493,14 @@ userCtrl.verifyContactList = (req, res) => {
                                                        // response.send(res);
                                                     } else {
                                                         console.log("UserWiseVerifiedUserModel");
-                                                        
-                                                       // response.setData(AppCode.Success, dataa);
-                                                       // response.send(res);
+                                                       
                                                     }
                                                 });
                                                 
                                                 
-                                            }else{
-                                                console.log("create in elseeeeeeeeeeeee")
+                                            }
+                                            else{
+                                                console.log("not in tabel")
                                             }
                                            
                                         }
@@ -2496,7 +2517,8 @@ userCtrl.verifyContactList = (req, res) => {
                             }
                             if ((userdata.length - 1) == a) {
                                 obj = {
-                                    mobileNo: req.body.data[i],
+                                    mobileNo: abc[i].mobileNo,
+                                    userName:abc[i].userName,
                                     isverified: false
                                 }
                                 resultList.push(obj)
