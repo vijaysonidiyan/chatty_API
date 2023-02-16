@@ -2499,9 +2499,7 @@ userCtrl.verifyContactList = (req, res) => {
                                                 
                                                 
                                             }
-                                            else{
-                                                console.log("not in tabel")
-                                            }
+                                           
                                            
                                         }
                                     })
@@ -2525,52 +2523,13 @@ userCtrl.verifyContactList = (req, res) => {
                             }
                         }
 
-                        if ((req.body.data.length - 1) == i) {
+                        if ((abc.length - 1) == i) {
                           
 
                             console.log("resultListresultList", resultList)
                             response.setData(AppCode.Success, resultList)
                             response.send(res)
-                            // for (let j = 0; j < resultList.length; j++) {
-                            //     if (resultList[j].isverified === true) {
-
-                            //         console.log("ifffffffffffffffffffffffffff");
-                            //       let abc = {
-                            //             mobileNo: resultList[j].mobileNo,
-                            //             isverified: resultList[j].isverified,
-                            //             userId: ObjectID(req.auth._id)
-                            //         }
-                            //         list.push(abc)
-
-                                  
-
-
-                            //     }
-                            //     if ((resultList.length - 1) == j) {
-                            //         console.log("listttttttttt",list)
-
-                                    
-                            //         UserWiseVerifiedUserModel.createMany(list, function (err, data) {
-                            //             if (err) {
-                            //                 console.log("event error", err)
-                            //                 response.setError(AppCode.InternalServerError);
-                            //                 response.send(res);
-                            //             } else {
-                            //                 //  console.log(".....length...", excelList.length)
-                            //                 console.log(".....length...", data.length)
-    
-                            //                 response.setData(AppCode.Success, resultList)
-                            //                 response.send(res)
-    
-                            //             }
-                            //         });
-    
-                            //     }
-    
-
-                            // }
-                           
-
+                         
                         }
 
                     }
