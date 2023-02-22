@@ -19,6 +19,17 @@ const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
+//const Peer = require("peerjs")
+if (typeof navigator !== "undefined") {
+  const { ExpressPeerServer } = require("peerjs").default
+}
+// const peerServer = ExpressPeerServer(server, {
+//   debug: true,
+//   });
+
+
+
+
 
 //var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
@@ -52,6 +63,10 @@ MongoConnect.init()
 
     const socketio = require("socket.io");
 
+    const RTCMultiConnectionServer = require('rtcmulticonnection-server');
+
+   
+
     const io = socketio(server, {
 
       cors: {
@@ -67,6 +82,13 @@ MongoConnect.init()
       },
 
     });
+
+  //   io.on('connection', function(socket) {
+  //     RTCMultiConnectionServer.addSocket(socket);
+  // });
+
+
+    
 
     function getkeyByValue(object, value) {
 
@@ -84,6 +106,9 @@ MongoConnect.init()
 
     //setup event listener
     io.on("connection", function (socket) {
+
+      RTCMultiConnectionServer.addSocket(socket);
+
       //console.log("........socket",socket)
       // console.log("", socket.id);
       // console.log("", socket.handshake.query.userId);
@@ -117,6 +142,45 @@ MongoConnect.init()
       console.log("userssssssssssssssss connected........", users)
 
 
+
+      //vedio calling
+
+
+      socket.on("join-room", (roomId, userId) => {
+        socket.join(roomId);
+        socket.to(roomId).broadcast.emit("connected", userId);
+        });
+      
+      socket.on('call', (data) => {
+        let callee = data.name;
+        let rtcMessage = data.rtcMessage;
+
+        socket.to(callee).emit("newCall", {
+          caller: socket.user,
+          rtcMessage: rtcMessage
+        })
+
+      })
+      socket.on('answerCall', (data) => {
+        let caller = data.caller;
+        rtcMessage = data.rtcMessage
+
+        socket.to(caller).emit("callAnswered", {
+          callee: socket.user,
+          rtcMessage: rtcMessage
+        })
+
+      })
+
+      socket.on('ICEcandidate', (data) => {
+        let otherUser = data.user;
+        let rtcMessage = data.rtcMessage;
+
+        socket.to(otherUser).emit("ICEcandidate", {
+          sender: socket.user,
+          rtcMessage: rtcMessage
+        })
+      })
 
 
       socket.on("user_connected", function () {
@@ -278,8 +342,6 @@ MongoConnect.init()
         console.log(".....", socketId)
         io.emit("user_disconnected", users);
         console.log("disconnected user's", users);
-
-
 
       });
 
@@ -482,11 +544,7 @@ MongoConnect.init()
         //  var buff = new Buffer(base64Str ,"base64");
         // fs.writeFileSync("test.png", buff)
       });
-
-
-
-
-      
+  
 // old message API without block functonality
       // socket.on("message", function (msg) {
       //   console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
@@ -1131,9 +1189,6 @@ MongoConnect.init()
       });
 
 
-
-
-
       socket.on("chatdeletebyId", function (msg) {
         console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
 
@@ -1233,10 +1288,6 @@ MongoConnect.init()
 
 
       });
-
-
-
-
 
       // socket.on("allchatdelete", function (msg) {
       //   console.log(".......messagee...", msg)
@@ -1457,9 +1508,6 @@ MongoConnect.init()
 
 
       });
-
-
-
 
       socket.on("sharePost", function (msg) {
         console.log("message Data Before", msg);
@@ -1700,6 +1748,9 @@ MongoConnect.init()
           }
         });
       });
+
+
+
     });
 
     // server.listen(process.env.PORT || 3006, function () {

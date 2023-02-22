@@ -36,6 +36,8 @@
         ROOT_PATH: path.join(__dirname, '/../..'),
         DEFAULT: path.join(__dirname, '/../../uploads/'),
         DIR_PATH_PHOTOS: path.join(__dirname, '/../../uploads/photos/'),
+        DIR_PATH_STORYPHOTOS: path.join(__dirname, '/../../uploads/storyphotos/'),
+        DIR_PATH_STORYVIDEOS: path.join(__dirname, '/../../uploads/storyvideos/'),
       
         DIR_PATH_VIDEOS: path.join(__dirname, '/../../uploads/videos/'),
         DIR_PATH_DOCUMENTS: path.join(__dirname, '/../../uploads/documents/'),

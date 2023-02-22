@@ -18,6 +18,8 @@ const storage = multer.diskStorage({
     if (!!file.fieldname) {
       if (
         file.fieldname === "photos" ||
+       
+     
         file.fieldname === "image" ||
         file.fieldname === "profile_image" ||
         file.fieldname === "logo" ||
@@ -38,6 +40,7 @@ const storage = multer.diskStorage({
         }
       } else if (
         file.fieldname === "videos" ||
+       
         file.fieldname === "function_video"
       ) {
         dirPath = CONFIG.UPLOADS.DIR_PATH_VIDEOS;
@@ -53,6 +56,28 @@ const storage = multer.diskStorage({
         dirPath = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS;
         if (!!dirPath) {
           var path = CONFIG.UPLOADS.DIR_PATH_DOCUMENTS;
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+          }
+        }
+      }
+      else if (
+        file.fieldname === "storyphotos"
+      ) {
+        dirPath = CONFIG.UPLOADS.DIR_PATH_STORYPHOTOS;
+        if (!!dirPath) {
+          var path = CONFIG.UPLOADS.DIR_PATH_STORYPHOTOS;
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+          }
+        }
+      }
+      else if (
+        file.fieldname === "storyvideos"
+      ) {
+        dirPath = CONFIG.UPLOADS.DIR_PATH_STORYVIDEOS;
+        if (!!dirPath) {
+          var path = CONFIG.UPLOADS.DIR_PATH_STORYVIDEOS;
           if (!fs.existsSync(path)) {
             fs.mkdirSync(path, { recursive: true });
           }
@@ -120,6 +145,14 @@ module.exports = (app) => {
       maxCount: 15,
     },
     {
+      name: "storyphotos",
+      maxCount: 15,
+    },
+    {
+      name: "storyvideos",
+      maxCount: 15,
+    },
+    {
       name: "videos",
       maxCount: 15,
     },
@@ -175,6 +208,8 @@ module.exports = (app) => {
   app.use("/v1/story", cpUpload, require("./routes/v1/story"));
   app.use("/v1/image", cpUpload, require("./routes/v1/image"));
   app.use("/v1/media", cpUpload, require("./routes/v1/media"));
+  app.use("/v1/group", cpUpload, require("./routes/v1/group"));
+ 
  
 
   app.get(

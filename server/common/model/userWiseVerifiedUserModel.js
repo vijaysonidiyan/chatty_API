@@ -53,6 +53,19 @@ class userWiseVerifiedUserModel extends ModelBase {
         });
     }
 
+    createMany(data, cb) {
+
+        var self = this;
+        data.createdAt = new Date();;
+
+        self.insertMany(data, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, result.ops);
+        });
+    }
+
     update(query, data, cb) {
         console.log(data)
         // if (!!data.parentId) {

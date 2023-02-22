@@ -131,6 +131,18 @@ class userModel extends ModelBase {
             cb(null, result);
         });
     }
+    createMany(data, cb) {
+
+        var self = this;
+        data.createdAt = new Date();;
+
+        self.insertMany(data, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, result.ops);
+        });
+    }
     updateUser(params, cb) {
         if (!!data.roleId) {
             data.roleId = ObjectID(data.roleId)

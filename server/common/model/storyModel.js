@@ -6,11 +6,33 @@ const ObjectID = require("mongodb").ObjectID;
 class Story extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "story", {
-            userId: { type: Object, allowNullEmpty: false },
-            storyImages: { type: String, allowNullEmpty: true },
-            shortDescription:{ type: String, allowNullEmpty: true },
+            photos: { type: Array, allowNullEmpty: true },
+            photo_name:{type: String, allowNullEmpty: true},
+            video_name:{type: String, allowNullEmpty: true},
+            originalname:{type: String, allowNullEmpty: true},
+            document_name:{type: String, allowNullEmpty: true},
+            videos: { type: Array, allowNullEmpty: true },
+            type: {
+                type: Number,
+                allowNullEmpty: false,
+                enum: { 1: "photo", 2: "video",3:"document" }
+            },
+            documents: { type: Array, allowNullEmpty: true },  
+            thumbnail:{type:Array, allowNullEmpty: true },   
+            ext:{type:Array, allowNullEmpty: true},  
+            mimetype:{type:Array, allowNullEmpty: true} ,
+            size:{type:Number, allowNullEmpty: true},
+            createdBy:{type: Object, allowNullEmpty: false },
             createdAt: { type: Object, allowNullEmpty: false },
-            updatedAt: { type: Object, allowNullEmpty: true }
+            expiredAt: { type: Object, allowNullEmpty: false },
+            updatedAt: { type: Object, allowNullEmpty: true },
+            userId:{type: Object, allowNullEmpty: true },
+            status: {
+                type: Number,
+                allowNullEmpty: false,
+                enum: { 1: "active", 2: "inactive" }
+            },
+           
         });
     }
 
@@ -18,77 +40,118 @@ class Story extends ModelBase {
      * @param {*} data
      * @param {*} cb
      */
-    create(data, cb) {
-        if (!!data.user_id) {
-            data.user_id = ObjectID(data.user_id);
-        }
-        var err = this.validate(data);
+    // create(data, cb) {
+    //     if (!!data.user_id) {
+    //         data.user_id = ObjectID(data.user_id);
+    //     }
+    //     var err = this.validate(data);
 
+    //     if (err) {
+    //         return cb(err);
+    //     }
+    //     var id = [data.content];
+    //     var self = this;
+    //     data.createdAt = new Date();
+
+    //     //Find and then update postType (Note make these conditons same as update time condition)
+    //     // if (!!data.content) {
+    //     //     data.postType = 1;
+    //     //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length === 1) {
+    //     //         data.postType = 2;
+    //     //     }
+    //     //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 1) {
+    //     //         data.postType = 7;
+    //     //     }
+
+
+    //     //     if (!_.isEmpty(data.url_site_meta_info)) {
+    //     //         data.postType = 12;
+    //     //     }
+    //     //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length === 1) {
+    //     //         data.postType = 13;
+    //     //     }
+
+    //     //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 1) {
+    //     //         data.postType = 23;
+    //     //     }
+
+    //     //     if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length === 1) {
+    //     //         data.postType = 16;
+    //     //     }
+
+    //     //     if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length > 1) {
+    //     //         data.postType = 22;
+    //     //     }
+
+
+    //     //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 0 && !_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 0) {
+    //     //         data.postType = 14;
+    //     //     }
+
+    //     // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 0 && !_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 0) {
+    //     //     data.postType = 8;
+    //     // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length === 1) {
+    //     //     data.postType = 9;
+    //     // } else if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length === 1) {
+    //     //     data.postType = 10;
+    //     // } else if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length > 1) {
+    //     //     data.postType = 15;
+    //     // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length === 1) {
+    //     //     data.postType = 19;
+    //     // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 1) {
+    //     //     data.postType = 20;
+    //     // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 1) {
+    //     //     data.postType = 21
+    //     // }
+
+    //     self.insert(data, function (err, result) {
+
+    //         if (err) {
+    //             return cb(err);
+    //         }
+
+    //         cb(null, result.ops[0]);
+    //     });
+    // }
+
+    create(data, cb) {
+
+
+      
+        var err = this.validate(data);
         if (err) {
             return cb(err);
         }
-        var id = [data.content];
-        var self = this;
-        data.createdAt = new Date();
+        data.status=1
+        data.createdAt = new Date();;
 
-        //Find and then update postType (Note make these conditons same as update time condition)
-        // if (!!data.content) {
-        //     data.postType = 1;
-        //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length === 1) {
-        //         data.postType = 2;
-        //     }
-        //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 1) {
-        //         data.postType = 7;
-        //     }
-
-
-        //     if (!_.isEmpty(data.url_site_meta_info)) {
-        //         data.postType = 12;
-        //     }
-        //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length === 1) {
-        //         data.postType = 13;
-        //     }
-
-        //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 1) {
-        //         data.postType = 23;
-        //     }
-
-        //     if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length === 1) {
-        //         data.postType = 16;
-        //     }
-
-        //     if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length > 1) {
-        //         data.postType = 22;
-        //     }
-
-
-        //     if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 0 && !_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 0) {
-        //         data.postType = 14;
-        //     }
-
-        // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 0 && !_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 0) {
-        //     data.postType = 8;
-        // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length === 1) {
-        //     data.postType = 9;
-        // } else if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length === 1) {
-        //     data.postType = 10;
-        // } else if (!_.isEmpty(data.documents) && !_.isEmpty(data.documents.files) && data.documents.files.length > 1) {
-        //     data.postType = 15;
-        // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length === 1) {
-        //     data.postType = 19;
-        // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.photos) && !_.isEmpty(data.media.photos.files) && data.media.photos.files.length > 1) {
-        //     data.postType = 20;
-        // } else if (!_.isEmpty(data.media) && !_.isEmpty(data.media.videos) && !_.isEmpty(data.media.videos.files) && data.media.videos.files.length > 1) {
-        //     data.postType = 21
-        // }
-
-        self.insert(data, function (err, result) {
-
+        this.insert(data, (err, result) => {
             if (err) {
                 return cb(err);
             }
 
             cb(null, result.ops[0]);
+        });
+    }
+    createMany(data, cb) {
+
+        var self = this;
+        
+        data.createdAt = new Date();;
+        data.status = 1;
+        //data.createdAt = new Date();;
+        var currentTime = new Date();
+        currentTime.setHours(currentTime.getHours() + 24);
+        data.expiredAt = new Date();;
+        console.log("expiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAt",data.expiredAt);
+        // currentTime.setMinutes(currentTime.getMinutes() + 3);
+        // data.expiredAt = currentTime;
+
+        self.insertMany(data, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, result.ops);
         });
     }
 
