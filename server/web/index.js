@@ -14,14 +14,27 @@ const NotificationModel =
 const DeviceTokenModel =
   new (require("./../../server/common/model/deviceTokenModel"))();
 const BlockUserModel = new (require("../../server/common/model/blockUserModel"))();
+const GroupModel = new (require("./../../server/common/model/groupModel"))
 const ObjectID = require("mongodb").ObjectID;
 const MongoConnect = require("../common/nosql/mongoDb/index");
 const async = require("async");
 const CONFIG = require("../config");
 const _ = require("lodash");
+//const Peer = require("peerjs")
+if (typeof navigator !== "undefined") {
+  const { ExpressPeerServer } = require("peerjs").default
+}
+// const peerServer = ExpressPeerServer(server, {
+//   debug: true,
+//   });
+
+
+
+
 
 //var siofu = require("socketio-file-upload");
 const ChatCtrl = require("../services/security/chatCtrl");
+const groupModel = require("../common/model/groupModel");
 //const chatModel = require("./../../server/common/model/chatModel");
 const PostModel = new (require("./../../server/common/model/postModel").Post)();
 
@@ -52,6 +65,10 @@ MongoConnect.init()
 
     const socketio = require("socket.io");
 
+    const RTCMultiConnectionServer = require('rtcmulticonnection-server');
+
+   
+
     const io = socketio(server, {
 
       cors: {
@@ -67,6 +84,13 @@ MongoConnect.init()
       },
 
     });
+
+  //   io.on('connection', function(socket) {
+  //     RTCMultiConnectionServer.addSocket(socket);
+  // });
+
+
+    
 
     function getkeyByValue(object, value) {
 
@@ -84,12 +108,8 @@ MongoConnect.init()
 
     //setup event listener
     io.on("connection", function (socket) {
-      //console.log("........socket",socket)
-      // console.log("", socket.id);
-      // console.log("", socket.handshake.query.userId);
-      socket.userId = socket.handshake.query.userId;
-      //socket.userId1 = socket.query.userId;
-      console.log("user connection Established");
+
+     
 
       usersss[socket.userId] = socket.id;
       console.log("Connected user's old code", usersss);
@@ -117,6 +137,45 @@ MongoConnect.init()
       console.log("userssssssssssssssss connected........", users)
 
 
+
+      //vedio calling
+
+
+                          // socket.on("join-room", (roomId, userId) => {
+                          //   socket.join(roomId);
+                          //   socket.to(roomId).broadcast.emit("connected", userId);
+                          //   });
+                          
+                          // socket.on('call', (data) => {
+                          //   let callee = data.name;
+                          //   let rtcMessage = data.rtcMessage;
+
+                          //   socket.to(callee).emit("newCall", {
+                          //     caller: socket.user,
+                          //     rtcMessage: rtcMessage
+                          //   })
+
+                          // })
+                          // socket.on('answerCall', (data) => {
+                          //   let caller = data.caller;
+                          //   rtcMessage = data.rtcMessage
+
+                          //   socket.to(caller).emit("callAnswered", {
+                          //     callee: socket.user,
+                          //     rtcMessage: rtcMessage
+                          //   })
+
+                          // })
+
+                          // socket.on('ICEcandidate', (data) => {
+                          //   let otherUser = data.user;
+                          //   let rtcMessage = data.rtcMessage;
+
+                          //   socket.to(otherUser).emit("ICEcandidate", {
+                          //     sender: socket.user,
+                          //     rtcMessage: rtcMessage
+                          //   })
+                          // })
 
 
       socket.on("user_connected", function () {
@@ -278,8 +337,6 @@ MongoConnect.init()
         console.log(".....", socketId)
         io.emit("user_disconnected", users);
         console.log("disconnected user's", users);
-
-
 
       });
 
@@ -482,11 +539,7 @@ MongoConnect.init()
         //  var buff = new Buffer(base64Str ,"base64");
         // fs.writeFileSync("test.png", buff)
       });
-
-
-
-
-      
+  
 // old message API without block functonality
       // socket.on("message", function (msg) {
       //   console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
@@ -819,11 +872,27 @@ MongoConnect.init()
         var query = {
           message: msg.message,
           sender_id: msg.sender_id,
-          reciver_id: msg.reciver_id,
+       //   reciver_id: msg.reciver_id,
           type: msg.type,
 
         };
 
+        if(!!msg.reciver_id)
+        {
+          query.reciver_id= msg.reciver_id
+
+        }
+        if(!!msg.groupId)
+        {
+          query.groupId= ObjectID(msg.groupId)
+        
+        }
+        if(!!msg.isGroup)
+        {
+         
+          query.isGroup = msg.isGroup
+
+        }
         if (!!msg.size) {
           query.size = msg.size
         }
@@ -897,7 +966,7 @@ MongoConnect.init()
                 console.log(err);
               } else {
                 console.log(".....else in else if")
-                if (!!chat) {
+                if (!!chat.isGroup == false) {
                   console.log("chatchatchatchatchatchatchatchatchat", chat);
 
 
@@ -1090,6 +1159,221 @@ MongoConnect.init()
                     }
                   );
                 }
+                if (!!chat.isGroup == true) {
+                  console.log("chatchatchatchatchatchatchatchatchat", chat);
+
+                  let group ={
+                    _id:ObjectID(msg.groupId)
+
+                  }
+                  GroupModel.advancedAggregate(group, {}, (err, groupdata) => {
+                    if (err) {
+                      throw err;
+                    } else {
+                      console.log("groupdatagroupdatagroupdata",groupdata[0]);
+                      console.log("groupdatagroupdatagroupdata",groupdata[0].group_user);
+
+                      const groupArray = groupdata[0].group_user
+                     
+
+                      console.log("groupArraygroupArraygroupArraygroupArray",groupArray);
+                      for (let i = 0; i < users.length; i++) {
+                        for (let j = 0; j < groupArray.length; j++) {
+    
+                        if (groupArray[j] == users[i].userId && users[i].userId != undefined) {
+    
+    
+                          io.to(users[i].socketId).emit("new_message", {
+                            _id: chat._id,
+    
+                            message: msg.message,
+    
+                            sender_id: msg.sender_id,
+    
+                            groupId:msg.groupId,
+    
+                           isGroup:msg.isGroup,
+    
+                            type: msg.type,
+    
+                            file_name: msg.file_name,
+    
+                            video_screenshort: msg.video_screenshort,
+    
+                            file_original_name: msg.file_original_name,
+    
+                            thumbnail: msg.thumbnail,
+    
+                            size: msg.size,
+    
+                            createdAt: new Date()
+    
+                          });
+    
+    
+    
+    
+                        }
+                      }
+                        if (msg.sender_id == users[i].userId && users[i].userId != undefined) {
+    
+                          io.to(users[i].socketId).emit("return_message", {
+                            _id: chat._id,
+    
+                            message: msg.message,
+    
+                            sender_id: msg.sender_id,
+    
+                            groupId:msg.groupId,
+    
+                            isGroup:msg.isGroup,
+    
+                            type: msg.type,
+    
+                            file_name: msg.file_name,
+    
+                            video_screenshort: msg.video_screenshort,
+    
+                            file_original_name: msg.file_original_name,
+    
+                            thumbnail: msg.thumbnail,
+    
+                            size: msg.size,
+    
+                            createdAt: new Date()
+    
+                          });
+    
+    
+    
+                        }
+    
+                      }
+                     
+    
+                                // let isSendNotification = true;
+                                // ChatScreenManagementModel.findOne(
+                                //   { userId: ObjectID(msg.reciver_id) },
+                                //   function (err, chatManage) {
+                                //     if (err) {
+                                //       console.log(err);
+                                //     } else {
+                                //       console.log(".........chatscreenmanagementModel")
+                                //       if (!!chatManage) {
+                                //         let idD = "";
+                                //         if (!!chatManage.chatWith) {
+                                //           idD = chatManage.chatWith.toString();
+                                //         }
+              
+                                //         console.log("Chat With ID", idD);
+                                //         // if (chatManage.status == 1) {
+                                //         //   isSendNotification = false;
+                                //         // }
+                                //         // if (chatManage.status == 2 && idD == msg.sender_id) {
+                                //         //   isSendNotification = false;
+                                //         // }
+                                //       }
+                                //       if (isSendNotification == true) {
+                                //         UserModel.findOne(
+                                //           { _id: ObjectID(msg.sender_id) },
+                                //           (err, user) => {
+                                //             if (err) {
+                                //               console.log(err);
+                                //             } else if (!!user) {
+                                //               UserModel.findOne(
+                                //                 { _id: ObjectID(msg.reciver_id) },
+                                //                 (err, receiverUser) => {
+                                //                   if (err) {
+                                //                     console.log(err);
+                                //                   } else if (!!receiverUser) {
+                                //                     let mesg = user.userName + " message you!",
+                                //                       title = "New Message",
+                                //                       type = "message",
+                                //                       senderId = msg.sender_id,
+                                //                       receiverId = msg.reciver_id,
+                                //                       receiverName = user.userName,
+                                //                       senderImage = !!receiverUser.profile_image
+                                //                         ? receiverUser.profile_image
+                                //                         : "",
+                                //                       receiverImage = !!user.profile_image
+                                //                         ? user.profile_image
+                                //                         : "",
+                                //                       res = "";
+              
+                                //                     let query = [
+                                //                       {
+                                //                         $match: { userId: ObjectID(msg.reciver_id) },
+                                //                       },
+                                //                     ];
+                                //                     DeviceTokenModel.aggregate(
+                                //                       query,
+                                //                       function (err, deviceTokensData) {
+                                //                         if (err) {
+                                //                           console.log(err);
+                                //                         } else {
+                                //                           console.log(
+                                //                             "deviceTokensDataaaaaaaaaaaaaa",
+                                //                             deviceTokensData
+                                //                           );
+                                //                           if (!!deviceTokensData) {
+                                //                             deviceTokensData.forEach((element) => {
+                                //                               let tokens = element.deviceToken;
+                                //                               if (!!tokens) {
+                                //                                 sendToTopics(
+                                //                                   mesg,
+                                //                                   title,
+                                //                                   type,
+                                //                                   senderId,
+                                //                                   receiverId,
+                                //                                   receiverName,
+                                //                                   receiverImage,
+                                //                                   senderImage,
+                                //                                   tokens,
+                                //                                   res
+                                //                                 );
+                                //                               }
+                                //                             });
+                                //                           }
+                                //                         }
+                                //                       }
+                                //                     );
+              
+                                //                     let notificationQuery = {
+                                //                       senderId: msg.sender_id,
+                                //                       reciverId: msg.reciver_id,
+                                //                       message: mesg,
+                                //                       type: type
+                                //                     }
+                                //                     NotificationModel.create(notificationQuery, (err, notification) => {
+                                //                       if (err) {
+                                //                         throw err;
+                                //                       } else {
+                                //                         console.log(".....notificationModel")
+              
+                                //                       }
+                                //                     });
+                                //                   }
+                                //                 }
+                                //               );
+                                //             }
+                                //           }
+                                //         );
+                                //       }
+                                //     }
+                                //   }
+                                // );
+
+                      
+
+
+                    }
+                  });
+
+
+
+
+                 
+                }
               }
             });
 
@@ -1129,9 +1413,6 @@ MongoConnect.init()
         });
 
       });
-
-
-
 
 
       socket.on("chatdeletebyId", function (msg) {
@@ -1233,10 +1514,6 @@ MongoConnect.init()
 
 
       });
-
-
-
-
 
       // socket.on("allchatdelete", function (msg) {
       //   console.log(".......messagee...", msg)
@@ -1457,9 +1734,6 @@ MongoConnect.init()
 
 
       });
-
-
-
 
       socket.on("sharePost", function (msg) {
         console.log("message Data Before", msg);
@@ -1700,6 +1974,9 @@ MongoConnect.init()
           }
         });
       });
+
+
+
     });
 
     // server.listen(process.env.PORT || 3006, function () {

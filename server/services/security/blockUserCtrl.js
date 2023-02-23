@@ -268,8 +268,7 @@ blockUserCtrl.getBlockUserList = (req, res) => {
         $project: {
           _id: 1,
           userId: 1,
-          userName: 1,
-         
+          userName: 1,  
           profile_image: { $ifNull: ["$profile_image", ""] },
 
           // qualityRating: { $ifNull: ["$qualityRating", 0] },
