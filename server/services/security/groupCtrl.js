@@ -190,10 +190,10 @@ groupCtrl.groupUpdate = (req, res) => {
                 let photos = [];
                 let deletedocuments;
                
-                if (req.body.addUser && req.body.deleteuser== null) {
-                    (!!bodyData.addUser && bodyData.friendsId !== undefined &&      bodyData.friendsId !== "")
+                if (!!req.body.addUser && req.body.deleteuser== null) {
+                    
           
-                  console.log("only document passed");
+                  console.log("only add user passed");
                  
 
                   let final =[]
@@ -202,10 +202,10 @@ groupCtrl.groupUpdate = (req, res) => {
                   adduser.map((obj, index) => {
                       adduser[index] = ObjectID(obj.trim());
                   });
-                  console.log("adduseradduseradduseradduser",adduser);
-                  console.log("previousssssssssssssss",group[0].group_user)
+                //  console.log("adduseradduseradduseradduser",adduser);
+                 // console.log("previousssssssssssssss",group[0].group_user)
                   final = adduser.concat(group[0].group_user)
-                  console.log("group[0].group_usergroup[0].group_usergroup[0].group_user",final)
+                //  console.log("group[0].group_usergroup[0].group_usergroup[0].group_user",final)
                   updatedataQuery.group_user=final
 
 
@@ -223,17 +223,17 @@ groupCtrl.groupUpdate = (req, res) => {
                     adduser.map((obj, index) => {
                         adduser[index] = ObjectID(obj.trim());
                     });
-                    console.log("adduseradduseradduseradduser", adduser);
+                   // console.log("adduseradduseradduseradduser", adduser);
 
                     let deleteuser = []
                     deleteuser = req.body.deleteuser.split(",");
                     deleteuser.map((obj, index) => {
                         deleteuser[index] = ObjectID(obj.trim());
                     });
-                    console.log("deleteddddddddddd", deleteuser);
-                    console.log("previousssssssssssssss",group[0].group_user)
+                   // console.log("deleteddddddddddd", deleteuser);
+                   // console.log("previousssssssssssssss",group[0].group_user)
 
-                    console.log("only document passed");
+                   // console.log("only document passed");
                  
 
                     let final =[]
@@ -242,21 +242,66 @@ groupCtrl.groupUpdate = (req, res) => {
                     adduser.map((obj, index) => {
                         adduser[index] = ObjectID(obj.trim());
                     });
-                    console.log("adduseradduseradduseradduser",adduser);
-                    console.log("previousssssssssssssss",group[0].group_user)
+                  //  console.log("adduseradduseradduseradduser",adduser);
+                   // console.log("previousssssssssssssss",group[0].group_user)
                     final = adduser.concat(group[0].group_user)
-                    console.log("adduserrrrrrrrrrrrrrrrrrrrfinalllllllll",final)
+                  //  console.log("adduserrrrrrrrrrrrrrrrrrrrfinalllllllll",final)
                    
 
                     for (let i = 0; i < deleteuser.length; i++) {
 
                         for (let a = 0; a < final.length; a++) {
 
-                            console.log("deleteuser", deleteuser[i]);
-                            console.log("finalll", final[a]);
+                          //  console.log("deleteuser", deleteuser[i]);
+                          //  console.log("finalll", final[a]);
 
                             if (deleteuser[i].toString() == final[a].toString()) {
-                                console.log("spliceeeeeeeeeeeeeeeeee");
+                              //  console.log("spliceeeeeeeeeeeeeeeeee");
+
+                                final.splice(a, 1)
+
+                            }
+                            if ((deleteuser.length - 1) == i) {
+
+                             //   console.log("finallllllllllllllllllllllllllllllllllllllllllll",final);
+
+                                updatedataQuery.group_user = final
+                               // console.log("updatedataQueryupdatedataQuery",updatedataQuery.group_user);
+
+
+                            }
+                        }
+
+                    }
+
+                } 
+
+                if(!!req.body.deleteuser && req.body.addUser == null)
+                {
+
+                    console.log("deleteuser onlyyyyyyyyyy");
+                    
+                    let deleteuser = []
+                    deleteuser = req.body.deleteuser.split(",");
+                    deleteuser.map((obj, index) => {
+                        deleteuser[index] = ObjectID(obj.trim());
+                    });
+                   // console.log("deleteddddddddddd", deleteuser);
+                    //console.log("previousssssssssssssss",group[0].group_user)
+
+                    let final =[]
+
+                    final =group[0].group_user
+
+                    for (let i = 0; i < deleteuser.length; i++) {
+
+                        for (let a = 0; a < final.length; a++) {
+
+                          //  console.log("deleteuser", deleteuser[i]);
+                           // console.log("finalll", final[a]);
+
+                            if (deleteuser[i].toString() == final[a].toString()) {
+                             //   console.log("spliceeeeeeeeeeeeeeeeee");
 
                                 final.splice(a, 1)
 
@@ -266,7 +311,7 @@ groupCtrl.groupUpdate = (req, res) => {
                                 console.log("finallllllllllllllllllllllllllllllllllllllllllll",final);
 
                                 updatedataQuery.group_user = final
-                                console.log("updatedataQueryupdatedataQuery",updatedataQuery.group_user);
+                              //  console.log("updatedataQueryupdatedataQuery",updatedataQuery.group_user);
 
 
                             }
@@ -274,7 +319,8 @@ groupCtrl.groupUpdate = (req, res) => {
 
                     }
 
-                } 
+
+                }
           
                
           
