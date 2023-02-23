@@ -27,6 +27,7 @@ const { Console } = require("console");
 const handlebars = require('handlebars');
 const userModel = require("./../../common/model/userModel");
 const { result } = require("lodash");
+const { update } = require("./postCtrl");
 
 
 /*group create */
@@ -55,8 +56,11 @@ groupCtrl.groupCreate = (req, res) => {
                 query.profile_image = req.files.profile_image[0].filename;
               }
 
-              if (!!req.body.admin) {
-                query.admin = ObjectID(req.body.admin);
+              if (!!req.body.group_admin) {
+                query.group_admin = req.body.group_admin.split(",");
+                query.group_admin.map((obj, index) => {
+                    query.group_admin[index] = ObjectID(obj.trim());
+                });
               }
             GroupModel.create(query, (err, data) => {
                 if (err) {
@@ -75,7 +79,7 @@ groupCtrl.groupCreate = (req, res) => {
 };
 
 /* user details Update*/
-groupCtrl.groupUpdate = (req, res) => {
+groupCtrl.groupUpdateold = (req, res) => {
     var response = new HttpRespose();
     var _id = ObjectID(req.body._id);
     let bodydata = req.body;
@@ -101,8 +105,11 @@ groupCtrl.groupUpdate = (req, res) => {
                         if (!!req.files.profile_image) {
                             bodydata.profile_image = req.files.profile_image[0].filename;
                         }
-                        if (!!req.body.admin) {
-                            bodydata.admin = ObjectID(req.body.admin);
+                        if (!!req.body.group_admin) {
+                            bodydata.group_admin = req.body.group_admin.split(",");
+                            bodydata.group_admin.map((obj, index) => {
+                                bodydata.group_admin[index] = ObjectID(obj.trim());
+                            });
                         }
                         if (!!req.body.group_user) {
                             bodydata.group_user = req.body.group_user.split(",");
@@ -137,7 +144,180 @@ groupCtrl.groupUpdate = (req, res) => {
         response.send(res);
     }
 };
+/* user Details By Id*/
+groupCtrl.groupUpdate = (req, res) => {
+    const response = new HttpRespose();
 
+    let user=[]
+    user.push(ObjectID(req.body.group_admin))
+
+    console.log("group_admingroup_admin",user);
+    try {
+        let query = [
+            {
+                $match: {
+                    $and:[
+                        {
+                            group_admin: {
+                                $in: [
+                                    ObjectID(req.body.group_admin)
+                                ]
+                            },
+
+                        },
+                        {
+                            _id:ObjectID(req.body._id)
+
+                        }
+                    ]
+                  
+                
+                }
+
+            },
+           
+        ];
+        GroupModel.advancedAggregate(query, {}, (err, group) => {
+            if (err) {
+                throw err;
+            } else if (_.isEmpty(group)) {
+                console.log("groupgroupgroup");
+                response.setError(AppCode.NotFound);
+                response.send(res);
+            } else {
+                console.log("groupgroupgroup",group[0]);
+                let updatedataQuery={}
+                let photos = [];
+                let deletedocuments;
+               
+                if (req.body.addUser && req.body.deleteuser== null) {
+                    (!!bodyData.addUser && bodyData.friendsId !== undefined &&      bodyData.friendsId !== "")
+          
+                  console.log("only document passed");
+                 
+
+                  let final =[]
+                  let adduser =[]
+                  adduser = req.body.addUser.split(",");
+                  adduser.map((obj, index) => {
+                      adduser[index] = ObjectID(obj.trim());
+                  });
+                  console.log("adduseradduseradduseradduser",adduser);
+                  console.log("previousssssssssssssss",group[0].group_user)
+                  final = adduser.concat(group[0].group_user)
+                  console.log("group[0].group_usergroup[0].group_usergroup[0].group_user",final)
+                  updatedataQuery.group_user=final
+
+
+                 
+              
+                }
+             
+                if (!!req.body.addUser && !!req.body.deleteuser) {
+
+                    console.log("adduserrrrrrrrr and deleteuser");
+
+                    let adduser = []
+                    let array=[]
+                    adduser = req.body.addUser.split(",");
+                    adduser.map((obj, index) => {
+                        adduser[index] = ObjectID(obj.trim());
+                    });
+                    console.log("adduseradduseradduseradduser", adduser);
+
+                    let deleteuser = []
+                    deleteuser = req.body.deleteuser.split(",");
+                    deleteuser.map((obj, index) => {
+                        deleteuser[index] = ObjectID(obj.trim());
+                    });
+                    console.log("deleteddddddddddd", deleteuser);
+                    console.log("previousssssssssssssss",group[0].group_user)
+
+                    console.log("only document passed");
+                 
+
+                    let final =[]
+                
+                    adduser = req.body.addUser.split(",");
+                    adduser.map((obj, index) => {
+                        adduser[index] = ObjectID(obj.trim());
+                    });
+                    console.log("adduseradduseradduseradduser",adduser);
+                    console.log("previousssssssssssssss",group[0].group_user)
+                    final = adduser.concat(group[0].group_user)
+                    console.log("adduserrrrrrrrrrrrrrrrrrrrfinalllllllll",final)
+                   
+
+                    for (let i = 0; i < deleteuser.length; i++) {
+
+                        for (let a = 0; a < final.length; a++) {
+
+                            console.log("deleteuser", deleteuser[i]);
+                            console.log("finalll", final[a]);
+
+                            if (deleteuser[i].toString() == final[a].toString()) {
+                                console.log("spliceeeeeeeeeeeeeeeeee");
+
+                                final.splice(a, 1)
+
+                            }
+                            if ((deleteuser.length - 1) == i) {
+
+                                console.log("finallllllllllllllllllllllllllllllllllllllllllll",final);
+
+                                updatedataQuery.group_user = final
+                                console.log("updatedataQueryupdatedataQuery",updatedataQuery.group_user);
+
+
+                            }
+                        }
+
+                    }
+
+                } 
+          
+               
+          
+                if (!!req.body.group_name) {
+                    updatedataQuery.group_name = req.body.group_name
+
+                }
+                if (!!req.files.profile_image) {
+                    updatedataQuery.profile_image = req.files.profile_image[0].filename;
+                }
+
+
+              let q ={
+                _id:ObjectID(req.body._id)
+              }
+              delete req.body._id;
+
+                GroupModel.update(q, updatedataQuery, function (err, groupdata) {
+                  if (err) {
+                    console.log("err",err);
+                    response.setError(AppCode.Fail);
+                    response.send(res);
+                  } else if (
+                    groupdata == undefined ||
+                    (groupdata.matchedCount === 0 &&
+                      groupdata.modifiedCount === 0)
+                  ) {
+                    response.setError(AppCode.NotFound);
+                  } else {
+                    response.setData(AppCode.Success);
+                    response.send(res);
+                  }
+                });
+
+              //  response.setData(AppCode.Success, userData[0]);
+              //  response.send(res);
+            }
+        });
+    } catch (exception) {
+        response.setError(AppCode.InternalServerError);
+        response.send(res);
+    }
+}
 /* user details Update*/
 groupCtrl.removeProfile = (req, res) => {
     var response = new HttpRespose();
@@ -190,31 +370,19 @@ groupCtrl.removeProfile = (req, res) => {
 };
 
 /* user Details By Id*/
-groupCtrl.userDetailsById = (req, res) => {
+groupCtrl.groupDetailsById = (req, res) => {
     const response = new HttpRespose();
     try {
         let query = [
             {
                 $match: {
-                    _id: ObjectID(req.body._id)
+                    _id: ObjectID(req.query._id)
                 }
 
             },
-            {
-                $project: {
-                    _id: 1,
-                    mobileNo: 1,
-                    isverified: 1,
-                    status: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                    profile_image: 1,
-                    userName: 1,
-
-                }
-            }
+           
         ];
-        UserModel.advancedAggregate(query, {}, (err, userData) => {
+        GroupModel.advancedAggregate(query, {}, (err, userData) => {
             if (err) {
                 throw err;
             } else if (_.isEmpty(userData)) {
@@ -231,163 +399,30 @@ groupCtrl.userDetailsById = (req, res) => {
     }
 }
 
-//userList_final_with_searchfield
-groupCtrl.getUserList = (req, res) => {
+/* user Details By Id*/
+groupCtrl.allGroupDetails = (req, res) => {
     const response = new HttpRespose();
-
-    let searchKey = "";
-    let sortField = "";
-    let sortDirection = "";
-    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
-    sortField = !!req.query.sortField ? req.query.sortField.toString() : "";
-    sortDirection = !!req.query.sortDirection ? parseInt(req.query.sortDirection) : "";
-
-
-    let options = {};
-    let pageNumber = !!req.query.pageNumber ? (parseInt(req.query.pageNumber) - 1) : 0;
-
-    const limit = parseInt(req.query.pageSize);
-    const skip = limit * parseInt(pageNumber);
-    // skip = limit * parseInt(pageNumber);
-    options.skip = parseInt(skip);
-    options.limit = limit;
-    let condition = {};
-
-    if (req.query.sortField == "userName") {
-        condition = {
-            userName: sortDirection
-        }
-    }
-
-    if (req.query.sortField == "mobileNo") {
-        condition = {
-            mobileNo: sortDirection
-        }
-    }
-
-    let query = [
-        {
-            $match: {
-
-                $or: [
-                    {
-                        userName: new RegExp(
-                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                            "i"
-                        ),
-                    },
-                    {
-                        mobileNo: new RegExp(
-                            ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                            "i"
-                        ),
-                    },
-                ],
-            },
-
-
-        },
-        {
-            $sort: condition,
-        },
-        { $skip: skip },
-        { $limit: limit },
-        {
-            $project: {
-                _id: 1,
-                mobileNo: 1,
-                isverified: 1,
-                status: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                profile_image: 1,
-                userName: 1
-
-
-
-            }
-        }
-
-    ];
-    let countQuery = {
-        $or: [
-            {
-                userName: new RegExp(
-                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                    "i"
-                ),
-            },
-            {
-                mobileNo: new RegExp(
-                    ".*" + searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + ".*",
-                    "i"
-                ),
-            },
-        ],
-
-    }
     try {
-        let result = {};
-        async.parallel(
-            [
-                function (cb) {
-                    //UserModel.advancedAggregate(query, {}, (err, countData) => {
-                    UserModel.count(countQuery, (err, countData) => {
-                        if (err) {
-                            throw err;
-                        } else if (options.skip === 0 && countData === 0) {
-                            cb(null);
-                        } else if (options.skip > 0 && countData === 0) {
-                            cb(null);
-                        } else {
-                            console.log("....coundata", countData)
-                            if (countData <= skip + limit) {
-                                result.totaluser = countData;
-
-                            } else {
-                                result.nextPage = parseInt(pageNumber) + 1;
-                                result.totaluser = countData;
-                            }
-                            cb(null);
-                        }
-                    });
-                },
-                function (cb) {
-                    UserModel.aggregate(query, (err, followers) => {
-                        if (err) {
-                            throw err;
-                        } else if (options.skip === 0 && _.isEmpty(followers)) {
-                            cb(null);
-                        } else if (options.skip > 0 && _.isEmpty(followers)) {
-                            cb(null);
-                        } else {
-                            result.result = followers;
-                            cb(null);
-                        }
-                    });
-                },
-            ],
-            function (err) {
-                if (err) {
-                    throw err;
-                } else if (options.skip === 0 && _.isEmpty(result.result)) {
-                    response.setData(AppCode.NoUserFound, result);
-                    response.send(res);
-                } else if (options.skip > 0 && _.isEmpty(result.result)) {
-                    response.setData(AppCode.NoMoreBlockUserFound, result);
-                    response.send(res);
-                } else {
-                    response.setData(AppCode.Success, result);
-                    response.send(res);
-                }
+        let query = [
+           
+           
+        ];
+        GroupModel.advancedAggregate(query, {}, (err, userData) => {
+            if (err) {
+                throw err;
+            } else if (_.isEmpty(userData)) {
+                response.setError(AppCode.NotFound);
+                response.send(res);
+            } else {
+                response.setData(AppCode.Success, userData[0]);
+                response.send(res);
             }
-        );
+        });
     } catch (exception) {
         response.setError(AppCode.InternalServerError);
         response.send(res);
     }
-
-};
+}
 
 //userList_final_with_searchfield
 groupCtrl.getActiveUserList = (req, res) => {
