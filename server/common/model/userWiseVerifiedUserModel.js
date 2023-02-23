@@ -10,6 +10,8 @@ class userWiseVerifiedUserModel extends ModelBase {
             mobileNo: { type: String, allowNullEmpty: true },
             isverified: { type: Boolean, allowNullEmpty: true },
             userName: { type: String, allowNullEmpty: true },
+            countryCode: { type: String, allowNullEmpty: false },
+            countryName: { type: String, allowNullEmpty: false },
             status: {
                 type: Number,
                 allowNullEmpty: false,
