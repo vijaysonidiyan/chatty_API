@@ -8,15 +8,18 @@ class groupModel extends ModelBase {
         super(CONFIG.DB.MONGO.DB_NAME, "group", {
             group_name: { type: String, allowNullEmpty: true },
             group_user:{type: Array, atllowNullEmpty: true},
-            admin:{type: Object, atllowNullEmpty: true},
-            
+            admin:{type: Object, atllowNullEmpty: true},  
             createdAt: { type: Object, allowNullEmpty: false },
             updatedAt: { type: Object, allowNullEmpty: true },
+            profile_image: { type: String, allowNullEmpty: true },
             status: {
                 type: Number,
                 allowNullEmpty: false,
                 enum: { 1: "active", 2: "inactive" }
             },
+            createdby: { type: Object, allowNullEmpty: true },
+            updatedBy: { type: Object, allowNullEmpty: true },
+            updatedBy: { type: Object, allowNullEmpty: true },
         });
     }
 
