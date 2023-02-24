@@ -18,7 +18,9 @@ class chatModel extends ModelBase {
             createdAt: { type: Object, allowNullEmpty: true },
             updatedAt: { type: Object, allowNullEmpty: true },
             isRead: { type: Boolean, allowNullEmpty: true },
+            unreadArray :{ type: Array, allowNullEmpty: true },
             isDeletedBy: { type: Array, allowNullEmpty: true },
+          
             type: { type: String, allowNullEmpty: true },
             isGroup:{type: Boolean, allowNullEmpty: true},
             groupId:{ type: Object, allowNullEmpty: true }

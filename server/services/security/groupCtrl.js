@@ -187,8 +187,7 @@ groupCtrl.groupUpdate = (req, res) => {
             } else {
                 console.log("groupgroupgroup",group[0]);
                 let updatedataQuery={}
-                let photos = [];
-                let deletedocuments;
+              
                
                 if (!!req.body.addUser && req.body.deleteuser== null) {
                     
@@ -208,8 +207,6 @@ groupCtrl.groupUpdate = (req, res) => {
                 //  console.log("group[0].group_usergroup[0].group_usergroup[0].group_user",final)
                   updatedataQuery.group_user=final
 
-
-                 
               
                 }
              
@@ -331,6 +328,9 @@ groupCtrl.groupUpdate = (req, res) => {
                 if (!!req.files.profile_image) {
                     updatedataQuery.profile_image = req.files.profile_image[0].filename;
                 }
+                if (!!req.body.status) {
+                    updatedataQuery.status =parseInt(req.body.status)
+                }
 
 
               let q ={
@@ -364,56 +364,7 @@ groupCtrl.groupUpdate = (req, res) => {
         response.send(res);
     }
 }
-/* user details Update*/
-groupCtrl.removeProfile = (req, res) => {
-    var response = new HttpRespose();
-    var _id = ObjectID(req.body._id);
 
-    let bodydata = {}
-    if (!!req.body) {
-        try {
-            let query = { _id: _id };
-            delete bodydata._id
-            UserModel.findOne(query, function (err, userdata) {
-                if (err) {
-                    response.setError(AppCode.Fail);
-                    response.send(res);
-                } else {
-                    if (userdata === null) {
-                        response.setError(AppCode.NotFound);
-                        response.send(res);
-                    } else {
-
-
-                        bodydata.profile_image = "";
-
-
-                        UserModel.update(query, bodydata, function (err, userdata) {
-                            if (err) {
-                                console.log(err)
-                                response.setError(AppCode.Fail);
-                                response.send(res);
-                            } else if (userdata == undefined || (userdata.matchedCount === 0 && userdata.modifiedCount === 0)) {
-                                response.setError(AppCode.NotFound);
-                            } else {
-                                response.setData(AppCode.Success);
-                                response.send(res);
-                            }
-                        });
-                    }
-                }
-            });
-        } catch (exception) {
-            response.setError(AppCode.Fail);
-            response.send(res);
-        }
-    }
-    else {
-        AppCode.Fail.error = "Oops! something went wrong, please try again later";
-        response.setError(AppCode.Fail);
-        response.send(res);
-    }
-};
 
 /* user Details By Id*/
 groupCtrl.groupDetailsById = (req, res) => {
