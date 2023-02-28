@@ -20,7 +20,7 @@ class chatModel extends ModelBase {
             isRead: { type: Boolean, allowNullEmpty: true },
             unreadArray :{ type: Array, allowNullEmpty: true },
             isDeletedBy: { type: Array, allowNullEmpty: true },
-          
+            group_user:{type: Array, allowNullEmpty: true},
             type: { type: String, allowNullEmpty: true },
             isGroup:{type: Boolean, allowNullEmpty: true},
             groupId:{ type: Object, allowNullEmpty: true }

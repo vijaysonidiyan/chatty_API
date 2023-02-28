@@ -880,12 +880,10 @@ MongoConnect.init()
 
         if(!!msg.reciver_id)
         {
-          let array=[]
-          array.push(ObjectID(msg.reciver_id))
-          console.log("arrayyyyyyyyy",array);
+         
          
           query.reciver_id= msg.reciver_id
-          query.unreadArray = array
+        //  query.unreadArray = array
         }
         if(!!msg.groupId)
         {
@@ -901,6 +899,7 @@ MongoConnect.init()
 
               console.log("groupdatagroupdatagroupdatagroupdata",groupdata);
               console.log("groupdatagroupdatagroupdatagroupdata",groupdata.group_user);
+
               let groupArray =[]
               groupdata.group_user.forEach((element , index) =>
                 {
@@ -914,6 +913,7 @@ MongoConnect.init()
                   if(index == (groupdata.group_user.length - 1))
                   {
                     query.unreadArray = groupArray
+                    query.group_user =groupdata.group_user
                   }
 
                 })
@@ -994,6 +994,8 @@ MongoConnect.init()
             throw err;
           } else if (_.isEmpty(leaveGetById)) {
             console.log(" no block user found.............................")
+           
+        
 
 
             ChatModel.create(query, function (err, chat) {
@@ -1076,14 +1078,7 @@ MongoConnect.init()
                     }
 
                   }
-                  // io.to(socket_id).emit("new_message", {
-                  //   _id:chat._id,
-                  //   message: msg.message,
-                  //   sender_id: msg.sender_id,
-                  //   reciver_id: msg.reciver_id,
-                  //   type: "message",
-                  //   createdAt:new Date()
-                  // });
+               
 
                   let isSendNotification = true;
                   ChatScreenManagementModel.findOne(
@@ -1198,7 +1193,9 @@ MongoConnect.init()
                   );
                 }
                 if (!!chat.isGroup == true) {
-                  console.log("chatchatchatchatchatchatchatchatchat", chat);
+
+                  console.log("queryyyyy of group chat",query);
+                  console.log("if gorup is trueeeeeeeeeee", chat);
 
                   let group ={
                     _id:ObjectID(msg.groupId)
