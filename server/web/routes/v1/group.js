@@ -14,6 +14,16 @@ const CONFIG = require("../../../config");
 //List country Data : http://localhost:3017/v1/group/groupCreate
 router.route("/groupCreate").post(groupCtrl.groupCreate)
 
+//List country Data : http://localhost:3017/v1/group/groupUpdate
+router.route("/groupUpdate").post(groupCtrl.groupUpdate)
+
+
+//List country Data : http://localhost:3017/v1/group/groupDetailsById
+router.route("/groupDetailsById").get(groupCtrl.groupDetailsById)
+
+//List country Data : http://localhost:3017/v1/group/allGroupDetails
+router.route("/allGroupDetails").get(groupCtrl.allGroupDetails)
+
 
 
 module.exports = router;

@@ -7,6 +7,7 @@ var cors = require("cors");
 const AppCode = require("../common/constant/appCods");
 const ChatModel = new (require("./../../server/common/model/chatModel"))();
 const UserModel = new (require("./../../server/common/model/UserModel"))();
+
 const ChatScreenManagementModel =
   new (require("./../../server/common/model/chatScreenManagementModel"))();
 const NotificationModel =
@@ -879,19 +880,53 @@ MongoConnect.init()
 
         if(!!msg.reciver_id)
         {
+         
+         
           query.reciver_id= msg.reciver_id
-
+        //  query.unreadArray = array
         }
         if(!!msg.groupId)
         {
           query.groupId= ObjectID(msg.groupId)
+          let q = {
+            _id: ObjectID(msg.groupId),
+          };
+          GroupModel.findOne(q, function (err, groupdata) {
+            if (err) {
+             // response.setError(AppCode.Fail);
+             // response.send(res);
+            }else {
+
+              console.log("groupdatagroupdatagroupdatagroupdata",groupdata);
+              console.log("groupdatagroupdatagroupdatagroupdata",groupdata.group_user);
+
+              let groupArray =[]
+              groupdata.group_user.forEach((element , index) =>
+                {
+                  
+                  if(element.toString() !=(msg.sender_id).toString())
+                  {
+                      groupArray.push(ObjectID(element))
+
+                  }
+
+                  if(index == (groupdata.group_user.length - 1))
+                  {
+                    query.unreadArray = groupArray
+                    query.group_user =groupdata.group_user
+                  }
+
+                })
+              
+            }
+          });
+
+         
         
         }
         if(!!msg.isGroup)
         {
-         
           query.isGroup = msg.isGroup
-
         }
         if (!!msg.size) {
           query.size = msg.size
@@ -908,6 +943,7 @@ MongoConnect.init()
         if (!!msg.file_original_name) {
           query.file_original_name = msg.file_original_name
         }
+        
 
         console.log("message data", query);
         var socket_id = usersss[msg.reciver_id];
@@ -958,6 +994,10 @@ MongoConnect.init()
             throw err;
           } else if (_.isEmpty(leaveGetById)) {
             console.log(" no block user found.............................")
+           
+        
+
+
             ChatModel.create(query, function (err, chat) {
               if (err) {
                 console.log("......err.....")
@@ -1038,14 +1078,7 @@ MongoConnect.init()
                     }
 
                   }
-                  // io.to(socket_id).emit("new_message", {
-                  //   _id:chat._id,
-                  //   message: msg.message,
-                  //   sender_id: msg.sender_id,
-                  //   reciver_id: msg.reciver_id,
-                  //   type: "message",
-                  //   createdAt:new Date()
-                  // });
+               
 
                   let isSendNotification = true;
                   ChatScreenManagementModel.findOne(
@@ -1160,7 +1193,9 @@ MongoConnect.init()
                   );
                 }
                 if (!!chat.isGroup == true) {
-                  console.log("chatchatchatchatchatchatchatchatchat", chat);
+
+                  console.log("queryyyyy of group chat",query);
+                  console.log("if gorup is trueeeeeeeeeee", chat);
 
                   let group ={
                     _id:ObjectID(msg.groupId)
@@ -1376,6 +1411,7 @@ MongoConnect.init()
                 }
               }
             });
+         
 
           } else {
             console.log("reciver id or sender ID is in block List so you cant message .......................................");

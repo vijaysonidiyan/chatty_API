@@ -8,7 +8,7 @@ class groupModel extends ModelBase {
         super(CONFIG.DB.MONGO.DB_NAME, "group", {
             group_name: { type: String, allowNullEmpty: true },
             group_user:{type: Array, atllowNullEmpty: true},
-            admin:{type: Object, atllowNullEmpty: true},  
+            group_admin:{type: Array, atllowNullEmpty: true},  
             createdAt: { type: Object, allowNullEmpty: false },
             updatedAt: { type: Object, allowNullEmpty: true },
             profile_image: { type: String, allowNullEmpty: true },
@@ -61,6 +61,35 @@ class groupModel extends ModelBase {
             } else {
                 model.find(conditions).toArray(cb);
             }
+        });
+    }
+  
+    update(query, data, cb) {
+        // data.birthDate = new Date(data.birthDate);
+
+        console.log(data);
+
+        var err = this.validate(data);
+        if (err) {
+            return cb(err);
+        }
+
+        data.updatedAt = new Date();
+        var self = this;
+        self.updateOne(query, { $set: data }, function (err, result) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, result);
+        });
+    }
+    updateOne(query, data, cb) {
+        // do a validation with this.schema
+        this.getModel(function (err, model) {
+            if (err) {
+                return cb(err);
+            }
+            model.updateOne(query, data, cb);
         });
     }
 

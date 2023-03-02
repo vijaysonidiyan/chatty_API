@@ -26,7 +26,7 @@ const { Console } = require("console");
 const handlebars = require('handlebars');
 const userModel = require("./../../common/model/userModel");
 const { result } = require("lodash");
-const userWiseVerifiedUserModel = require("./../../common/model/userWiseVerifiedUserModel");
+//const userWiseVerifiedUserModel = require("./../../common/model/userWiseVerifiedUserModel");
 
 // import { Country, State, City } from 'country-state-city';
 //import { ICountry, IState, ICity } from 'country-state-city';
@@ -1265,7 +1265,7 @@ userCtrl.getUserList = (req, res) => {
 };
 
 //userList_final_with_searchfield
-userCtrl.getActiveUserList = (req, res) => {
+userCtrl.getActiveUserListold = (req, res) => {
     const response = new HttpRespose();
 
     let searchKey = "";
@@ -1420,7 +1420,157 @@ userCtrl.getActiveUserList = (req, res) => {
 
 };
 
+//userList_final_without
+userCtrl.getActiveUserList = (req, res) => {
+    const response = new HttpRespose();
 
+    let searchKey = "";
+    let sortField = "";
+    let sortDirection = "";
+    searchKey = !!req.query.searchKey ? req.query.searchKey : "";
+
+   // var userId = ObjectID(req.auth._id)
+   // console.log("userIduserIduserIduserId", userId)
+
+    let condition = {};
+
+
+    let query = [
+        {
+            $match: {
+                $and: [
+                    
+                    {
+                        userId: { $eq: ObjectID(req.auth._id) },
+
+                    }
+                ]
+
+
+            },
+
+
+        },
+        {
+            $lookup: {
+              from: "user",
+              as: "userData",
+              let: { userId: "$mobileNo" },
+              pipeline: [
+                { 
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$mobileNo", "$$userId"] },
+                       
+                      ],
+                    },
+                  
+    
+                  },
+                },
+                {
+                    $project: {
+                        "_id": 0,
+                        "userName": 1,
+                        "profile_image":1,
+                        "countryName":1,
+                        "countryCode":1
+                       
+
+                    }
+                }
+               
+               
+              ],
+            },
+          },
+    
+          {
+            $unwind: {
+              path: "$userData",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+
+        {
+            $project: {
+                _id: 1,
+                mobileNo: 1,
+                isverified: 1,
+                userId:1,
+                status: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                "userName":"$userData.userName",
+                "profile_image":"$userData.profile_image",
+                "countryName":"$userData.countryName",
+                "countryCode":"$userData.countryCode",
+                //userData:1,
+
+
+
+
+            }
+        }
+
+    ];
+    let countQuery = {
+        $and: [
+           
+          
+            {
+
+                userId: { $eq: ObjectID(req.auth._id) },
+
+
+            }
+        ]
+
+    }
+    try {
+        let result = {};
+        async.parallel(
+            [
+                function (cb) {
+                    //UserModel.advancedAggregate(query, {}, (err, countData) => {
+                        UserWiseVerifiedUserModel.count(countQuery, (err, countData) => {
+                        if (err) {
+                            throw err;
+                        } else {
+                            console.log("....coundata", countData)
+                            result.totaluser = countData;
+
+                            cb(null);
+                        }
+                    });
+                },
+                function (cb) {
+                    UserWiseVerifiedUserModel.aggregate(query, (err, followers) => {
+                        if (err) {
+                            throw err;
+                        } else {
+                            result.result = followers;
+                            cb(null);
+                        }
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    throw err;
+                } else {
+                    response.setData(AppCode.Success, result);
+                    response.send(res);
+                }
+            }
+        );
+    } catch (exception) {
+        response.setError(AppCode.InternalServerError);
+        response.send(res);
+    }
+
+};
 
 // favorite added Like 
 userCtrl.favoriteCreate = (req, res) => {
