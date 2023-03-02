@@ -523,8 +523,16 @@ MongoConnect.init()
           sender_id: msg.sender_id,
           //   reciver_id: msg.reciver_id,
           type: msg.type,
+          size:msg.size,
+          file_name:msg.file_name,
+          video_screenshort:msg.video_screenshort,
+          thumbnail:msg.thumbnail,
+          file_original_name:msg.file_original_name
+
+
 
         };
+        query.isGroup =false
 
         if (!!msg.reciver_id) {
 
@@ -570,21 +578,7 @@ MongoConnect.init()
         if (!!msg.isGroup) {
           query.isGroup = msg.isGroup
         }
-        if (!!msg.size) {
-          query.size = msg.size
-        }
-        if (!!msg.file_name) {
-          query.file_name = msg.file_name
-        }
-        if (!!msg.video_screenshort) {
-          query.video_screenshort = msg.video_screenshort
-        }
-        if (!!msg.thumbnail) {
-          query.thumbnail = msg.thumbnail
-        }
-        if (!!msg.file_original_name) {
-          query.file_original_name = msg.file_original_name
-        }
+      
 
 
         console.log("message data", query);
@@ -648,7 +642,7 @@ MongoConnect.init()
                 console.log(err);
               } else {
                 console.log(".....else in else if")
-                if (!!chat.isGroup == false) {
+                if (!!chat.isGroup != true) {
                   console.log("chatchatchatchatchatchatchatchatchat", chat);
 
 
@@ -669,6 +663,8 @@ MongoConnect.init()
                         reciver_id: msg.reciver_id,
 
                         type: msg.type,
+
+                        isGroup:false,
 
                         file_name: msg.file_name,
 
@@ -700,6 +696,8 @@ MongoConnect.init()
                         reciver_id: msg.reciver_id,
 
                         type: msg.type,
+                        
+                        isGroup:false,
 
                         file_name: msg.file_name,
 
@@ -857,7 +855,7 @@ MongoConnect.init()
                       for (let i = 0; i < users.length; i++) {
                         for (let j = 0; j < groupArray.length; j++) {
 
-                          if (groupArray[j] == users[i].userId && users[i].userId != undefined) {
+                          if (groupArray[j] == users[i].userId && users[i].userId != undefined && msg.sender_id !=users[i].userId ) {
 
 
                             io.to(users[i].socketId).emit("new_message", {
