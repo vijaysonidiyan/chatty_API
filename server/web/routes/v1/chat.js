@@ -74,10 +74,7 @@ router
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDeleteAll);
 
 
-  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteAll1
-  router
-  .route("/chatDeleteAll1")
-  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDeleteAll1);
+ 
   
   
    //Check OnChatOrNot : http://localhost:3000/v1/chat/imageUpload
