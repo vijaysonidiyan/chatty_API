@@ -79,7 +79,8 @@ ffmpeg.setFfprobePath(ffprobePath);
 //     });
 // };
 
-// stroy saved in photo , video folder with photo and video body parameteres
+// - not use
+// stroy saved in photo , video folder with photo and video body parameteres - not use
 storyCtrl.createold = (req, res) => {
     const response = new HttpRespose();
 
@@ -811,9 +812,8 @@ storyCtrl.create = (req, res) => {
 };
 
 
-  /*
-*Get story list for User
-*/
+// - not use
+//Get story list for User
 //half done.
 storyCtrl.getStoryListData = (req, res) => {
     const response = new HttpRespose();
@@ -1077,9 +1077,9 @@ storyCtrl.getStoryListData = (req, res) => {
     }
 };
 
-/*
-*Get story list for User
-*/
+// - not use
+// Get story list for User
+
 storyCtrl.getStoryUserList = (req, res) => {
     const response = new HttpRespose();
     var data = {};

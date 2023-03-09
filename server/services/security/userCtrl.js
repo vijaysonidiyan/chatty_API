@@ -1417,7 +1417,7 @@ userCtrl.getActiveUserList = (req, res) => {
 
 };
 
-// favorite added Like 
+// favorite added Like - not use
 userCtrl.favoriteCreate = (req, res) => {
     var response = new HttpRespose()
     try {
@@ -1463,7 +1463,7 @@ userCtrl.favoriteCreate = (req, res) => {
     }
 };
 
-// favourite Job List User Wise
+// favourite Job List User Wise - not use
 userCtrl.favouriteUserList2 = (req, res) => {
     const response = new HttpRespose();
     //   console.log("@@@@@@@@@@@@@@@@", req.auth._id)
@@ -1690,7 +1690,7 @@ userCtrl.favouriteUserList2 = (req, res) => {
     }
 }
 
-// favourite Job List User Wise
+// favourite Job List User Wise - not use
 userCtrl.favouriteUserList = (req, res) => {
     const response = new HttpRespose();
     //   console.log("@@@@@@@@@@@@@@@@", req.auth._id)
@@ -1996,7 +1996,7 @@ userCtrl.favouriteUserList = (req, res) => {
     }
 }
 
-// favourite Job List User Wise
+// favourite Job List User Wise - not use
 userCtrl.favouriteUserList1 = (req, res) => {
     const response = new HttpRespose();
     //   console.log("@@@@@@@@@@@@@@@@", req.auth._id)

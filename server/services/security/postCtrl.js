@@ -31,6 +31,9 @@ const admin = require("firebase-admin");
 //   rejectUnauthorized: false,
 // });
 
+
+//- not use
+
 PostCtrl.create = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth._id) {
@@ -371,6 +374,8 @@ PostCtrl.create = (req, res) => {
     response.send(res);
   }
 };
+
+//- not use
 PostCtrl.update = (req, res) => {
   const response = new HttpRespose();
   console.log("original body data::::::::::::::::::::::", req.body);
@@ -712,6 +717,8 @@ PostCtrl.update = (req, res) => {
     response.send(res);
   }
 };
+
+//- not use
 PostCtrl.getPostFeedList = (req, res) => {
   const response = new HttpRespose();
   var data = {};
@@ -978,6 +985,8 @@ PostCtrl.getPostFeedList = (req, res) => {
     response.send(res);
   }
 };
+
+//- not use
 PostCtrl.getPostFeedListForUser = (req, res) => {
   const response = new HttpRespose();
   var data = {};
@@ -1283,6 +1292,8 @@ PostCtrl.getPostFeedListForUser = (req, res) => {
 /*
  *Like/dislike post
  */
+
+ //- not use
 PostCtrl.likeDislikePost = (req, res) => {
   const response = new HttpRespose();
   console.log("Payload Data", req.auth);
@@ -1443,6 +1454,8 @@ PostCtrl.likeDislikePost = (req, res) => {
 /*
  *add comment post
  */
+
+ //- not use
 PostCtrl.addCommentPost = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth._id) {
@@ -1719,7 +1732,7 @@ PostCtrl.addCommentPost = (req, res) => {
 };
 
 /*add comment reply*/
-
+ //- not use
 PostCtrl.addCommentReply = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth._id) {
@@ -2022,6 +2035,8 @@ PostCtrl.addCommentReply = (req, res) => {
     response.send(res);
   }
 };
+
+ //- not use
 PostCtrl.postLikeListForHomePage = (req, res) => {
   const response = new HttpRespose();
   let searchKey = "";
@@ -2134,6 +2149,7 @@ PostCtrl.postLikeListForHomePage = (req, res) => {
 /*
  *Get comment list of post
  */
+ //- not use
 PostCtrl.commentListForHomePage = (req, res) => {
   const response = new HttpRespose();
   if (!!req.query.postId) {
@@ -2370,6 +2386,7 @@ PostCtrl.commentListForHomePage = (req, res) => {
   }
 };
 
+ //- not use
 PostCtrl.postDelete = (req, res) => {
   const response = new HttpRespose();
   var bodyData = req.body;

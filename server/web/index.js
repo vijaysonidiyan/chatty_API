@@ -399,7 +399,7 @@ MongoConnect.init()
 
       });
 
-      //Someone is enter in chat
+      //Someone is enter in chat - not use
 
       socket.on("onChat", function (userId) {
         console.log("userid", userId);
@@ -414,7 +414,7 @@ MongoConnect.init()
         }
 
       });
-      //Someone is leave the chat
+      //Someone is leave the chat - not use
       socket.on("offChat", function (userId) {
         console.log("userid", userId);
         let socketId = userId;
@@ -428,7 +428,7 @@ MongoConnect.init()
         }
       });
 
-      //Someone is typing
+      //Someone is typing - not use
       socket.on("typing", (data) => {
         io.broadcast.emit("notifyTyping", {
           user: data.user,
@@ -437,7 +437,7 @@ MongoConnect.init()
         });
       });
 
-      //when soemone stops typing
+      //when soemone stops typing - not use
       socket.on("stopTyping", () => {
         socket.broadcast.emit("notifyStopTyping");
       });
@@ -497,6 +497,7 @@ MongoConnect.init()
       });
 
 
+      //not use
       socket.on("img", function (info) {
         console.log("inside receiver");
         console.log(".........", info)
@@ -1090,7 +1091,7 @@ MongoConnect.init()
 
       });
 
-      // chat deleteby Id
+      // chat deleteby Id 
       socket.on("chatdeletebyId", function (msg) {
         console.log(".......messageeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...", msg)
 
@@ -1299,6 +1300,8 @@ MongoConnect.init()
 
       });
 
+
+      //- not use
       socket.on("sharePost", function (msg) {
         console.log("message Data Before", msg);
         var query = {

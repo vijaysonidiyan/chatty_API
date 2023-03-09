@@ -16,7 +16,7 @@ const CONFIG = require("../../config");
 const userModel = require("../../common/model/userModel");
 
 
-//notification create
+//notification create -not use
 NotificationCtrl.notificationData = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth) {
@@ -141,7 +141,7 @@ NotificationCtrl.notificationData = (req, res) => {
   }
 };
 
-//unreadnotification count
+//unreadnotification count -not use
 NotificationCtrl.unReadNotificationCount = (req, res) => {
   const response = new HttpRespose();
   let result = {};
@@ -196,7 +196,7 @@ NotificationCtrl.unReadNotificationCount = (req, res) => {
 };
 
 
-//whene notification is viewd 
+//whene notification is viewd -not use
 NotificationCtrl.viewNotifications = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth) {
@@ -250,7 +250,7 @@ NotificationCtrl.viewNotifications = (req, res) => {
   }
 };
 
-//notification  read
+//notification  read - not use
 NotificationCtrl.readNotification = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth) {
@@ -272,7 +272,7 @@ NotificationCtrl.readNotification = (req, res) => {
   }
 };
 
-//delete notification
+//delete notification -not use
 NotificationCtrl.deleteNotification = (req, res) => {
   const response = new HttpRespose();
   if (!!req.auth) {
