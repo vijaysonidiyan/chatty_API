@@ -18,7 +18,7 @@ const UserModel =
     new (require("../../common/model/userModel"))();
 
 /* Create Decoration Data */
-
+// - not use
 imageCtrl.imageCreate1 = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
@@ -48,8 +48,10 @@ imageCtrl.imageCreate1 = (req, res) => {
     response.setData(AppCode.Success);
     response.send(res);
 };
-/* Create Decoration Data */
 
+
+/* Create Decoration Data */
+// - not use
 imageCtrl.imageCreate = (req, res) => {
     var response = new HttpRespose()
     var data = req.body;
@@ -108,7 +110,7 @@ imageCtrl.imageCreate = (req, res) => {
 };
 
 
-
+// - not use
 // imageCtrl.imageCreate = (req, res) => {
 //     var response = new HttpRespose()
 //     var data = req.body;
@@ -190,7 +192,7 @@ imageCtrl.imageUpdate = (req, res) => {
 
 
 /* decoration Delete*/
-
+// - not use
 imageCtrl.decorationDelete = (req, res) => {
     const response = new HttpRespose();
     const data = req.query;

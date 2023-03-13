@@ -78,6 +78,8 @@ groupCtrl.groupCreate = (req, res) => {
     });
 };
 
+
+// - not use
 /* user details Update*/
 groupCtrl.groupUpdateold = (req, res) => {
     var response = new HttpRespose();

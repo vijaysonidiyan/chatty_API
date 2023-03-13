@@ -17,6 +17,8 @@ const CONFIG = require("../../config");
 const userModel = require("../../common/model/userModel");
 const { eq } = require("lodash");
 
+
+// -not use
 ChatCtrl.getMessages = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
@@ -760,7 +762,7 @@ ChatCtrl.getMessageswithPagination = (req, res) => {
 };
 
 
-
+//-not use
 ChatCtrl.getMessagesAll = (req, res) => {
   const response = new HttpRespose();
   let data = req.body;
@@ -1012,6 +1014,8 @@ ChatCtrl.getMessagesAll = (req, res) => {
   }
 };
 
+
+//-not use
 // recent chat user List without group old
 ChatCtrl.getChatWithUsersList = (req, res) => {
   const response = new HttpRespose();
@@ -1407,6 +1411,7 @@ ChatCtrl.getChatWithUsersList = (req, res) => {
 };
 
 
+//-not use
 //ajay sir - done.
 // ChatCtrl.getChatUsersListold = (req, res) => {
 //   const response = new HttpRespose();
@@ -2329,6 +2334,9 @@ ChatCtrl.getChatUsersList2 = (req, res) => {
     response.send(res);
   }
 }
+
+
+//-not use
 //ajay sir - done.
 ChatCtrl.getChatUsersList1 = (req, res) => {
   const response = new HttpRespose();
@@ -2896,6 +2904,9 @@ ChatCtrl.getChatUsersList1 = (req, res) => {
   }
 }
 
+
+
+//-not use
 //ajay sir - done.
 ChatCtrl.getChatUsersListseconfinal = (req, res) => {
   const response = new HttpRespose();
@@ -4084,6 +4095,7 @@ ChatCtrl.getChatUsersListseconfinal = (req, res) => {
 }
 
 
+//-not use
 //current used API for recent user chat
 ChatCtrl.getChatUsersList = (req, res) => {
   const response = new HttpRespose();
@@ -5100,6 +5112,7 @@ ChatCtrl.getChatUsersList = (req, res) => {
 }
 
 
+//-not use
 ChatCtrl.manageChatScreenData = (req, res) => {
   console.log(req.body);
   var response = new HttpRespose();
@@ -5154,6 +5167,8 @@ ChatCtrl.manageChatScreenData = (req, res) => {
   }
 };
 
+
+//-not use
 ChatCtrl.updateMessageReadStatus = (req, res) => {
   console.log(req.body);
   var response = new HttpRespose();
@@ -5244,6 +5259,8 @@ ChatCtrl.updateMessageReadStatus = (req, res) => {
   }
 };
 
+
+//-not use
 ChatCtrl.unreadChatCount = (req, res) => {
   var response = new HttpRespose();
   if (!!req.auth && !!req.auth._id) {
@@ -5293,6 +5310,8 @@ ChatCtrl.unreadChatCount = (req, res) => {
   }
 };
 
+
+//-not use
 ChatCtrl.onChatScreen = (req, res) => {
   var response = new HttpRespose();
   if (!!req.auth && !!req.auth._id) {
@@ -5332,6 +5351,8 @@ ChatCtrl.onChatScreen = (req, res) => {
   }
 };
 
+
+//-not use
 // user chat Delete
 ChatCtrl.chatDelete = (req, res) => {
   const response = new HttpRespose();
@@ -5355,6 +5376,7 @@ ChatCtrl.chatDelete = (req, res) => {
 };
 
 
+//-not use
 // all chat delete between two user
 ChatCtrl.chatDeleteAll = (req, res) => {
   const response = new HttpRespose();
@@ -5435,6 +5457,7 @@ ChatCtrl.chatDeleteAll = (req, res) => {
 
 
 
+//-not use
 // _id wise chat delete
 ChatCtrl.chatDeleteById = (req, res) => {
   const response = new HttpRespose();
@@ -5503,6 +5526,8 @@ ChatCtrl.chatDeleteById = (req, res) => {
   });
 };
 
+
+//-not use
 ChatCtrl.allchatDelete = (req, res) => {
   const response = new HttpRespose();
   let data = req.query;
@@ -5582,6 +5607,7 @@ ChatCtrl.allchatDelete = (req, res) => {
 };
 
 
+//-not use
 //EMP Info Save API
 ChatCtrl.imageUpload = (req, res) => {
   var response = new HttpRespose();
