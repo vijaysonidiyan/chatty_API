@@ -1999,9 +1999,6 @@ userCtrl.favouriteUserList = (req, res) => {
 // favourite Job List User Wise - not use
 userCtrl.favouriteUserList1 = (req, res) => {
     const response = new HttpRespose();
-    //   console.log("@@@@@@@@@@@@@@@@", req.auth._id)
-    //  let abc=ObjectID(req.auth._id)
-    //console.log(",,,,,abc.....",abc)
 
     let query = []
 
@@ -2167,8 +2164,6 @@ userCtrl.verifyContactList = (req, res) => {
         abc[index] = {
             mobileNo: obj.mobileNo,
             userName: obj.userName
-
-
         }
     });
 
@@ -2298,8 +2293,14 @@ userCtrl.verifyContactList = (req, res) => {
                         }
 
                         if ((abc.length - 1) == i) {
-                            response.setData(AppCode.Success, resultList)
-                            response.send(res)
+                            if (resultList.length == 0) {
+                                response.setError(AppCode.NoUserFound)
+                                response.send(res)
+                            } else {
+
+                                response.setData(AppCode.Success, resultList)
+                                response.send(res)
+                            }
                         }
 
                     }
