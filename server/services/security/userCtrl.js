@@ -17,7 +17,7 @@ const CONFIG = require("../../config");
 const async = require("async");
 const AppCode = require("../../common/constant/appCods");
 const { ObjectId } = require("mongodb");
-const { query } = require("express");
+const { query, json } = require("express");
 const _ = require("lodash");
 
 const fs = require("fs");
@@ -1274,8 +1274,8 @@ userCtrl.getActiveUserList = (req, res) => {
     let sortDirection = "";
     searchKey = !!req.query.searchKey ? req.query.searchKey : "";
 
-   // var userId = ObjectID(req.auth._id)
-   // console.log("userIduserIduserIduserId", userId)
+    // var userId = ObjectID(req.auth._id)
+    // console.log("userIduserIduserIduserId", userId)
 
     let condition = {};
 
@@ -1284,7 +1284,7 @@ userCtrl.getActiveUserList = (req, res) => {
         {
             $match: {
                 $and: [
-                    
+
                     {
                         userId: { $eq: ObjectID(req.auth._id) },
 
@@ -1298,59 +1298,59 @@ userCtrl.getActiveUserList = (req, res) => {
         },
         {
             $lookup: {
-              from: "user",
-              as: "userData",
-              let: { userId: "$mobileNo" },
-              pipeline: [
-                { 
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$mobileNo", "$$userId"] },
-                       
-                      ],
-                    },
-                  
-    
-                  },
-                },
-                {
-                    $project: {
-                        "_id": 0,
-                        "userName": 1,
-                        "profile_image":1,
-                        "countryName":1,
-                        "countryCode":1
-                       
+                from: "user",
+                as: "userData",
+                let: { userId: "$mobileNo" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$mobileNo", "$$userId"] },
 
+                                ],
+                            },
+
+
+                        },
+                    },
+                    {
+                        $project: {
+                            "_id": 0,
+                            "userName": 1,
+                            "profile_image": 1,
+                            "countryName": 1,
+                            "countryCode": 1
+
+
+                        }
                     }
-                }
-               
-               
-              ],
+
+
+                ],
             },
-          },
-    
-          {
+        },
+
+        {
             $unwind: {
-              path: "$userData",
-              preserveNullAndEmptyArrays: true,
+                path: "$userData",
+                preserveNullAndEmptyArrays: true,
             },
-          },
+        },
 
         {
             $project: {
                 _id: 1,
                 mobileNo: 1,
                 isverified: 1,
-                userId:1,
+                userId: 1,
                 status: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                "userName":"$userData.userName",
-                "profile_image":"$userData.profile_image",
-                "countryName":"$userData.countryName",
-                "countryCode":"$userData.countryCode",
+                "userName": "$userData.userName",
+                "profile_image": "$userData.profile_image",
+                "countryName": "$userData.countryName",
+                "countryCode": "$userData.countryCode",
                 //userData:1,
 
 
@@ -1362,8 +1362,8 @@ userCtrl.getActiveUserList = (req, res) => {
     ];
     let countQuery = {
         $and: [
-           
-          
+
+
             {
 
                 userId: { $eq: ObjectID(req.auth._id) },
@@ -1379,7 +1379,7 @@ userCtrl.getActiveUserList = (req, res) => {
             [
                 function (cb) {
                     //UserModel.advancedAggregate(query, {}, (err, countData) => {
-                        UserWiseVerifiedUserModel.count(countQuery, (err, countData) => {
+                    UserWiseVerifiedUserModel.count(countQuery, (err, countData) => {
                         if (err) {
                             throw err;
                         } else {
@@ -2152,23 +2152,28 @@ userCtrl.verifyContactList = (req, res) => {
 
     const list = [req.body.data];
     // list.push(ObjectID(req.body.data))
-
-    let abc=[]
-    let aaa=[]
+    var reg = new RegExp(
+        ".*" +
+        searchKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") +
+        ".*",
+        "i"
+    );
+    let abc = []
+    let aaa = []
     req.body.data.map((obj, index) => {
         req.body.data = abc
         aaa.push(obj.mobileNo)
 
         abc[index] = {
-            mobileNo :obj.mobileNo,
-            userName:obj.userName
-          
-            
+            mobileNo: obj.mobileNo,
+            userName: obj.userName
+
+
         }
     });
 
-  console.log(">>>>>>>>>abc>>>>>>>>>", abc);
-  console.log(">>>>>>>>aaa>>>>>>>>>>", aaa);
+    console.log(">>>>>>>>>abc>>>>>>>>>", abc);
+    console.log(">>>>>>>>aaa>>>>>>>>>>", aaa);
     console.log(">>>>>>>list>>>>>>>>>>>", list);
 
 
@@ -2182,7 +2187,7 @@ userCtrl.verifyContactList = (req, res) => {
                 _id: 1,
                 mobileNo: 1,
                 isverified: 1,
-                userName:1,
+                userName: 1,
 
             }
         },
@@ -2202,87 +2207,99 @@ userCtrl.verifyContactList = (req, res) => {
             else {
                 console.log("elseeeeeeeeeeeeee");
 
-                console.log("userdatauserdatauserdata",userdata);
+                console.log("userdatauserdatauserdata", userdata);
 
                 if (req.body.data.length > 0) {
                     let obj = {}
                     let resultList = []
 
-                    console.log("Listtttttttttttttttttttttttt",abc);
+                    console.log("Listtttttttttttttttttttttttt", abc);
                     for (let i = 0; i < abc.length; i++) {
 
                         for (let a = 0; a < userdata.length; a++) {
                             if (abc[i].mobileNo.toString() == userdata[a].mobileNo.toString()) {
                                 obj = {
                                     mobileNo: abc[i].mobileNo,
-                                    userName:abc[i].userName,
+                                    userName: abc[i].userName,
                                     isverified: userdata[a].isverified
                                 }
-                                resultList.push(obj)
 
-                                if(userdata[a].isverified == true)
-                                {
-                                    let query = { mobileNo:abc[i].mobileNo,
-                                                isverified: userdata[a].isverified,
-                                                userId:ObjectID(req.auth._id),
-                                             }
+                                if (!!req.query.searchKey) {
+                                    if ((obj.mobileNo).match(reg) || (obj.userName).match(reg)) {
+                                        resultList.push(obj)
+                                    }
+                                }
+                                else {
+                                    resultList.push(obj)
+                                }
 
-                                             let queryy = { mobileNo:abc[i].mobileNo,
-                                                isverified: userdata[a].isverified,
-                                                userId:ObjectID(req.auth._id),
-                                                userName:userdata[a].userName
-                                             }
+
+                                if (userdata[a].isverified == true) {
+                                    let query = {
+                                        mobileNo: abc[i].mobileNo,
+                                        isverified: userdata[a].isverified,
+                                        userId: ObjectID(req.auth._id),
+                                    }
+
+                                    let queryy = {
+                                        mobileNo: abc[i].mobileNo,
+                                        isverified: userdata[a].isverified,
+                                        userId: ObjectID(req.auth._id),
+                                        userName: userdata[a].userName
+                                    }
                                     UserWiseVerifiedUserModel.findOne(query, {}, function (err, data) {
                                         if (err) {
                                             response.setError(AppCode.Fail);
                                             response.send(res);
                                         } else {
-                                            if(data == null)
-                                            {
-                                                
+                                            if (data == null) {
+
                                                 UserWiseVerifiedUserModel.create(queryy, (err, dataa) => {
                                                     if (err) {
-                                                      //  response.setError(AppCode.Fail);
-                                                       // response.send(res);
+                                                        //  response.setError(AppCode.Fail);
+                                                        // response.send(res);
                                                     } else {
                                                         console.log("UserWiseVerifiedUserModel");
-                                                       
+
                                                     }
                                                 });
-                                                
-                                                
+
+
                                             }
-                                           
-                                           
+
+
                                         }
                                     })
                                     break
 
                                 }
-                                
-                                else{
+
+                                else {
                                     break
 
                                 }
-                                
+
                             }
                             if ((userdata.length - 1) == a) {
                                 obj = {
                                     mobileNo: abc[i].mobileNo,
-                                    userName:abc[i].userName,
+                                    userName: abc[i].userName,
                                     isverified: false
                                 }
-                                resultList.push(obj)
+                                if (!!req.query.searchKey) {
+                                    if ((obj.mobileNo).match(reg) || (obj.userName).match(reg)) {
+                                        resultList.push(obj)
+                                    }
+                                }
+                                else {
+                                    resultList.push(obj)
+                                }
                             }
                         }
 
                         if ((abc.length - 1) == i) {
-                          
-
-                            console.log("resultListresultList", resultList)
                             response.setData(AppCode.Success, resultList)
                             response.send(res)
-                         
                         }
 
                     }
