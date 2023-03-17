@@ -28,10 +28,10 @@ router
 
 
 
-  //Get chat of Users : http://localhost:3000/v1/chat/getChatWithUsersList
+//Get chat of Users : http://localhost:3000/v1/chat/getChatWithUsersList
 router
-.route("/getChatWithUsersList")
-.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatWithUsersList);
+  .route("/getChatWithUsersList")
+  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.getChatWithUsersList);
 
 
 
@@ -57,44 +57,44 @@ router
   .route("/unread-chat-count")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.unreadChatCount);
 
-  //Check OnChatOrNot : http://localhost:3000/v1/chat/check-chat-live
+//Check OnChatOrNot : http://localhost:3000/v1/chat/check-chat-live
 router
-.route("/onChatScreen")
-.get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
+  .route("/onChatScreen")
+  .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.onChatScreen);
 
-  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDelete
-  router
+//Check OnChatOrNot : http://localhost:3000/v1/chat/chatDelete
+router
   .route("/chatDelete")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDelete);
 
 
-  //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteAll
-  router
+//Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteAll
+router
   .route("/chatDeleteAll")
   .get(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.chatDeleteAll);
 
 
- 
-  
-  
-   //Check OnChatOrNot : http://localhost:3000/v1/chat/imageUpload
-   router
-   .route("/imageUpload")
-   .get(ChatCtrl.imageUpload);
-  
 
 
-   
-   //Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteById
-   router
-   .route("/chatDeleteById")
-   .post(ChatCtrl.chatDeleteById);
-   
 
-   //Check OnChatOrNot : http://localhost:3000/v1/chat/allchatDelete
-   router
-   .route("/allchatDelete")
-   .post(CONFIG.JWTTOKENALLOWACCESS,ChatCtrl.allchatDelete);
-   
+//Check OnChatOrNot : http://localhost:3000/v1/chat/imageUpload
+router
+  .route("/imageUpload")
+  .get(ChatCtrl.imageUpload);
+
+
+
+
+//Check OnChatOrNot : http://localhost:3000/v1/chat/chatDeleteById
+router
+  .route("/chatDeleteById")
+  .post(ChatCtrl.chatDeleteById);
+
+
+//Check OnChatOrNot : http://localhost:3000/v1/chat/allchatDelete
+router
+  .route("/allchatDelete")
+  .post(CONFIG.JWTTOKENALLOWACCESS, ChatCtrl.allchatDelete);
+
 
 module.exports = router;

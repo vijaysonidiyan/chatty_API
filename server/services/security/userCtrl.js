@@ -2212,11 +2212,12 @@ userCtrl.verifyContactList = (req, res) => {
                     for (let i = 0; i < abc.length; i++) {
 
                         for (let a = 0; a < userdata.length; a++) {
-                            if (abc[i].mobileNo.toString() == userdata[a].mobileNo.toString()) {
+                            if (JSON.stringify(abc[i].mobileNo) == JSON.stringify(userdata[a].mobileNo)) {
                                 obj = {
                                     mobileNo: abc[i].mobileNo,
                                     userName: abc[i].userName,
-                                    isverified: userdata[a].isverified
+                                    isverified: userdata[a].isverified,
+                                    _id:userdata[a]._id
                                 }
 
                                 if (!!req.query.searchKey) {
