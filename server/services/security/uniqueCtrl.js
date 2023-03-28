@@ -6,6 +6,9 @@ const Logger = require("../../common/logger");
 const ObjectID = require("mongodb").ObjectID;
 const _ = require("lodash");
 
+
+
+//-not use
 /* Unique Authentication For User */
 UniqueCtrl.uniqueAuthentication = (req, res, next) => {
     console.log("check auth", req.body.mobile);
@@ -36,6 +39,9 @@ UniqueCtrl.uniqueAuthentication = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Unique SlugName */
 UniqueCtrl.uniqueSlugName = (req, res, next) => {
     console.log("check auth", req.body.seoSlug);
@@ -65,6 +71,9 @@ UniqueCtrl.uniqueSlugName = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Unique Admin EmailId */
 UniqueCtrl.uniqueAdminEmail = (req, res, next) => {
     console.log("check auth", req.body.email);
@@ -94,6 +103,9 @@ UniqueCtrl.uniqueAdminEmail = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Unique Admin EmailId */
 UniqueCtrl.uniqueEmail = (req, res, next) => {
     console.log("check auth", req.body.email);
@@ -123,6 +135,9 @@ UniqueCtrl.uniqueEmail = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Unique User EmailId */
 UniqueCtrl.uniqueUserEmail = (req, res, next) => {
     console.log("check auth", req.body.email);
@@ -152,6 +167,9 @@ UniqueCtrl.uniqueUserEmail = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Unique User Mobile Number */
 UniqueCtrl.uniqueUserMobile = (req, res, next) => {
     console.log("check auth", req.body.email);
@@ -181,6 +199,9 @@ UniqueCtrl.uniqueUserMobile = (req, res, next) => {
     }
 };
 
+
+
+//-not use
 /* Check IF Subscription Plan Exist */
 UniqueCtrl.checkIfSubscriptionPlanExist = (req, res, next) => {
     const response = new HttpRespose();
@@ -203,6 +224,9 @@ UniqueCtrl.checkIfSubscriptionPlanExist = (req, res, next) => {
     }
 }
 
+
+
+//-not use
 /* Unique Device Token */
 UniqueCtrl.addDeviceToken = (req, res, next) => {
     const response = new HttpRespose();

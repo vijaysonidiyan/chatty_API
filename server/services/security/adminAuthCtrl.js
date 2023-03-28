@@ -16,6 +16,7 @@ const handlebars = require('handlebars');
 const adminUserModel = require("./../../common/model/adminUserModel");
 
 /* Token Check */
+// - not use
 AdminAuthCtrl.TokenCheck = (req, res) => {
     var response = new HttpRespose();
     if (!!req.payload && !!req.payload._id) {
