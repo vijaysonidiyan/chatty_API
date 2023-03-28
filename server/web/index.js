@@ -588,11 +588,11 @@ MongoConnect.init()
         var socket_id1 = usersss[msg.sender_id];
         console.log("m old socketId: sender_id ", socket_id1);
 
-        console.log("new_message call", users)
+        // console.log("new_message call", users)
 
-        console.log("queryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", query)
-        console.log("reciver_id", ObjectID(msg.reciver_id))
-        console.log("sender_id", ObjectID(msg.sender_id))
+        // console.log("queryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", query)
+        // console.log("reciver_id", ObjectID(msg.reciver_id))
+        // console.log("sender_id", ObjectID(msg.sender_id))
 
 
         let Query = [
