@@ -7,32 +7,33 @@ class Story extends ModelBase {
     constructor() {
         super(CONFIG.DB.MONGO.DB_NAME, "story", {
             photos: { type: Array, allowNullEmpty: true },
-            photo_name:{type: String, allowNullEmpty: true},
-            video_name:{type: String, allowNullEmpty: true},
-            originalname:{type: String, allowNullEmpty: true},
-            document_name:{type: String, allowNullEmpty: true},
+            photo_name: { type: String, allowNullEmpty: true },
+            video_name: { type: String, allowNullEmpty: true },
+            originalname: { type: String, allowNullEmpty: true },
+            document_name: { type: String, allowNullEmpty: true },
             videos: { type: Array, allowNullEmpty: true },
             type: {
                 type: Number,
                 allowNullEmpty: false,
-                enum: { 1: "photo", 2: "video",3:"document" }
+                enum: { 1: "photo", 2: "video", 3: "document" }
             },
-            documents: { type: Array, allowNullEmpty: true },  
-            thumbnail:{type:Array, allowNullEmpty: true },   
-            ext:{type:Array, allowNullEmpty: true},  
-            mimetype:{type:Array, allowNullEmpty: true} ,
-            size:{type:Number, allowNullEmpty: true},
-            createdBy:{type: Object, allowNullEmpty: false },
+            documents: { type: Array, allowNullEmpty: true },
+            storySeeBy: { type: Array, allowNullEmpty: true },
+            thumbnail: { type: Array, allowNullEmpty: true },
+            ext: { type: Array, allowNullEmpty: true },
+            mimetype: { type: Array, allowNullEmpty: true },
+            size: { type: Number, allowNullEmpty: true },
+            createdBy: { type: Object, allowNullEmpty: false },
             createdAt: { type: Object, allowNullEmpty: false },
             expiredAt: { type: Object, allowNullEmpty: false },
             updatedAt: { type: Object, allowNullEmpty: true },
-            userId:{type: Object, allowNullEmpty: true },
+            userId: { type: Object, allowNullEmpty: true },
             status: {
                 type: Number,
                 allowNullEmpty: false,
                 enum: { 1: "active", 2: "inactive" }
             },
-           
+
         });
     }
 
@@ -117,12 +118,12 @@ class Story extends ModelBase {
     create(data, cb) {
 
 
-      
+
         var err = this.validate(data);
         if (err) {
             return cb(err);
         }
-        data.status=1
+        data.status = 1
         data.createdAt = new Date();;
 
         this.insert(data, (err, result) => {
@@ -136,14 +137,14 @@ class Story extends ModelBase {
     createMany(data, cb) {
 
         var self = this;
-        
+
         data.createdAt = new Date();;
         data.status = 1;
         //data.createdAt = new Date();;
         var currentTime = new Date();
         currentTime.setHours(currentTime.getHours() + 24);
         data.expiredAt = new Date();;
-        console.log("expiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAt",data.expiredAt);
+        console.log("expiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAtexpiredAt", data.expiredAt);
         // currentTime.setMinutes(currentTime.getMinutes() + 3);
         // data.expiredAt = currentTime;
 
@@ -152,6 +153,16 @@ class Story extends ModelBase {
                 return cb(err);
             }
             cb(null, result.ops);
+        });
+    }
+
+    addUserId(query, updateQuery, cb) {
+        var self = this;
+        self.updateOne(query, updateQuery, function (err, post) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, post);
         });
     }
 
@@ -217,7 +228,7 @@ class Story extends ModelBase {
                                 if (!_.isEmpty(latestPost.media) && !_.isEmpty(latestPost.media.videos) && !_.isEmpty(latestPost.media.videos.files) && latestPost.media.videos.files.length === 1) {
                                     latestPost.postType = 13;
                                 }
- 
+
                                 if (!_.isEmpty(latestPost.media) && !_.isEmpty(latestPost.media.videos) && !_.isEmpty(latestPost.media.videos.files) && latestPost.media.videos.files.length > 1) {
                                     latestPost.postType = 23;
                                 }
